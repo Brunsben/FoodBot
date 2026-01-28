@@ -43,7 +43,7 @@ Für Production-Deployment auf Raspberry Pi:
 ```bash
 # Repository klonen
 cd /home/pi
-git clone <repository-url> FoodBot
+git clone https://github.com/Brunsben/FoodBot
 cd FoodBot
 
 # Automatisches Setup (als root)
