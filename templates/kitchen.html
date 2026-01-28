@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="30">
+    <title>Küchenansicht - FoodBot</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1a0000 0%, #2d0a0a 25%, #450a0a 50%, #2d0a0a 75%, #1a0000 100%);
+            color: #fff; 
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(20,20,20,0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(220,38,38,0.4), 0 0 100px rgba(220,38,38,0.2);
+            padding: 40px;
+            border: 1px solid #7f1d1d;
+        }
+        h1 { 
+            color: #ef4444; 
+            margin: 0 0 30px 0;
+            font-size: 2.5em;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-shadow: 0 0 20px rgba(220,38,38,0.6);
+        }
+        h1:before { content: '🍳'; font-size: 1.2em; }
+        .menu-section {
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+            color: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(220,38,38,0.3);
+            border: 1px solid #dc2626;
+        }
+        .menu-section h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.3em;
+        }
+        .menu-form { 
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        input[type="text"] { 
+            flex: 1;
+            min-width: 250px;
+            font-size: 1.2em;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.95);
+            transition: all 0.3s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #fff;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.2);
+        }
+        .count-section {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: #fff;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 25px 0;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(220,38,38,0.4), 0 0 50px rgba(220,38,38,0.2);
+            border: 2px solid #ef4444;
+        }
+        .count { 
+            font-size: 4em;
+            margin: 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .count-detail {
+            font-size: 1.2em;
+            margin: 10px 0 20px 0;
+            opacity: 0.9;
+        }
+        .btn { 
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        .btn:hover { 
+            background: rgba(255,255,255,0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        .guest-control { 
+            background: rgba(69,10,10,0.6);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid #7f1d1d;
+        }
+        .guest-btn { 
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: #fff;
+            border: 2px solid #ef4444;
+            padding: 15px 35px;
+            font-size: 1.4em;
+            border-radius: 12px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(220,38,38,0.4);
+        }
+        .guest-btn:hover { 
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(220,38,38,0.6);
+            border-color: #fca5a5;
+        }
+        .user-list { 
+            background: rgba(20,20,20,0.8);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            display: none;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+            border: 1px solid #374151;
+        }
+        .user-list.show { display: block; animation: slideIn 0.3s; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-list h3 { 
+            color: #ef4444;
+            margin-top: 0;
+        }
+        .user-list ul { 
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .user-list li { 
+            background: rgba(69,10,10,0.4);
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            color: #fca5a5;
+        }
+        .refresh-note {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9em;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 1.8em; }
+            .count { font-size: 2.5em; }
+            .count-section { padding: 25px; }
+            input[type="text"] { width: 100%; margin-bottom: 10px; min-width: 100%; }
+            .menu-form { flex-direction: column; }
+            .btn { width: 100%; }
+            .guest-btn { width: 48%; font-size: 1.2em; padding: 12px 20px; }
+            .user-list ul { grid-template-columns: 1fr; }
+        }
+    </style>
+    <script>
+        function toggleList() {
+            var el = document.getElementById('user-list');
+            el.classList.toggle('show');
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Küchenansicht</h1>
+        
+        <div class="menu-section">
+            <h2>🍽️ Heutiges Menü</h2>
+            <form class="menu-form" method="post">
+                <input type="text" name="menu" value="{{ menu.description if menu else '' }}" placeholder="Was gibt es heute zu essen?" required>
+                <button class="btn" type="submit">✅ Speichern</button>
+            </form>
+        </div>
+        
+        <div class="count-section">
+            <div class="count">{{ total }}</div>
+            <div class="count-detail">🍴 Personen zum Essen angemeldet</div>
+            <div style="font-size:0.9em;opacity:0.8;margin-bottom:20px;">{{ users|length }} Kameraden + {{ guest_count }} Gäste</div>
+            <button class="btn" onclick="toggleList()">📜 Namen anzeigen</button>
+        </div>
+        
+        <div class="guest-control">
+            <h3 style="margin:0 0 15px 0;color:#856404;">👥 Gästezähler</h3>
+            <form method="post" style="display:inline;">
+                <button class="guest-btn" name="guest_action" value="add" type="submit">+ Gast</button>
+                <button class="guest-btn" name="guest_action" value="remove" type="submit">- Gast</button>
+            </form>
+        </div>
+        
+        <div id="user-list" class="user-list">
+            <h3>👨‍🚒 Angemeldete Kameraden:</h3>
+            <ul>
+            {% for user in users %}
+                <li>{{ user.name }}</li>
+            {% endfor %}
+            </ul>
+            {% if guest_count > 0 %}
+                <p style="margin-top:20px;padding:15px;background:#fef3c7;border-radius:8px;font-weight:600;color:#92400e;"><span style="font-size:1.5em;">👤</span> + {{ guest_count }} Gäste</p>
+            {% endif %}
+        </div>
+        
+        <div class="refresh-note">
+            🔄 Seite aktualisiert sich automatisch alle 30 Sekunden
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+[Unit]
+Description=FoodBot Essensanmeldung
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/FoodBot
+Environment="PATH=/usr/bin:/usr/local/bin"
+ExecStart=/usr/bin/python3 /home/pi/FoodBot/app/main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

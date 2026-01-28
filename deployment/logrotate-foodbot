@@ -1,0 +1,16 @@
+# Logrotate Konfiguration für FoodBot
+# Speichern unter: /etc/logrotate.d/foodbot
+
+/var/log/foodbot/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 0644 pi pi
+    sharedscripts
+    postrotate
+        systemctl reload foodbot > /dev/null 2>&1 || true
+    endscript
+}

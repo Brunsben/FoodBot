@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Essensanmeldung - FoodBot</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: linear-gradient(135deg, #1a0000 0%, #450a0a 50%, #1a0000 100%);
+            color: #fff; 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding: 8px;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        h1 { 
+            font-size: 1.8em; 
+            margin: 5px 0;
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(220,38,38,0.8);
+        }
+        .menu { 
+            font-size: 0.95em; 
+            padding: 8px 12px; 
+            background: rgba(20,20,20,0.8);
+            border-radius: 8px;
+            border: 1px solid #dc2626;
+            margin: 5px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .menu b { 
+            color: #fca5a5;
+            font-size: 0.9em;
+        }
+        .rfid-zone {
+            background: rgba(20,20,20,0.9);
+            border: 3px dashed #dc2626;
+            border-radius: 15px;
+            padding: 25px 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 30px rgba(220,38,38,0.4);
+            animation: pulse 2s infinite;
+            margin: 8px 0;
+        }
+        .rfid-zone h2 {
+            color: #ef4444;
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(220,38,38,0.6);
+        }
+        .rfid-zone p {
+            font-size: 1em;
+            color: #fca5a5;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(220,38,38,0.4); }
+            50% { box-shadow: 0 0 50px rgba(220,38,38,0.7); }
+        }
+        .fallback-btn {
+            background: transparent;
+            border: 1px solid #6b7280;
+            color: #9ca3af;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75em;
+            width: 100%;
+            margin: 5px 0;
+        }
+        .fallback-form {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            padding: 20px;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .fallback-form.show { display: flex; }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc2626;
+            border: none;
+            color: #fff;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+        input[type="text"] { 
+            font-size: 1.5em; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 2px solid #374151; 
+            background: rgba(0,0,0,0.5);
+            color: #fff; 
+            width: 100%;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #dc2626;
+        }
+        input::placeholder { color: #6b7280; }
+        input[type="hidden"] { display: none; }
+        .submit-btn { 
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: #fff; 
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+        }
+        @keyframes pop { 
+            0% { transform: scale(0.8); opacity: 0; } 
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; } 
+        }
+    </style>
+</head>
+<body>
+    <h1>🚒 Essen</h1>
+    <div class="menu">
+        {% if menu %}
+            <b>Heute:</b> {{ menu.description }}
+        {% else %}
+            <i style="color:#fca5a5;">Kein Menü</i>
+        {% endif %}
+    </div>
+    
+    <div class="rfid-zone">
+        <h2>📱</h2>
+        <p>Karte scannen</p>
+    </div>
+    
+    <button class="fallback-btn" onclick="document.getElementById('fallback').classList.add('show')">Personalnummer</button>
+    
+    <form id="fallback" class="fallback-form" action="/" method="post">
+        <button type="button" class="close-btn" onclick="document.getElementById('fallback').classList.remove('show')">✕</button>
+        <input type="text" name="personal_number" placeholder="Personalnummer" autofocus>
+        <button class="submit-btn" type="submit">OK</button>
+    </form>
+    
+    <!-- Verstecktes Formular für RFID -->
+    <form id="rfid-form" action="/" method="post" style="display:none;">
+        <input type="hidden" name="card_id" id="card_id">
+    </form>
+    {% if message %}
+        <div id="feedback" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:280px;padding:20px;border-radius:12px;{% if status=='success' %}background:linear-gradient(135deg,#dc2626,#991b1b);border:2px solid #ef4444;{% elif status=='info' %}background:rgba(55,65,81,0.95);border:2px solid #6b7280;{% else %}background:linear-gradient(135deg,#7f1d1d,#450a0a);border:2px solid #991b1b;{% endif %};font-size:1.3em;animation:pop 0.3s;box-shadow:0 10px 40px rgba(0,0,0,0.8);font-weight:600;z-index:2000;">
+            {{ message }}
+        </div>
+        <audio id="beep">
+            <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjSH0fPTgjMGHm7A7+OZSA4PVK/n77BdGAg+ltryxnMoBSqAzvLaizsIGmi78OuhUBELTKXh8bllHgU2jdXyz3osBSR3x/DdkEAKFF607uunVBIKRp/h8r9wIQYzhM/y1IU1Bx9tvu7mnEwOD1Ow5u+zXRgIPpfb8sh0KAUqgM7y2os7CBppvO/noVASC0yl4fG5ZR4FNo3V8tB6LAUkd8fw3Y9ACRVet" type="audio/wav">
+        </audio>
+        <script>
+        {% if status == 'success' %}
+        var beep = document.getElementById('beep');
+        if (beep) beep.play().catch(function(){});
+        {% endif %}
+        
+        setTimeout(function() {
+            window.location.href = "/";
+        }, 2000);
+        </script>
+    {% endif %}
+</body>
+<script>
+// RFID Auto-Submit - funktioniert immer, auch ohne Fokus
+setInterval(async function() {
+    try {
+        let resp = await fetch('/rfid_scan');
+        if (resp.ok) {
+            let data = await resp.json();
+            if (data.card_id) {
+                document.getElementById('card_id').value = data.card_id;
+                document.getElementById('rfid-form').submit();
+            }
+        }
+    } catch (e) {}
+}, 500);
+</script>
+</html>

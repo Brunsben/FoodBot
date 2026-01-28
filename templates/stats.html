@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistiken</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; color: #222; padding: 20px; }
+        h1 { color: #0a5; }
+        .summary { background: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .summary h2 { margin-top: 0; }
+        table { border-collapse: collapse; width: 100%; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #0a5; color: #fff; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .export-btn { background: #0a5; color: #fff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; margin: 10px 5px; }
+        .export-btn:hover { background: #0c7; }
+        a { color: #0a5; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>📊 Statistiken</h1>
+    <div class="summary">
+        <h2>Zusammenfassung</h2>
+        <p><b>Durchschnittliche Teilnehmer (letzte 14 Tage):</b> {{ average }}</p>
+        <a href="/stats/export/csv"><button class="export-btn">📥 Als CSV exportieren (30 Tage)</button></a>
+        <a href="/admin"><button class="export-btn" style="background:#666;">Zurück zum Admin</button></a>
+    </div>
+    
+    <h2>Letzte 14 Tage</h2>
+    <table>
+        <tr>
+            <th>Datum</th>
+            <th>Kameraden</th>
+            <th>Gäste</th>
+            <th>Gesamt</th>
+            <th>Menü</th>
+        </tr>
+        {% for day in days %}
+        <tr>
+            <td>{{ day.date.strftime('%d.%m.%Y (%A)') }}</td>
+            <td>{{ day.registrations }}</td>
+            <td>{{ day.guests }}</td>
+            <td><b>{{ day.total }}</b></td>
+            <td>{{ day.menu }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

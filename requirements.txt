@@ -1,0 +1,8 @@
+flask
+flask_sqlalchemy
+flask-limiter
+python-dotenv
+pyserial
+qrcode[pil]
+requests
+gunicorn

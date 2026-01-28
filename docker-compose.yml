@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  foodbot:
+    build: .
+    container_name: foodbot
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=production
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-feuerwehr2026}
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+    volumes:
+      # Persistente Datenbank
+      - ./data:/app/data
+      # Backups
+      - ./backups:/app/backups
+      # Logs
+      - ./logs:/app/logs
+      # RFID Device (nur auf Raspberry Pi)
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    devices:
+      # RFID-Reader Zugriff
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    networks:
+      - foodbot-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5001/api/status')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: foodbot-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/nginx-foodbot:/etc/nginx/conf.d/default.conf:ro
+      # Optional: SSL Zertifikate
+      # - ./ssl:/etc/ssl/certs:ro
+    depends_on:
+      - foodbot
+    networks:
+      - foodbot-network
+
+networks:
+  foodbot-network:
+    driver: bridge
+
+volumes:
+  data:
+  backups:
+  logs:
