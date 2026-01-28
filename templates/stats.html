@@ -2,49 +2,152 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Statistiken</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiken - FoodBot</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; color: #222; padding: 20px; }
-        h1 { color: #0a5; }
-        .summary { background: #fff; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .summary h2 { margin-top: 0; }
-        table { border-collapse: collapse; width: 100%; background: #fff; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background: #0a5; color: #fff; }
-        tr:nth-child(even) { background: #f9f9f9; }
-        .export-btn { background: #0a5; color: #fff; padding: 12px 24px; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; margin: 10px 5px; }
-        .export-btn:hover { background: #0c7; }
-        a { color: #0a5; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a0000 0%, #2d0a0a 25%, #450a0a 50%, #2d0a0a 75%, #1a0000 100%);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(20,20,20,0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(220,38,38,0.4);
+            padding: 40px;
+            border: 1px solid #7f1d1d;
+        }
+        h1 {
+            color: #ef4444;
+            margin: 0 0 30px 0;
+            font-size: 2.2em;
+            text-shadow: 0 0 20px rgba(220,38,38,0.6);
+        }
+        .summary {
+            background: rgba(69,10,10,0.4);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid #7f1d1d;
+        }
+        .summary h2 {
+            color: #ef4444;
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+        .summary p {
+            font-size: 1.2em;
+            color: #e5e7eb;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .export-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: #fff;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220,38,38,0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        }
+        h2 {
+            color: #ef4444;
+            font-size: 1.8em;
+            margin: 40px 0 20px 0;
+            border-bottom: 2px solid #7f1d1d;
+            padding-bottom: 10px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #374151;
+            color: #e5e7eb;
+        }
+        th {
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+        tr:hover {
+            background: rgba(69,10,10,0.3);
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        td:nth-child(4) {
+            font-weight: bold;
+            color: #ef4444;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
-    <h1>📊 Statistiken</h1>
-    <div class="summary">
-        <h2>Zusammenfassung</h2>
-        <p><b>Durchschnittliche Teilnehmer (letzte 14 Tage):</b> {{ average }}</p>
-        <a href="/stats/export/csv"><button class="export-btn">📥 Als CSV exportieren (30 Tage)</button></a>
-        <a href="/admin"><button class="export-btn" style="background:#666;">Zurück zum Admin</button></a>
+    <div class="container">
+        <h1>📊 Statistiken</h1>
+        
+        <div class="summary">
+            <h2>Zusammenfassung</h2>
+            <p><b>Durchschnittliche Teilnehmer (letzte 14 Dienste):</b> {{ average }}</p>
+            <div class="button-group">
+                <a href="/stats/export/csv" class="export-btn">📥 Als CSV exportieren (alle Dienste)</a>
+                <a href="/admin" class="export-btn btn-secondary">← Zurück zum Admin</a>
+            </div>
+        </div>
+        
+        <h2>Letzte 14 Dienste mit Menü</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Kameraden</th>
+                    <th>Gäste</th>
+                    <th>Gesamt</th>
+                    <th>Menü</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in days %}
+                <tr>
+                    <td>{{ day.date.strftime('%d.%m.%Y (%A)') }}</td>
+                    <td>{{ day.registrations }}</td>
+                    <td>{{ day.guests }}</td>
+                    <td>{{ day.total }}</td>
+                    <td>{{ day.menu }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    
-    <h2>Letzte 14 Tage</h2>
-    <table>
-        <tr>
-            <th>Datum</th>
-            <th>Kameraden</th>
-            <th>Gäste</th>
-            <th>Gesamt</th>
-            <th>Menü</th>
-        </tr>
-        {% for day in days %}
-        <tr>
-            <td>{{ day.date.strftime('%d.%m.%Y (%A)') }}</td>
-            <td>{{ day.registrations }}</td>
-            <td>{{ day.guests }}</td>
-            <td><b>{{ day.total }}</b></td>
-            <td>{{ day.menu }}</td>
-        </tr>
-        {% endfor %}
-    </table>
 </body>
 </html>
