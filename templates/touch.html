@@ -1,26 +1,50 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="google" content="notranslate">
     <title>Essensanmeldung - FoodBot</title>
     <style>
-        /* Google Translate Leiste verstecken */
+        /* Google Translate komplett blockieren - MAXIMALE PRIORITÄT */
         body > .skiptranslate,
         body > .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
         body > .goog-te-banner-frame,
+        .goog-te-banner-frame,
         .goog-te-banner-frame.skiptranslate,
         div#google_translate_element,
         .goog-te-gadget,
         #goog-gt-tt,
         .goog-te-balloon-frame,
         div.skiptranslate,
-        iframe.skiptranslate {
+        iframe.skiptranslate,
+        .goog-te-menu-frame,
+        #\:1\.container,
+        #\:2\.container,
+        #\:3\.container,
+        [id*="google_translate"],
+        [class*="goog-te"],
+        iframe[src*="translate"] {
             display: none !important;
             visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            width: 0 !important;
+            position: absolute !important;
+            top: -9999px !important;
+            left: -9999px !important;
+            z-index: -9999 !important;
         }
-        body.translated-ltr { margin-top: 0 !important; }
-        body { top: 0 !important; }
+        body.translated-ltr,
+        body.translated-rtl { 
+            margin-top: 0 !important; 
+            padding-top: 0 !important;
+        }
+        body { 
+            top: 0 !important; 
+            position: relative !important;
+        }
+        html { top: 0 !important; }
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -94,6 +118,40 @@
             width: 100%;
             margin: 5px 0;
         }
+        .keyboard {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(20,20,20,0.98);
+            border-top: 2px solid #dc2626;
+            padding: 10px;
+            display: none;
+            z-index: 3000;
+        }
+        .keyboard.show { display: block; }
+        .keyboard-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+            justify-content: center;
+        }
+        .key {
+            background: #374151;
+            color: #fff;
+            border: 1px solid #6b7280;
+            border-radius: 6px;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            min-width: 60px;
+            text-align: center;
+        }
+        .key:active {
+            background: #dc2626;
+            transform: scale(0.95);
+        }
+        .key.wide { min-width: 120px; }
         .fallback-form {
             display: none;
             position: fixed;
@@ -159,8 +217,9 @@
 </head>
 <body>
     <h1>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor" width="40" height="40" style="vertical-align: middle; margin-right: 8px;">
-            <path d="M624 352h-16V243.9c0-12.7-5.1-24.9-14.1-33.9L494 110.1c-9-9-21.2-14.1-33.9-14.1H416V48c0-26.5-21.5-48-48-48H48C21.5 0 0 21.5 0 48v320c0 26.5 21.5 48 48 48h16c0 53 43 96 96 96s96-43 96-96h128c0 53 43 96 96 96s96-43 96-96h48c8.8 0 16-7.2 16-16v-32c0-8.8-7.2-16-16-16zM160 464c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48zm144-248c0 4.4-3.6 8-8 8h-56v56c0 4.4-3.6 8-8 8h-48c-4.4 0-8-3.6-8-8v-56h-56c-4.4 0-8-3.6-8-8v-48c0-4.4 3.6-8 8-8h56v-56c0-4.4 3.6-8 8-8h48c4.4 0 8 3.6 8 8v56h56c4.4 0 8 3.6 8 8v48zm176 248c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48zm80-208H416V144h44.1l99.9 99.9V256z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" width="40" height="40" style="vertical-align: middle; margin-right: 8px;">
+            <!-- Feuerwehrauto -->
+            <path d="M32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H32zm80-64c35.3 0 64-28.7 64-64V96H80c-26.5 0-48 21.5-48 48V288c0 35.3 28.7 64 64 64zm96-160h96V96H208v96zm128 160c35.3 0 64-28.7 64-64V96H304V192h96v96c0 35.3 28.7 64 64 64zM480 144v144c0 8.8-7.2 16-16 16s-16-7.2-16-16V144c0-8.8 7.2-16 16-16s16 7.2 16 16zM48 144v144c0 8.8-7.2 16-16 16s-16-7.2-16-16V144c0-8.8 7.2-16 16-16s16 7.2 16 16zm128 0h96v32H176V144z"/>
         </svg>
         Essen
     </h1>
@@ -184,10 +243,33 @@
     <button class="fallback-btn" onclick="document.getElementById('fallback').classList.add('show')">Personalnummer</button>
     
     <form id="fallback" class="fallback-form" action="/" method="post">
-        <button type="button" class="close-btn" onclick="document.getElementById('fallback').classList.remove('show')">✕</button>
-        <input type="text" inputmode="numeric" pattern="[0-9]*" name="personal_number" placeholder="Personalnummer" id="personal_number_input" onfocus="showKeyboard()" autofocus>
+        <button type="button" class="close-btn" onclick="closeForm()">✕</button>
+        <input type="text" inputmode="none" readonly name="personal_number" placeholder="Personalnummer" id="personal_number_input" onclick="showKeyboard()">
         <button class="submit-btn" type="submit">OK</button>
     </form>
+    
+    <!-- On-Screen Keyboard -->
+    <div id="keyboard" class="keyboard">
+        <div class="keyboard-row">
+            <button type="button" class="key" onclick="addDigit('1')">1</button>
+            <button type="button" class="key" onclick="addDigit('2')">2</button>
+            <button type="button" class="key" onclick="addDigit('3')">3</button>
+        </div>
+        <div class="keyboard-row">
+            <button type="button" class="key" onclick="addDigit('4')">4</button>
+            <button type="button" class="key" onclick="addDigit('5')">5</button>
+            <button type="button" class="key" onclick="addDigit('6')">6</button>
+        </div>
+        <div class="keyboard-row">
+            <button type="button" class="key" onclick="addDigit('7')">7</button>
+            <button type="button" class="key" onclick="addDigit('8')">8</button>
+            <button type="button" class="key" onclick="addDigit('9')">9</button>
+        </div>
+        <div class="keyboard-row">
+            <button type="button" class="key wide" onclick="backspace()">← Löschen</button>
+            <button type="button" class="key" onclick="addDigit('0')">0</button>
+        </div>
+    </div>
     
     <!-- Verstecktes Formular für RFID -->
     <form id="rfid-form" action="/" method="post" style="display:none;">
@@ -227,12 +309,33 @@ setInterval(async function() {
     } catch (e) {}
 }, 500);
 
-// Bildschirmtastatur öffnen (benötigt matchbox-keyboard oder onboard auf dem Pi)
+// HTML-Tastatur Funktionen
 function showKeyboard() {
-    // Versuche Tastatur über D-Bus zu öffnen (funktioniert mit matchbox-keyboard)
-    if (window.matchbox) {
-        window.matchbox.show();
-    }
+    document.getElementById('keyboard').classList.add('show');
 }
+
+function hideKeyboard() {
+    document.getElementById('keyboard').classList.remove('show');
+}
+
+function addDigit(digit) {
+    var input = document.getElementById('personal_number_input');
+    input.value += digit;
+}
+
+function backspace() {
+    var input = document.getElementById('personal_number_input');
+    input.value = input.value.slice(0, -1);
+}
+
+function closeForm() {
+    document.getElementById('fallback').classList.remove('show');
+    hideKeyboard();
+}
+
+// Keyboard automatisch öffnen wenn Personalnummer-Button geklickt wird
+document.querySelector('.fallback-btn').addEventListener('click', function() {
+    setTimeout(showKeyboard, 100);
+});
 </script>
 </html>
