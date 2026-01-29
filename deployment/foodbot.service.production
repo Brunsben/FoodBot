@@ -23,7 +23,7 @@ NoNewPrivileges=true
 PrivateDevices=false
 ProtectSystem=false
 ProtectHome=false
-ReadWritePaths=/home/brunsben/FoodBot/backups
+ReadWritePaths=/home/brunsben/FoodBot/backups /home/brunsben/FoodBot/logs
 
 # Logging
 StandardOutput=journal
