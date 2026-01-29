@@ -202,14 +202,14 @@
             <table>
                 <tr><th>Name</th><th>Personalnummer</th><th>Karten-ID</th><th>Status</th><th>Aktion</th><th>QR</th></tr>
                 {% for user in users %}
-                <tr>
+                <tr data-user-id="{{ user.id }}">
                     <form method="post">
                         <td><input type="text" name="edit_name" value="{{ user.name }}" style="width:120px;"></td>
                         <td><input type="text" name="edit_personal_number" value="{{ user.personal_number }}" style="width:90px;"></td>
                         <td><input type="text" name="edit_card_id" value="{{ user.card_id or '' }}" style="width:90px;"></td>
-                        <td>{% if user.id in registered_ids %}<span class="status-registered">✔ angemeldet</span>{% else %}<span class="status-not-registered">✖ nicht angemeldet</span>{% endif %}</td>
+                        <td class="status-cell">{% if user.id in registered_ids %}<span class="status-registered">✔ angemeldet</span>{% else %}<span class="status-not-registered">✖ nicht angemeldet</span>{% endif %}</td>
                         <td>
-                            <button name="user_id" value="{{ user.id }}" type="submit">{% if user.id in registered_ids %}Abmelden{% else %}Anmelden{% endif %}</button>
+                            <button class="action-btn" name="user_id" value="{{ user.id }}" type="submit">{% if user.id in registered_ids %}Abmelden{% else %}Anmelden{% endif %}</button>
                             <button name="edit_user" value="{{ user.id }}" type="submit">Speichern</button>
                             <button name="delete_user" value="{{ user.id }}" type="submit" onclick="return confirm('Benutzer {{ user.name }} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.');">Löschen</button>
                         </td>
@@ -241,4 +241,38 @@
         <small>CSV: Spaltennamen z.B. Name, Personalnummer, Karte</small>
     </div>
 </body>
+<script>
+// Auto-Update für Registrierungsstatus alle 5 Sekunden
+async function updateRegistrations() {
+    try {
+        const resp = await fetch('/kitchen/data');
+        if (resp.ok) {
+            const data = await resp.json();
+            const registeredIds = new Set(data.users.map(u => u.id));
+            
+            // Alle Status-Zellen und Buttons aktualisieren
+            document.querySelectorAll('tr[data-user-id]').forEach(row => {
+                const userId = parseInt(row.dataset.userId);
+                const statusCell = row.querySelector('.status-cell');
+                const actionBtn = row.querySelector('.action-btn');
+                
+                if (statusCell && actionBtn) {
+                    if (registeredIds.has(userId)) {
+                        statusCell.innerHTML = '<span class="status-registered">✔ angemeldet</span>';
+                        actionBtn.textContent = 'Abmelden';
+                    } else {
+                        statusCell.innerHTML = '<span class="status-not-registered">✖ nicht angemeldet</span>';
+                        actionBtn.textContent = 'Anmelden';
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Update error:', e);
+    }
+}
+
+// Alle 5 Sekunden aktualisieren
+setInterval(updateRegistrations, 5000);
+</script>
 </html>
