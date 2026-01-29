@@ -246,28 +246,34 @@
         <div style="padding: 10px 0;">
             <h2 style="color: #ef4444; margin-bottom: 8px; font-size: 1em;">Personalnummer</h2>
             <input type="text" inputmode="none" readonly name="personal_number" placeholder="------" id="personal_number_input">
-            <button class="submit-btn" type="submit">OK</button>
         </div>
-        <!-- On-Screen Keyboard -->
-        <div id="keyboard" class="keyboard">
-            <div class="keyboard-row">
-                <button type="button" class="key" onclick="addDigit('1')">1</button>
-                <button type="button" class="key" onclick="addDigit('2')">2</button>
-                <button type="button" class="key" onclick="addDigit('3')">3</button>
+        <!-- Tastatur und Button nebeneinander -->
+        <div style="display: flex; gap: 10px; align-items: flex-start;">
+            <!-- On-Screen Keyboard -->
+            <div id="keyboard" class="keyboard" style="flex: 1;">
+                <div class="keyboard-row">
+                    <button type="button" class="key" onclick="addDigit('1')">1</button>
+                    <button type="button" class="key" onclick="addDigit('2')">2</button>
+                    <button type="button" class="key" onclick="addDigit('3')">3</button>
+                </div>
+                <div class="keyboard-row">
+                    <button type="button" class="key" onclick="addDigit('4')">4</button>
+                    <button type="button" class="key" onclick="addDigit('5')">5</button>
+                    <button type="button" class="key" onclick="addDigit('6')">6</button>
+                </div>
+                <div class="keyboard-row">
+                    <button type="button" class="key" onclick="addDigit('7')">7</button>
+                    <button type="button" class="key" onclick="addDigit('8')">8</button>
+                    <button type="button" class="key" onclick="addDigit('9')">9</button>
+                </div>
+                <div class="keyboard-row">
+                    <button type="button" class="key" onclick="addDigit('0')">0</button>
+                    <button type="button" class="key" onclick="backspace()">←</button>
+                </div>
             </div>
-            <div class="keyboard-row">
-                <button type="button" class="key" onclick="addDigit('4')">4</button>
-                <button type="button" class="key" onclick="addDigit('5')">5</button>
-                <button type="button" class="key" onclick="addDigit('6')">6</button>
-            </div>
-            <div class="keyboard-row">
-                <button type="button" class="key" onclick="addDigit('7')">7</button>
-                <button type="button" class="key" onclick="addDigit('8')">8</button>
-                <button type="button" class="key" onclick="addDigit('9')">9</button>
-            </div>
-            <div class="keyboard-row">
-                <button type="button" class="key wide" onclick="backspace()">← Löschen</button>
-                <button type="button" class="key" onclick="addDigit('0')">0</button>
+            <!-- OK Button rechts -->
+            <div style="display: flex; flex-direction: column; justify-content: space-between; min-width: 80px;">
+                <button class="submit-btn" type="submit" style="height: 100%; min-height: 140px;">OK</button>
             </div>
         </div>
     </form>
