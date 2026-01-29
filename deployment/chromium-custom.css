@@ -1,0 +1,31 @@
+/* Hide Google Translate UI elements */
+body > .skiptranslate,
+body > .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+body > .goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+div#google_translate_element,
+.goog-te-gadget,
+.goog-te-combo,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+div.skiptranslate,
+iframe.skiptranslate {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+
+/* Prevent body push-down from translate bar */
+body {
+    top: 0 !important;
+    position: relative !important;
+}
+
+/* Remove margin that translate bar creates */
+body.translated-ltr {
+    margin-top: 0 !important;
+}
