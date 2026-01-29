@@ -3,14 +3,14 @@ Description=FoodBot - Feuerwehr Essensanmeldung
 After=network.target
 
 [Service]
-Type=notify
+Type=simple
 User=%USER%
 Group=%USER%
 WorkingDirectory=%INSTALL_DIR%
-Environment="PATH=%INSTALL_DIR%/venv/bin"
+Environment="PATH=%INSTALL_DIR%/venv/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="FLASK_ENV=production"
 EnvironmentFile=%INSTALL_DIR%/.env
-ExecStart=%INSTALL_DIR%/venv/bin/gunicorn -c %INSTALL_DIR%/deployment/gunicorn.conf.py "app:create_app()"
+ExecStart=%INSTALL_DIR%/venv/bin/python -m gunicorn -c %INSTALL_DIR%/deployment/gunicorn.conf.py wsgi:app
 ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=mixed
 TimeoutStopSec=5
@@ -23,10 +23,12 @@ NoNewPrivileges=true
 PrivateDevices=false
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=%INSTALL_DIR%/backups /var/log/foodbot
+ReadWritePaths=%INSTALL_DIR%/backups
 
 # Logging
 StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=foodbot
 StandardError=journal
 SyslogIdentifier=foodbot
 
