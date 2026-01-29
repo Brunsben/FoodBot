@@ -66,13 +66,13 @@
             text-shadow: 0 0 10px rgba(220,38,38,0.8);
         }
         .menu { 
-            font-size: 1.3em; 
-            padding: 12px 15px; 
+            font-size: 1.5em; 
+            padding: 15px 18px; 
             background: rgba(20,20,20,0.8);
             border-radius: 8px;
             border: 1px solid #dc2626;
             margin: 5px 0;
-            line-height: 1.4;
+            line-height: 1.5;
         }
         .menu b { 
             color: #fca5a5;
@@ -118,15 +118,9 @@
             margin: 5px 0;
         }
         .keyboard {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(20,20,20,0.98);
-            border-top: 2px solid #dc2626;
-            padding: 10px;
+            background: transparent;
+            padding: 10px 0;
             display: none;
-            z-index: 3000;
         }
         .keyboard.show { display: block; }
         .keyboard-row {
@@ -154,43 +148,44 @@
         .fallback-form {
             display: none;
             position: fixed;
-            top: 15%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(20,20,20,0.98);
-            border: 2px solid #dc2626;
-            border-radius: 15px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
             z-index: 5000;
-            padding: 30px 20px;
-            min-width: 300px;
-            box-shadow: 0 0 40px rgba(220,38,38,0.8);
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
         }
-        .fallback-form.show { display: block; }
+        .fallback-form.show { display: flex; }
         .close-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 15px;
+            right: 15px;
             background: #dc2626;
             border: none;
             color: #fff;
-            width: 35px;
-            height: 35px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            font-size: 1.2em;
+            font-size: 1.5em;
             cursor: pointer;
+            z-index: 5001;
         }
         input[type="text"] { 
-            font-size: 2em; 
-            padding: 20px; 
-            border-radius: 8px; 
-            border: 2px solid #374151; 
+            font-size: 2.5em; 
+            padding: 25px; 
+            border-radius: 12px; 
+            border: 3px solid #dc2626; 
             background: #1a1a1a;
             color: #fff; 
             width: 100%;
             margin: 20px 0;
             font-weight: bold;
             text-align: center;
-            letter-spacing: 4px;
+            letter-spacing: 8px;
+            min-height: 80px;
         }
         input[type="text"]:focus {
             outline: none;
@@ -240,32 +235,34 @@
     
     <form id="fallback" class="fallback-form" action="/" method="post">
         <button type="button" class="close-btn" onclick="closeForm()">✕</button>
-        <input type="text" inputmode="none" readonly name="personal_number" placeholder="Personalnummer" id="personal_number_input" onclick="showKeyboard()">
-        <button class="submit-btn" type="submit">OK</button>
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+            <h2 style="color: #ef4444; margin-bottom: 20px; font-size: 1.5em;">Personalnummer eingeben</h2>
+            <input type="text" inputmode="none" readonly name="personal_number" placeholder="---" id="personal_number_input">
+            <button class="submit-btn" type="submit">OK</button>
+        </div>
+        <!-- On-Screen Keyboard -->
+        <div id="keyboard" class="keyboard">
+            <div class="keyboard-row">
+                <button type="button" class="key" onclick="addDigit('1')">1</button>
+                <button type="button" class="key" onclick="addDigit('2')">2</button>
+                <button type="button" class="key" onclick="addDigit('3')">3</button>
+            </div>
+            <div class="keyboard-row">
+                <button type="button" class="key" onclick="addDigit('4')">4</button>
+                <button type="button" class="key" onclick="addDigit('5')">5</button>
+                <button type="button" class="key" onclick="addDigit('6')">6</button>
+            </div>
+            <div class="keyboard-row">
+                <button type="button" class="key" onclick="addDigit('7')">7</button>
+                <button type="button" class="key" onclick="addDigit('8')">8</button>
+                <button type="button" class="key" onclick="addDigit('9')">9</button>
+            </div>
+            <div class="keyboard-row">
+                <button type="button" class="key wide" onclick="backspace()">← Löschen</button>
+                <button type="button" class="key" onclick="addDigit('0')">0</button>
+            </div>
+        </div>
     </form>
-    
-    <!-- On-Screen Keyboard -->
-    <div id="keyboard" class="keyboard">
-        <div class="keyboard-row">
-            <button type="button" class="key" onclick="addDigit('1')">1</button>
-            <button type="button" class="key" onclick="addDigit('2')">2</button>
-            <button type="button" class="key" onclick="addDigit('3')">3</button>
-        </div>
-        <div class="keyboard-row">
-            <button type="button" class="key" onclick="addDigit('4')">4</button>
-            <button type="button" class="key" onclick="addDigit('5')">5</button>
-            <button type="button" class="key" onclick="addDigit('6')">6</button>
-        </div>
-        <div class="keyboard-row">
-            <button type="button" class="key" onclick="addDigit('7')">7</button>
-            <button type="button" class="key" onclick="addDigit('8')">8</button>
-            <button type="button" class="key" onclick="addDigit('9')">9</button>
-        </div>
-        <div class="keyboard-row">
-            <button type="button" class="key wide" onclick="backspace()">← Löschen</button>
-            <button type="button" class="key" onclick="addDigit('0')">0</button>
-        </div>
-    </div>
     
     <!-- Verstecktes Formular für RFID -->
     <form id="rfid-form" action="/" method="post" style="display:none;">
