@@ -37,7 +37,11 @@ def index():
     avg = sum(totals) / len(totals) if totals else 0
     
     return render_template('stats.html', days=days, average=round(avg, 1))
-aller Tage mit Menü als CSV"""
+
+@stats_bp.route('/export')
+@login_required
+def export_csv():
+    """CSV-Export aller Tage mit Menü als CSV"""
     output = StringIO()
     writer = csv.writer(output)
     writer.writerow(['Datum', 'Kameraden', 'Gäste', 'Gesamt', 'Menü'])
@@ -58,10 +62,6 @@ aller Tage mit Menü als CSV"""
             guests,
             len(regs) + guests,
             menu_entry.description
-            len(regs),
-            guests,
-            len(regs) + guests,
-            menu_entry.description if menu_entry else ''
         ])
     
     output.seek(0)
