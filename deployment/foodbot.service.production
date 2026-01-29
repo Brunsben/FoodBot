@@ -21,8 +21,8 @@ RestartSec=10
 # Security settings
 NoNewPrivileges=true
 PrivateDevices=false
-ProtectSystem=strict
-ProtectHome=true
+ProtectSystem=false
+ProtectHome=false
 ReadWritePaths=/home/brunsben/FoodBot/backups
 
 # Logging
