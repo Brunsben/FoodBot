@@ -67,12 +67,16 @@
         }
         .menu { 
             font-size: 1.5em; 
-            padding: 15px 18px; 
+            padding: 20px 18px; 
             background: rgba(20,20,20,0.8);
             border-radius: 8px;
             border: 1px solid #dc2626;
-            margin: 5px 0;
-            line-height: 1.5;
+            margin: 8px 0;
+            line-height: 1.6;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .menu b { 
             color: #fca5a5;
@@ -120,9 +124,8 @@
         .keyboard {
             background: transparent;
             padding: 10px 0;
-            display: none;
+            display: block;
         }
-        .keyboard.show { display: block; }
         .keyboard-row {
             display: flex;
             gap: 5px;
@@ -304,10 +307,14 @@ setInterval(async function() {
 
 // HTML-Tastatur Funktionen
 function openPersonalNumber() {
-    document.getElementById('fallback').classList.add('show');
+    var form = document.getElementById('fallback');
+    var keyboard = document.getElementById('keyboard');
+    form.classList.add('show');
+    keyboard.classList.add('show');
+    // Focus auf Input setzen
     setTimeout(function() {
-        document.getElementById('keyboard').classList.add('show');
-    }, 100);
+        document.getElementById('personal_number_input').focus();
+    }, 50);
 }
 
 function showKeyboard() {
