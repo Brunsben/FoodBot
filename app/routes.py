@@ -142,13 +142,11 @@ def menu_data():
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-    users = User.query.order_by(User.name).all()
-    registrations = Registration.query.filter_by(date=date.today()).all()
-    registered_ids = {r.user_id for r in registrations}
     today_menu = Menu.query.filter_by(date=date.today()).first()
     guest_entry = Guest.query.filter_by(date=date.today()).first()
     guest_count = guest_entry.count if guest_entry else 0
     message = None
+    
     if request.method == 'POST':
         # Menü speichern
         if 'menu_text' in request.form:
@@ -248,6 +246,12 @@ def admin():
                     pass
             db.session.commit()
             message = f"Gästezahl aktualisiert: {guest_entry.count}"
+    
+    # Daten NACH allen POST-Operationen neu laden
+    users = User.query.order_by(User.name).all()
+    registrations = Registration.query.filter_by(date=date.today()).all()
+    registered_ids = {r.user_id for r in registrations}
+    
     return render_template('admin.html', users=users, registered_ids=registered_ids, message=message, menu=today_menu, guest_count=guest_count)
 
 # API-Route für das Touch-Display, um den letzten Scan abzufragen
