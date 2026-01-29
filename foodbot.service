@@ -4,10 +4,11 @@ After=network.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/FoodBot
+User=%USER%
+WorkingDirectory=%INSTALL_DIR%
 Environment="PATH=/usr/bin:/usr/local/bin"
-ExecStart=/usr/bin/python3 /home/pi/FoodBot/app/main.py
+EnvironmentFile=%INSTALL_DIR%/.env
+ExecStart=/usr/bin/python3 %INSTALL_DIR%/app/main.py
 Restart=always
 RestartSec=10
 

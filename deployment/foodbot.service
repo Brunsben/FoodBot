@@ -4,14 +4,13 @@ After=network.target
 
 [Service]
 Type=notify
-User=pi
-Group=pi
-WorkingDirectory=/home/pi/FoodBot
-Environment="PATH=/home/pi/FoodBot/venv/bin"
+User=%USER%
+Group=%USER%
+WorkingDirectory=%INSTALL_DIR%
+Environment="PATH=%INSTALL_DIR%/venv/bin"
 Environment="FLASK_ENV=production"
-Environment="ADMIN_PASSWORD=feuerwehr2026"
-Environment="SECRET_KEY=your-secret-key-here-change-me"
-ExecStart=/home/pi/FoodBot/venv/bin/gunicorn -c /home/pi/FoodBot/deployment/gunicorn.conf.py "app:create_app()"
+EnvironmentFile=%INSTALL_DIR%/.env
+ExecStart=%INSTALL_DIR%/venv/bin/gunicorn -c %INSTALL_DIR%/deployment/gunicorn.conf.py "app:create_app()"
 ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=mixed
 TimeoutStopSec=5
@@ -24,7 +23,7 @@ NoNewPrivileges=true
 PrivateDevices=false
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/home/pi/FoodBot/backups /var/log/foodbot
+ReadWritePaths=%INSTALL_DIR%/backups /var/log/foodbot
 
 # Logging
 StandardOutput=journal

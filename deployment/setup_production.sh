@@ -23,8 +23,22 @@ fi
 echo -e "${YELLOW}📋 System-Voraussetzungen prüfen...${NC}"
 echo ""
 
-# Projektverzeichnis
-PROJECT_DIR="/home/pi/FoodBot"
+# Ermittle Projektverzeichnis (dynamisch)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
+PROJECT_USER="${SUDO_USER:-$USER}"
+
+# Konfiguration abfragen
+echo "Installationsverzeichnis: $PROJECT_DIR"
+echo "Installation für Benutzer: $PROJECT_USER"
+echo ""
+read -p "Ist dies korrekt? (j/n): " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Jj]$ ]]; then
+    read -p "Bitte gib das Installationsverzeichnis ein: " PROJECT_DIR
+    read -p "Bitte gib den Benutzernamen ein: " PROJECT_USER
+fi
+
 LOG_DIR="/var/log/foodbot"
 BACKUP_DIR="$PROJECT_DIR/backups"
 VENV_DIR="$PROJECT_DIR/venv"
@@ -41,8 +55,8 @@ echo -e "${GREEN}✓${NC} Projektverzeichnis gefunden"
 echo -e "${YELLOW}📁 Erstelle Verzeichnisse...${NC}"
 mkdir -p "$LOG_DIR"
 mkdir -p "$BACKUP_DIR"
-chown -R pi:pi "$LOG_DIR"
-chown -R pi:pi "$BACKUP_DIR"
+chown -R "$PROJECT_USER:$PROJECT_USER" "$LOG_DIR"
+chown -R "$PROJECT_USER:$PROJECT_USER" "$BACKUP_DIR"
 echo -e "${GREEN}✓${NC} Verzeichnisse erstellt"
 echo ""
 
@@ -50,7 +64,7 @@ echo ""
 echo -e "${YELLOW}🐍 Python Virtual Environment...${NC}"
 if [ ! -d "$VENV_DIR" ]; then
     echo "Erstelle Virtual Environment..."
-    sudo -u pi python3 -m venv "$VENV_DIR"
+    sudo -u "$PROJECT_USER" python3 -m venv "$VENV_DIR"
     echo -e "${GREEN}✓${NC} Virtual Environment erstellt"
 else
     echo -e "${GREEN}✓${NC} Virtual Environment existiert bereits"
@@ -58,19 +72,44 @@ fi
 
 # Requirements installieren
 echo "Installiere Python-Pakete..."
-sudo -u pi "$VENV_DIR/bin/pip" install -r "$PROJECT_DIR/requirements.txt"
+sudo -u "$PROJECT_USER" "$VENV_DIR/bin/pip" install -r "$PROJECT_DIR/requirements.txt"
 echo -e "${GREEN}✓${NC} Python-Pakete installiert"
 echo ""
 
 # Datenbank initialisieren
 echo -e "${YELLOW}💾 Datenbank initialisieren...${NC}"
 cd "$PROJECT_DIR"
-sudo -u pi "$VENV_DIR/bin/python" -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all(); print('✓ Datenbank initialisiert')"
+sudo -u "$PROJECT_USER" "$VENV_DIR/bin/python" -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all(); print('✓ Datenbank initialisiert')"
+echo ""
+
+# .env Datei erstellen falls nicht vorhanden
+if [ ! -f "$PROJECT_DIR/.env" ]; then
+    echo -e "${YELLOW}🔐 Erstelle .env Datei...${NC}"
+    cp "$PROJECT_DIR/.env.example" "$PROJECT_DIR/.env"
+    
+    # Generiere SECRET_KEY
+    NEW_SECRET=$(python3 -c 'import os; print(os.urandom(24).hex())')
+    sed -i "s/dev-secret-key-change-in-production/$NEW_SECRET/" "$PROJECT_DIR/.env"
+    
+    # Frage nach Admin-Passwort
+    read -sp "Bitte gib ein Admin-Passwort ein: " ADMIN_PASS
+    echo
+    sed -i "s/change-this-password/$ADMIN_PASS/" "$PROJECT_DIR/.env"
+    
+    chown "$PROJECT_USER:$PROJECT_USER" "$PROJECT_DIR/.env"
+    chmod 600 "$PROJECT_DIR/.env"
+    echo -e "${GREEN}✓${NC} .env Datei erstellt mit sicheren Zugangsdaten"
+else
+    echo -e "${GREEN}✓${NC} .env Datei existiert bereits"
+fi
 echo ""
 
 # Systemd Service installieren
 echo -e "${YELLOW}⚙️  Systemd Service installieren...${NC}"
-cp "$PROJECT_DIR/deployment/foodbot.service" /etc/systemd/system/
+# Ersetze Platzhalter in Service-Datei
+sed -e "s|%USER%|$PROJECT_USER|g" \
+    -e "s|%INSTALL_DIR%|$PROJECT_DIR|g" \
+    "$PROJECT_DIR/deployment/foodbot.service" > /etc/systemd/system/foodbot.service
 systemctl daemon-reload
 systemctl enable foodbot.service
 echo -e "${GREEN}✓${NC} Service installiert und aktiviert"
@@ -90,9 +129,9 @@ BACKUP_CRON="30 0 * * * $VENV_DIR/bin/python $PROJECT_DIR/backup_db.py >> $LOG_D
 # Reset Cronjob: Täglich um 00:00 Uhr
 RESET_CRON="0 0 * * * $VENV_DIR/bin/python $PROJECT_DIR/clear_registrations.py >> $LOG_DIR/reset.log 2>&1"
 
-# Cronjobs für pi-User hinzufügen
-(sudo -u pi crontab -l 2>/dev/null | grep -v "backup_db.py"; echo "$BACKUP_CRON") | sudo -u pi crontab -
-(sudo -u pi crontab -l 2>/dev/null | grep -v "clear_registrations.py"; echo "$RESET_CRON") | sudo -u pi crontab -
+# Cronjobs für den Projektuser hinzufügen
+(sudo -u "$PROJECT_USER" crontab -l 2>/dev/null | grep -v "backup_db.py"; echo "$BACKUP_CRON") | sudo -u "$PROJECT_USER" crontab -
+(sudo -u "$PROJECT_USER" crontab -l 2>/dev/null | grep -v "clear_registrations.py"; echo "$RESET_CRON") | sudo -u "$PROJECT_USER" crontab -
 echo -e "${GREEN}✓${NC} Cronjobs eingerichtet"
 echo ""
 
@@ -103,7 +142,8 @@ echo
 if [[ $REPLY =~ ^[Jj]$ ]]; then
     apt-get update
     apt-get install -y nginx
-    cp "$PROJECT_DIR/deployment/nginx-foodbot" /etc/nginx/sites-available/foodbot
+    # Ersetze Platzhalter in Nginx-Konfiguration
+    sed "s|%INSTALL_DIR%|$PROJECT_DIR|g" "$PROJECT_DIR/deployment/nginx-foodbot" > /etc/nginx/sites-available/foodbot
     ln -sf /etc/nginx/sites-available/foodbot /etc/nginx/sites-enabled/foodbot
     rm -f /etc/nginx/sites-enabled/default
     nginx -t && systemctl reload nginx
@@ -111,21 +151,6 @@ if [[ $REPLY =~ ^[Jj]$ ]]; then
     echo -e "${GREEN}✓${NC} Nginx installiert und konfiguriert"
 else
     echo "Nginx übersprungen"
-fi
-echo ""
-
-# Environment-Variablen setzen
-echo -e "${YELLOW}🔐 Environment-Variablen...${NC}"
-echo "Bitte setze folgende Variablen in /etc/systemd/system/foodbot.service:"
-echo "  - ADMIN_PASSWORD (aktuell: feuerwehr2026)"
-echo "  - SECRET_KEY (generiere mit: python3 -c 'import os; print(os.urandom(24).hex())')"
-echo ""
-read -p "Möchtest du jetzt einen neuen SECRET_KEY generieren? (j/n): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Jj]$ ]]; then
-    NEW_SECRET=$(python3 -c 'import os; print(os.urandom(24).hex())')
-    echo -e "${GREEN}Neuer SECRET_KEY:${NC} $NEW_SECRET"
-    echo "Trage diesen in /etc/systemd/system/foodbot.service ein"
 fi
 echo ""
 
@@ -167,7 +192,6 @@ echo "⏰ Cronjobs:"
 echo "   00:00 Uhr - Automatisches Reset der Anmeldungen"
 echo "   00:30 Uhr - Automatisches Backup der Datenbank"
 echo ""
-echo "🔐 Standard-Login:"
-echo "   Passwort: feuerwehr2026"
-echo "   (Ändern in /etc/systemd/system/foodbot.service)"
+echo "🔐 Zugangsdaten wurden in $PROJECT_DIR/.env gespeichert"
+echo "   (Zum Ändern: Bearbeite die .env Datei und starte den Service neu)"
 echo ""
