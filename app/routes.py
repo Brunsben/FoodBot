@@ -131,6 +131,14 @@ def kitchen_data():
         'total': len(users) + guest_count
     })
 
+@bp.route('/menu/data', methods=['GET'])
+def menu_data():
+    """API-Endpunkt für AJAX-Updates des Menüs auf der Touch-Seite"""
+    today_menu = Menu.query.filter_by(date=date.today()).first()
+    return jsonify({
+        'menu': today_menu.description if today_menu else None
+    })
+
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():

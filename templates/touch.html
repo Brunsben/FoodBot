@@ -222,11 +222,11 @@
 </head>
 <body>
     <h1>Essen</h1>
-    <div class="menu">
+    <div class="menu" id="menu-display">
         {% if menu %}
-            <b>Heute:</b> {{ menu.description }}
+            <b>Heute:</b> <span id="menu-text">{{ menu.description }}</span>
         {% else %}
-            <i style="color:#fca5a5;">Kein Menü</i>
+            <i style="color:#fca5a5;" id="menu-text">Kein Menü</i>
         {% endif %}
     </div>
     
@@ -315,6 +315,24 @@ setInterval(async function() {
         }
     } catch (e) {}
 }, 500);
+
+// Menü alle 10 Sekunden aktualisieren
+setInterval(async function() {
+    try {
+        let resp = await fetch('/menu/data');
+        if (resp.ok) {
+            let data = await resp.json();
+            let menuText = document.getElementById('menu-text');
+            let menuDisplay = document.getElementById('menu-display');
+            
+            if (data.menu) {
+                menuDisplay.innerHTML = '<b>Heute:</b> <span id="menu-text">' + data.menu + '</span>';
+            } else {
+                menuDisplay.innerHTML = '<i style="color:#fca5a5;" id="menu-text">Kein Menü</i>';
+            }
+        }
+    } catch (e) {}
+}, 10000);
 
 // HTML-Tastatur Funktionen
 function openPersonalNumber() {
