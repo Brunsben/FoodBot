@@ -117,6 +117,20 @@ def kitchen():
     total = len(users) + guest_count
     return render_template('kitchen.html', menu=today_menu, users=users, guest_count=guest_count, total=total)
 
+@bp.route('/kitchen/data', methods=['GET'])
+def kitchen_data():
+    """API-Endpunkt für AJAX-Updates der Küchenseite"""
+    registrations = Registration.query.filter_by(date=date.today()).all()
+    users = sorted([r.user for r in registrations], key=lambda u: u.name.lower())
+    guest_entry = Guest.query.filter_by(date=date.today()).first()
+    guest_count = guest_entry.count if guest_entry else 0
+    
+    return jsonify({
+        'users': [{'id': u.id, 'name': u.name} for u in users],
+        'guest_count': guest_count,
+        'total': len(users) + guest_count
+    })
+
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():

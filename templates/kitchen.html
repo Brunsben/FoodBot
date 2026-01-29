@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="30">
     <title>Küchenansicht - FoodBot</title>
     <style>
         * { box-sizing: border-box; }
@@ -192,6 +191,41 @@
             var el = document.getElementById('user-list');
             el.classList.toggle('show');
         }
+        
+        // Auto-Update Funktion
+        function updateData() {
+            fetch('/kitchen/data')
+                .then(response => response.json())
+                .then(data => {
+                    // Aktualisiere die Zahlen
+                    document.getElementById('total-count').textContent = data.total;
+                    document.getElementById('user-count').textContent = data.users.length;
+                    document.getElementById('guest-count').textContent = data.guest_count;
+                    document.getElementById('guest-count-detail').textContent = data.guest_count;
+                    
+                    // Aktualisiere Benutzerliste
+                    const userList = document.getElementById('user-names');
+                    userList.innerHTML = '';
+                    data.users.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = user.name;
+                        userList.appendChild(li);
+                    });
+                    
+                    // Aktualisiere Gast-Info
+                    const guestInfo = document.getElementById('guest-info');
+                    if (data.guest_count > 0) {
+                        guestInfo.style.display = 'block';
+                        guestInfo.innerHTML = '<span style="font-size:1.5em;">👤</span> + ' + data.guest_count + ' Gäste';
+                    } else {
+                        guestInfo.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Fehler beim Aktualisieren:', error));
+        }
+        
+        // Alle 10 Sekunden aktualisieren
+        setInterval(updateData, 10000);
     </script>
 </head>
 <body>
@@ -207,9 +241,9 @@
         </div>
         
         <div class="count-section">
-            <div class="count">{{ total }}</div>
+            <div id="total-count" class="count">{{ total }}</div>
             <div class="count-detail">🍴 Personen zum Essen angemeldet</div>
-            <div style="font-size:0.9em;opacity:0.8;margin-bottom:20px;">{{ users|length }} Kameraden + {{ guest_count }} Gäste</div>
+            <div style="font-size:0.9em;opacity:0.8;margin-bottom:20px;"><span id="user-count">{{ users|length }}</span> Kameraden + <span id="guest-count">{{ guest_count }}</span> Gäste</div>
             <button class="btn" onclick="toggleList()">📜 Namen anzeigen</button>
         </div>
         
@@ -223,18 +257,16 @@
         
         <div id="user-list" class="user-list">
             <h3>👨‍🚒 Angemeldete Kameraden:</h3>
-            <ul>
+            <ul id="user-names">
             {% for user in users %}
                 <li>{{ user.name }}</li>
             {% endfor %}
             </ul>
-            {% if guest_count > 0 %}
-                <p style="margin-top:20px;padding:15px;background:#fef3c7;border-radius:8px;font-weight:600;color:#92400e;"><span style="font-size:1.5em;">👤</span> + {{ guest_count }} Gäste</p>
-            {% endif %}
+            <p id="guest-info" style="margin-top:20px;padding:15px;background:#fef3c7;border-radius:8px;font-weight:600;color:#92400e;{% if guest_count == 0 %}display:none;{% endif %}"><span style="font-size:1.5em;">👤</span> + <span id="guest-count-detail">{{ guest_count }}</span> Gäste</p>
         </div>
         
         <div class="refresh-note">
-            🔄 Seite aktualisiert sich automatisch alle 30 Sekunden
+            🔄 Daten aktualisieren sich automatisch alle 10 Sekunden
         </div>
     </div>
 </body>
