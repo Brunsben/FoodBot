@@ -279,8 +279,8 @@
     </form>
     
     <!-- Verstecktes Formular für RFID -->
-    <form id="rfid-form" action="/" method="post" style="display:none;">
-        <input type="hidden" name="card_id" id="card_id">
+    <form id="rfid-form" action="/" method="post">
+        <input type="text" name="card_id" id="rfid_input" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
     </form>
     {% if message %}
         <div id="feedback" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:280px;padding:20px;border-radius:12px;{% if status=='success' %}background:linear-gradient(135deg,#dc2626,#991b1b);border:2px solid #ef4444;{% elif status=='info' %}background:rgba(55,65,81,0.95);border:2px solid #6b7280;{% else %}background:linear-gradient(135deg,#7f1d1d,#450a0a);border:2px solid #991b1b;{% endif %};font-size:1.3em;animation:pop 0.3s;box-shadow:0 10px 40px rgba(0,0,0,0.8);font-weight:600;z-index:2000;">
@@ -302,19 +302,51 @@
     {% endif %}
 </body>
 <script>
-// RFID Auto-Submit - funktioniert immer, auch ohne Fokus
-setInterval(async function() {
-    try {
-        let resp = await fetch('/rfid_scan');
-        if (resp.ok) {
-            let data = await resp.json();
-            if (data.card_id) {
-                document.getElementById('card_id').value = data.card_id;
-                document.getElementById('rfid-form').submit();
-            }
+// RFID HID Scanner Input Handler
+const rfidInput = document.getElementById('rfid_input');
+const rfidForm = document.getElementById('rfid-form');
+let scanBuffer = '';
+let scanTimeout;
+
+// Fokus immer auf RFID-Input halten (außer bei Personalnummer-Eingabe)
+document.addEventListener('click', function(e) {
+    if (!document.getElementById('fallback').classList.contains('show')) {
+        rfidInput.focus();
+    }
+});
+
+// Initial fokussieren
+rfidInput.focus();
+
+// Scanner-Input verarbeiten
+rfidInput.addEventListener('input', function() {
+    clearTimeout(scanTimeout);
+    scanBuffer = rfidInput.value;
+    
+    // Warte kurz ob noch mehr Zeichen kommen
+    scanTimeout = setTimeout(function() {
+        if (scanBuffer.length > 3) { // Mindestens 4 Zeichen
+            rfidForm.submit();
         }
-    } catch (e) {}
-}, 500);
+        scanBuffer = '';
+        rfidInput.value = '';
+    }, 100);
+});
+
+// Enter-Taste submitted sofort
+rfidInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(scanTimeout);
+        if (rfidInput.value.length > 3) {
+            rfidForm.submit();
+        }
+        rfidInput.value = '';
+    }
+});
+
+// Altes RFID-Polling entfernen (nicht mehr nötig)
+// setInterval(async function() { ... }, 500);
 
 // Menü alle 10 Sekunden aktualisieren
 setInterval(async function() {
