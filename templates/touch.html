@@ -83,7 +83,8 @@
             border: 3px dashed #dc2626;
             border-radius: 15px;
             padding: 25px 15px;
-            flex: 1;
+            flex: 0 1 auto;
+            max-height: 200px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -235,7 +236,7 @@
         <p>Karte scannen</p>
     </div>
     
-    <button class="fallback-btn" onclick="document.getElementById('fallback').classList.add('show')">Personalnummer</button>
+    <button class="fallback-btn" onclick="openPersonalNumber()">Personalnummer</button>
     
     <form id="fallback" class="fallback-form" action="/" method="post">
         <button type="button" class="close-btn" onclick="closeForm()">✕</button>
@@ -305,6 +306,13 @@ setInterval(async function() {
 }, 500);
 
 // HTML-Tastatur Funktionen
+function openPersonalNumber() {
+    document.getElementById('fallback').classList.add('show');
+    setTimeout(function() {
+        document.getElementById('keyboard').classList.add('show');
+    }, 100);
+}
+
 function showKeyboard() {
     document.getElementById('keyboard').classList.add('show');
 }
@@ -326,11 +334,7 @@ function backspace() {
 function closeForm() {
     document.getElementById('fallback').classList.remove('show');
     hideKeyboard();
+    document.getElementById('personal_number_input').value = '';
 }
-
-// Keyboard automatisch öffnen wenn Personalnummer-Button geklickt wird
-document.querySelector('.fallback-btn').addEventListener('click', function() {
-    setTimeout(showKeyboard, 100);
-});
 </script>
 </html>
