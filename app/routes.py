@@ -344,9 +344,13 @@ def example_csv():
     writer.writerow(['Anna Schmidt', '67890', '0123456789ABCDEF'])
     writer.writerow(['Peter Müller', '11111', ''])
     
-    response = make_response(output.getvalue())
+    # UTF-8 BOM für Excel-Kompatibilität
+    csv_content = '\ufeff' + output.getvalue()
+    
+    response = make_response(csv_content)
     response.headers['Content-Disposition'] = 'attachment; filename=beispiel_user.csv'
     response.headers['Content-Type'] = 'text/csv; charset=utf-8'
     
     return response
-    start_rfid_thread()
+
+start_rfid_thread()
