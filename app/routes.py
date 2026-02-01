@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, render_template_string
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, render_template_string, make_response
 from .models import db, User, Menu, Registration
 from .utils import register_user_for_today
 from .rfid import find_user_by_card
 from .auth import login_required, check_auth, LOGIN_TEMPLATE
 from datetime import date
 import csv
-from io import TextIOWrapper
+from io import TextIOWrapper, StringIO
 import threading
 import time
 import logging
@@ -328,4 +328,25 @@ def qr_code(user_id):
     </html>
     """
     return render_template_string(template, user=user, qr_image=qr_image)
+
+@bp.route('/admin/example-csv')
+@login_required
+def example_csv():
+    """Generiert eine Beispiel-CSV-Datei zum Download"""
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Header
+    writer.writerow(['name', 'personal_number', 'card_id'])
+    
+    # Beispieldaten
+    writer.writerow(['Max Mustermann', '12345', ''])
+    writer.writerow(['Anna Schmidt', '67890', '0123456789ABCDEF'])
+    writer.writerow(['Peter Müller', '11111', ''])
+    
+    response = make_response(output.getvalue())
+    response.headers['Content-Disposition'] = 'attachment; filename=beispiel_user.csv'
+    response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+    
+    return response
     start_rfid_thread()
