@@ -174,8 +174,11 @@
             <a href="/history" class="nav-btn">📈 Essenshistorie</a>
             <a href="/kitchen" class="nav-btn secondary">🍳 Zur Küchenansicht</a>
             <a href="/" class="nav-btn secondary">📡 Zum Touch-Display</a>
+            <button onclick="updateSystem()" class="nav-btn" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">🔄 System Update</button>
+            <button onclick="createBackup()" class="nav-btn" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">💾 Backup</button>
             <a href="/logout" class="nav-btn secondary" style="margin-left:auto;">🚪 Abmelden</a>
         </div>
+        <div id="system-message" style="display:none; padding:15px; border-radius:8px; margin-bottom:20px;"></div>
     <div class="section">
         <h2>Menü verwalten</h2>
         <form method="post">
@@ -274,5 +277,56 @@ async function updateRegistrations() {
 
 // Alle 5 Sekunden aktualisieren
 setInterval(updateRegistrations, 5000);
+
+// System-Management Funktionen
+function showMessage(message, success) {
+    const msgDiv = document.getElementById('system-message');
+    msgDiv.textContent = message;
+    msgDiv.style.display = 'block';
+    msgDiv.style.background = success ? 
+        'linear-gradient(135deg, #059669 0%, #047857 100%)' : 
+        'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)';
+    msgDiv.style.color = '#fff';
+    msgDiv.style.fontWeight = 'bold';
+    
+    setTimeout(() => {
+        msgDiv.style.display = 'none';
+    }, 5000);
+}
+
+async function updateSystem() {
+    if (!confirm('System-Update durchführen? (git pull + Neustart)')) return;
+    
+    showMessage('Update wird durchgeführt...', true);
+    
+    try {
+        const resp = await fetch('/system/update', { method: 'POST' });
+        const data = await resp.json();
+        
+        if (data.success) {
+            showMessage(data.message, true);
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        } else {
+            showMessage('Fehler: ' + data.message, false);
+        }
+    } catch (e) {
+        showMessage('Update-Fehler: ' + e, false);
+    }
+}
+
+async function createBackup() {
+    showMessage('Backup wird erstellt...', true);
+    
+    try {
+        const resp = await fetch('/system/backup', { method: 'POST' });
+        const data = await resp.json();
+        
+        showMessage(data.message, data.success);
+    } catch (e) {
+        showMessage('Backup-Fehler: ' + e, false);
+    }
+}
 </script>
 </html>

@@ -21,6 +21,7 @@ def create_app():
     from . import api
     from .stats import stats_bp
     from .history import history_bp
+    from .system import system_bp
     
     # Rate Limiter initialisieren
     from .api import limiter
@@ -28,6 +29,9 @@ def create_app():
     
     app.register_blueprint(routes.bp)
     app.register_blueprint(api.api)
+    app.register_blueprint(stats_bp)
+    app.register_blueprint(history_bp)
+    app.register_blueprint(system_bp)
     app.register_blueprint(stats_bp)
     app.register_blueprint(history_bp)
     return app
