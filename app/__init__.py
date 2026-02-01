@@ -32,6 +32,4 @@ def create_app():
     app.register_blueprint(stats_bp)
     app.register_blueprint(history_bp)
     app.register_blueprint(system_bp)
-    app.register_blueprint(stats_bp)
-    app.register_blueprint(history_bp)
     return app
