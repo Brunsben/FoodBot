@@ -45,6 +45,11 @@ def index():
     today_menu = Menu.query.filter_by(date=date.today()).first()
     message = None
     status = None
+    need_menu_choice = False
+    pending_user_id = None
+    pending_card_id = None
+    pending_personal_number = None
+    
     if request.method == 'POST':
         personal_number = request.form.get('personal_number')
         card_id = request.form.get('card_id')
@@ -62,45 +67,141 @@ def index():
             user = User.query.filter_by(personal_number=personal_number).first()
         elif card_id:
             user = find_user_by_card(card_id)
+            
         if user:
-            registered = register_user_for_today(user)
-            if registered:
-                message = f"{user.name}, du hast dich zum Essen angemeldet."
-                status = 'success'
-                logger.info(f"Anmeldung: {user.name} ({user.personal_number})")
-                notification_service.notify_new_registration(user.name)
+            # Prüfe ob zwei Menüs aktiv sind
+            if today_menu and today_menu.zwei_menues_aktiv:
+                # Prüfe ob User schon angemeldet ist
+                existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+                if existing_reg:
+                    # Abmelden
+                    db.session.delete(existing_reg)
+                    db.session.commit()
+                    message = f"{user.name}, du hast dich abgemeldet."
+                    status = 'info'
+                    logger.info(f"Abmeldung: {user.name} ({user.personal_number})")
+                else:
+                    # Zeige Menüauswahl
+                    need_menu_choice = True
+                    pending_user_id = user.id
+                    pending_card_id = card_id
+                    pending_personal_number = personal_number
+                    message = "Bitte wähle dein Menü"
+                    status = 'success'
             else:
-                message = f"{user.name}, du hast dich abgemeldet."
-                status = 'info'
-                logger.info(f"Abmeldung: {user.name} ({user.personal_number})")
+                # Normaler Modus ohne Menüauswahl
+                registered = register_user_for_today(user)
+                if registered:
+                    message = f"{user.name}, du hast dich zum Essen angemeldet."
+                    status = 'success'
+                    logger.info(f"Anmeldung: {user.name} ({user.personal_number})")
+                    notification_service.notify_new_registration(user.name)
+                else:
+                    message = f"{user.name}, du hast dich abgemeldet."
+                    status = 'info'
+                    logger.info(f"Abmeldung: {user.name} ({user.personal_number})")
         else:
             message = "Unbekannte Personalnummer oder Karte. Bitte im Adminbereich anlegen."
             status = 'error'
             logger.warning(f"Fehlversuch Anmeldung: {personal_number or card_id}")
-    return render_template('touch.html', menu=today_menu, message=message, status=status)
+    
+    return render_template('touch.html', 
+                         menu=today_menu, 
+                         message=message, 
+                         status=status,
+                         need_menu_choice=need_menu_choice,
+                         pending_user_id=pending_user_id,
+                         pending_card_id=pending_card_id,
+                         pending_personal_number=pending_personal_number)
+
+@bp.route('/register_with_menu', methods=['POST'])
+def register_with_menu():
+    """Route für Anmeldung mit Menüauswahl"""
+    user_id = request.form.get('user_id')
+    menu_choice = request.form.get('menu_choice', 1, type=int)
+    
+    user = User.query.get(user_id)
+    if user:
+        # Erstelle neue Registration mit Menüwahl
+        existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+        if not existing_reg:
+            reg = Registration(user_id=user.id, date=date.today(), menu_choice=menu_choice)
+            db.session.add(reg)
+            db.session.commit()
+            
+            today_menu = Menu.query.filter_by(date=date.today()).first()
+            menu_name = today_menu.menu1_name if menu_choice == 1 else today_menu.menu2_name
+            
+            logger.info(f"Anmeldung mit Menü {menu_choice}: {user.name} ({user.personal_number})")
+            notification_service.notify_new_registration(f"{user.name} - Menü {menu_choice}")
+            
+            return render_template('touch.html', 
+                                 menu=today_menu,
+                                 message=f"{user.name}, du hast dich für Menü {menu_choice} angemeldet: {menu_name}",
+                                 status='success')
+    
+    return redirect(url_for('main.index'))
 
 # Küche: Anzeige und Menü-Eingabe
 from .models import Guest
 
 @bp.route('/kitchen', methods=['GET', 'POST'])
 def kitchen():
+    from .models import PresetMenu
+    
     today_menu = Menu.query.filter_by(date=date.today()).first()
     registrations = Registration.query.filter_by(date=date.today()).all()
     users = sorted([r.user for r in registrations], key=lambda u: u.name.lower())
     guest_entry = Guest.query.filter_by(date=date.today()).first()
     guest_count = guest_entry.count if guest_entry else 0
+    preset_menus = PresetMenu.get_all_ordered()
+    
+    # Menüstatistiken berechnen
+    menu1_count = sum(1 for r in registrations if r.menu_choice == 1)
+    menu2_count = sum(1 for r in registrations if r.menu_choice == 2)
     
     if request.method == 'POST':
         # Menü speichern
-        if 'menu' in request.form:
-            menu_text = request.form.get('menu')
-            if today_menu:
-                today_menu.description = menu_text
+        if 'menu' in request.form or 'menu1' in request.form:
+            zwei_menues = request.form.get('zwei_menues_aktiv') == '1'
+            
+            if zwei_menues:
+                menu1_text = request.form.get('menu1', '').strip()
+                menu2_text = request.form.get('menu2', '').strip()
+                
+                if today_menu:
+                    today_menu.zwei_menues_aktiv = True
+                    today_menu.menu1_name = menu1_text
+                    today_menu.menu2_name = menu2_text
+                    today_menu.description = f"{menu1_text} / {menu2_text}"  # Für Kompatibilität
+                else:
+                    today_menu = Menu(
+                        date=date.today(),
+                        description=f"{menu1_text} / {menu2_text}",
+                        zwei_menues_aktiv=True,
+                        menu1_name=menu1_text,
+                        menu2_name=menu2_text
+                    )
+                    db.session.add(today_menu)
             else:
-                today_menu = Menu(date=date.today(), description=menu_text)
-                db.session.add(today_menu)
+                menu_text = request.form.get('menu', '').strip()
+                
+                if today_menu:
+                    today_menu.zwei_menues_aktiv = False
+                    today_menu.description = menu_text
+                    today_menu.menu1_name = None
+                    today_menu.menu2_name = None
+                else:
+                    today_menu = Menu(
+                        date=date.today(),
+                        description=menu_text,
+                        zwei_menues_aktiv=False
+                    )
+                    db.session.add(today_menu)
+                    
             db.session.commit()
             flash('Menü aktualisiert!')
+            
         # Gäste hinzufügen/entfernen
         elif 'guest_action' in request.form:
             action = request.form.get('guest_action')
@@ -115,7 +216,14 @@ def kitchen():
         return redirect(url_for('main.kitchen'))
     
     total = len(users) + guest_count
-    return render_template('kitchen.html', menu=today_menu, users=users, guest_count=guest_count, total=total)
+    return render_template('kitchen.html', 
+                         menu=today_menu, 
+                         users=users, 
+                         guest_count=guest_count, 
+                         total=total,
+                         menu1_count=menu1_count,
+                         menu2_count=menu2_count,
+                         preset_menus=preset_menus)
 
 @bp.route('/kitchen/data', methods=['GET'])
 def kitchen_data():
@@ -125,39 +233,109 @@ def kitchen_data():
     guest_entry = Guest.query.filter_by(date=date.today()).first()
     guest_count = guest_entry.count if guest_entry else 0
     
+    # Menüstatistiken
+    menu1_count = sum(1 for r in registrations if r.menu_choice == 1)
+    menu2_count = sum(1 for r in registrations if r.menu_choice == 2)
+    
     return jsonify({
         'users': [{'id': u.id, 'name': u.name} for u in users],
         'guest_count': guest_count,
-        'total': len(users) + guest_count
+        'total': len(users) + guest_count,
+        'menu1_count': menu1_count,
+        'menu2_count': menu2_count
     })
 
 @bp.route('/menu/data', methods=['GET'])
 def menu_data():
     """API-Endpunkt für AJAX-Updates des Menüs auf der Touch-Seite"""
     today_menu = Menu.query.filter_by(date=date.today()).first()
-    return jsonify({
-        'menu': today_menu.description if today_menu else None
-    })
+    if today_menu:
+        return jsonify({
+            'menu': today_menu.description if not today_menu.zwei_menues_aktiv else None,
+            'zwei_menues_aktiv': today_menu.zwei_menues_aktiv,
+            'menu1': today_menu.menu1_name if today_menu.zwei_menues_aktiv else None,
+            'menu2': today_menu.menu2_name if today_menu.zwei_menues_aktiv else None
+        })
+    return jsonify({'menu': None, 'zwei_menues_aktiv': False})
 
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
+    from .models import PresetMenu
+    
     today_menu = Menu.query.filter_by(date=date.today()).first()
     guest_entry = Guest.query.filter_by(date=date.today()).first()
     guest_count = guest_entry.count if guest_entry else 0
+    preset_menus = PresetMenu.get_all_ordered()
     message = None
     
     if request.method == 'POST':
-        # Menü speichern
-        if 'menu_text' in request.form:
-            menu_text = request.form.get('menu_text').strip()
-            if today_menu:
-                today_menu.description = menu_text
+        # Menü speichern (neue Logik für ein oder zwei Menüs)
+        if 'save_menu' in request.form:
+            zwei_menues = request.form.get('zwei_menues_aktiv') == '1'
+            
+            if zwei_menues:
+                menu1_text = request.form.get('menu1_text', '').strip()
+                menu2_text = request.form.get('menu2_text', '').strip()
+                
+                if today_menu:
+                    today_menu.zwei_menues_aktiv = True
+                    today_menu.menu1_name = menu1_text
+                    today_menu.menu2_name = menu2_text
+                    today_menu.description = f"{menu1_text} / {menu2_text}"
+                else:
+                    today_menu = Menu(
+                        date=date.today(),
+                        description=f"{menu1_text} / {menu2_text}",
+                        zwei_menues_aktiv=True,
+                        menu1_name=menu1_text,
+                        menu2_name=menu2_text
+                    )
+                    db.session.add(today_menu)
             else:
-                today_menu = Menu(date=date.today(), description=menu_text)
-                db.session.add(today_menu)
+                menu_text = request.form.get('menu_text', '').strip()
+                
+                if today_menu:
+                    today_menu.zwei_menues_aktiv = False
+                    today_menu.description = menu_text
+                    today_menu.menu1_name = None
+                    today_menu.menu2_name = None
+                else:
+                    today_menu = Menu(
+                        date=date.today(),
+                        description=menu_text,
+                        zwei_menues_aktiv=False
+                    )
+                    db.session.add(today_menu)
+            
             db.session.commit()
             message = "Menü gespeichert."
+            
+        # Vordefiniertes Menü hinzufügen
+        elif 'add_preset_menu' in request.form:
+            new_menu = request.form.get('new_preset_menu', '').strip()
+            if new_menu:
+                if not PresetMenu.query.filter_by(name=new_menu).first():
+                    max_order = db.session.query(db.func.max(PresetMenu.sort_order)).scalar() or 0
+                    preset = PresetMenu(name=new_menu, sort_order=max_order + 1)
+                    db.session.add(preset)
+                    db.session.commit()
+                    message = f"Menü '{new_menu}' hinzugefügt."
+                    preset_menus = PresetMenu.get_all_ordered()
+                else:
+                    message = "Dieses Menü existiert bereits."
+                    
+        # Vordefiniertes Menü löschen
+        elif 'delete_preset_menu' in request.form:
+            preset_id = request.form.get('delete_preset_id')
+            preset = PresetMenu.query.get(preset_id)
+            if preset:
+                menu_name = preset.name
+                db.session.delete(preset)
+                db.session.commit()
+                message = f"Menü '{menu_name}' gelöscht."
+                preset_menus = PresetMenu.get_all_ordered()
+                
         # Tagesan-/abmeldung
         elif 'user_id' in request.form and 'edit_user' not in request.form:
             user_id = request.form.get('user_id')
@@ -252,7 +430,13 @@ def admin():
     registrations = Registration.query.filter_by(date=date.today()).all()
     registered_ids = {r.user_id for r in registrations}
     
-    return render_template('admin.html', users=users, registered_ids=registered_ids, message=message, menu=today_menu, guest_count=guest_count)
+    return render_template('admin.html', 
+                         users=users, 
+                         registered_ids=registered_ids, 
+                         message=message, 
+                         menu=today_menu, 
+                         guest_count=guest_count,
+                         preset_menus=preset_menus)
 
 # API-Route für das Touch-Display, um den letzten Scan abzufragen
 @bp.route('/rfid_scan')
@@ -293,10 +477,20 @@ def on_load(state):
 
 @bp.route('/qr/<int:user_id>')
 def qr_code(user_id):
-    """Generiere QR-Code für User"""
+    """Generiere QR-Code für User - Mobile Registrierung"""
     user = User.query.get_or_404(user_id)
-    qr_data = f"FOODBOT:{user.personal_number}"
-    qr_image = generate_qr_code(qr_data)
+    
+    # Sicherstellen, dass User einen Token hat
+    if not user.mobile_token:
+        user.mobile_token = User.generate_token()
+        db.session.commit()
+    
+    # QR-Code mit Mobile-URL generieren
+    # Verwendet BASE_URL aus .env falls gesetzt, sonst automatische Erkennung
+    import os
+    base_url = os.getenv('BASE_URL', request.host_url.rstrip('/'))
+    mobile_url = f"{base_url}/m/{user.mobile_token}"
+    qr_image = generate_qr_code(mobile_url)
     
     from flask import render_template_string
     template = """
@@ -304,30 +498,100 @@ def qr_code(user_id):
     <html lang="de">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>QR-Code für {{ user.name }}</title>
         <style>
-            body { font-family: sans-serif; text-align: center; padding: 40px; }
-            .qr-card { display: inline-block; border: 2px solid #000; padding: 20px; border-radius: 12px; }
-            img { margin: 20px 0; }
+            body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+                text-align: center; 
+                padding: 40px; 
+                background: linear-gradient(135deg, #1a0000 0%, #450a0a 50%, #1a0000 100%);
+                color: #fff;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            .qr-card { 
+                display: inline-block; 
+                background: rgba(20,20,20,0.95);
+                border: 3px solid #dc2626; 
+                padding: 30px; 
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(220,38,38,0.5);
+            }
+            h1 { 
+                color: #ef4444; 
+                margin-top: 0;
+                font-size: 2em;
+                text-shadow: 0 0 20px rgba(220,38,38,0.6);
+            }
+            img { margin: 20px 0; background: white; padding: 15px; border-radius: 8px; }
+            .info { color: #9ca3af; margin: 15px 0; }
+            .info b { color: #fca5a5; }
+            .url { 
+                background: rgba(69,10,10,0.4); 
+                padding: 10px 15px; 
+                border-radius: 8px; 
+                font-family: monospace; 
+                font-size: 0.9em;
+                color: #d1d5db;
+                word-break: break-all;
+                margin: 15px 0;
+            }
+            .buttons { margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+            button, .btn { 
+                padding: 12px 24px; 
+                font-size: 1.1em; 
+                cursor: pointer; 
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s;
+                text-decoration: none;
+                display: inline-block;
+            }
+            .btn-print {
+                background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+                color: white;
+                border: 2px solid #ef4444;
+            }
+            .btn-back {
+                background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+                color: white;
+                border: 2px solid #6b7280;
+            }
+            button:hover, .btn:hover { transform: translateY(-2px); }
             @media print {
+                body { background: white; color: black; }
+                .qr-card { border-color: black; box-shadow: none; background: white; }
+                h1 { color: black; text-shadow: none; }
+                .info, .info b, .url { color: black; background: white; }
                 .no-print { display: none; }
             }
         </style>
     </head>
     <body>
         <div class="qr-card">
-            <h1>{{ user.name }}</h1>
-            <img src="{{ qr_image }}" alt="QR Code">
-            <p><b>Personalnummer:</b> {{ user.personal_number }}</p>
+            <h1>📱 Mobile Anmeldung</h1>
+            <img src="{{ qr_image }}" alt="QR Code" style="max-width: 300px;">
+            <div class="info"><b>Name:</b> {{ user.name }}</div>
+            <div class="info"><b>Personalnummer:</b> {{ user.personal_number }}</div>
+            <div class="url">{{ mobile_url }}</div>
+            <div class="info" style="font-size: 0.9em; color: #6b7280; margin-top: 20px;">
+                QR-Code mit Smartphone scannen für schnelle Essensanmeldung
+            </div>
         </div>
-        <div class="no-print" style="margin-top:30px;">
-            <button onclick="window.print()" style="padding:12px 24px;font-size:1.1em;cursor:pointer;">🖨️ Drucken</button>
-            <a href="/admin"><button style="padding:12px 24px;font-size:1.1em;cursor:pointer;">Zurück</button></a>
+        <div class="no-print buttons">
+            <button onclick="window.print()" class="btn-print">🖨️ Drucken</button>
+            <a href="/admin" class="btn btn-back">← Zurück zum Admin</a>
         </div>
     </body>
     </html>
     """
-    return render_template_string(template, user=user, qr_image=qr_image)
+    return render_template_string(template, user=user, qr_image=qr_image, mobile_url=mobile_url)
+
 
 @bp.route('/admin/example-csv')
 @login_required
@@ -352,5 +616,74 @@ def example_csv():
     response.headers['Content-Type'] = 'text/csv; charset=utf-8'
     
     return response
+
+# Mobile Registrierung via Token
+@bp.route('/m/<token>', methods=['GET', 'POST'])
+def mobile_registration(token):
+    user = User.query.filter_by(mobile_token=token).first()
+    if not user:
+        return render_template_string("""
+        <!DOCTYPE html>
+        <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ungültiger Link</title></head>
+        <body style="font-family: sans-serif; text-align: center; padding: 50px; background: #1a0000; color: #fff;">
+        <h1 style="color: #ef4444;">❌ Ungültiger Link</h1>
+        <p style="font-size: 1.2em; color: #9ca3af;">Dieser QR-Code ist nicht mehr gültig.</p>
+        </body></html>
+        """), 404
+    
+    today_menu = Menu.query.filter_by(date=date.today()).first()
+    registration = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+    is_registered = registration is not None
+    
+    message = None
+    status_type = None
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'register':
+            if not today_menu:
+                message = "Heute ist kein Menü verfügbar"
+                status_type = "info"
+            elif is_registered:
+                message = "Du bist bereits angemeldet"
+                status_type = "info"
+            else:
+                menu_choice = None
+                if today_menu.zwei_menues_aktiv:
+                    menu_choice = int(request.form.get('menu_choice', 1))
+                
+                new_registration = Registration(
+                    user_id=user.id,
+                    date=date.today(),
+                    menu_choice=menu_choice
+                )
+                db.session.add(new_registration)
+                db.session.commit()
+                message = "✓ Erfolgreich angemeldet!"
+                status_type = "success"
+                is_registered = True
+                registration = new_registration
+                
+        elif action == 'unregister':
+            if registration:
+                db.session.delete(registration)
+                db.session.commit()
+                message = "✓ Erfolgreich abgemeldet"
+                status_type = "info"
+                is_registered = False
+                registration = None
+            else:
+                message = "Du warst nicht angemeldet"
+                status_type = "info"
+    
+    return render_template('mobile.html',
+                         user=user,
+                         menu=today_menu,
+                         is_registered=is_registered,
+                         registration=registration,
+                         message=message,
+                         status=status_type)
 
 start_rfid_thread()

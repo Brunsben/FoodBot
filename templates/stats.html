@@ -110,6 +110,20 @@
             color: #ef4444;
             font-size: 1.1em;
         }
+        .menu-breakdown {
+            margin-top: 8px;
+            padding: 10px;
+            background: rgba(69,10,10,0.3);
+            border-radius: 6px;
+            font-size: 0.95em;
+            border-left: 3px solid #dc2626;
+        }
+        .menu-breakdown div {
+            margin: 4px 0;
+        }
+        .menu-breakdown b {
+            color: #fca5a5;
+        }
     </style>
 </head>
 <body>
@@ -143,7 +157,17 @@
                     <td>{{ day.registrations }}</td>
                     <td>{{ day.guests }}</td>
                     <td>{{ day.total }}</td>
-                    <td>{{ day.menu }}</td>
+                    <td>
+                        {% if day.zwei_menues %}
+                            <div style="margin-bottom: 8px;">Zwei Menüs angeboten:</div>
+                            <div class="menu-breakdown">
+                                <div><b>Menü 1:</b> {{ day.menu1_name }} <span style="color:#ef4444;font-weight:600;">({{ day.menu1_count }})</span></div>
+                                <div><b>Menü 2:</b> {{ day.menu2_name }} <span style="color:#ef4444;font-weight:600;">({{ day.menu2_count }})</span></div>
+                            </div>
+                        {% else %}
+                            {{ day.menu }}
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

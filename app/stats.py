@@ -20,17 +20,36 @@ def index():
     
     for menu_entry in menus:
         day = menu_entry.date
-        regs = Registration.query.filter_by(date=day).count()
+        all_regs = Registration.query.filter_by(date=day).all()
         guest_entry = Guest.query.filter_by(date=day).first()
         guests = guest_entry.count if guest_entry else 0
         
-        days.append({
-            'date': day,
-            'registrations': regs,
-            'guests': guests,
-            'total': regs + guests,
-            'menu': menu_entry.description
-        })
+        # Prüfe ob zwei Menüs aktiv waren
+        if menu_entry.zwei_menues_aktiv:
+            menu1_regs = sum(1 for r in all_regs if r.menu_choice == 1)
+            menu2_regs = sum(1 for r in all_regs if r.menu_choice == 2)
+            
+            days.append({
+                'date': day,
+                'registrations': len(all_regs),
+                'guests': guests,
+                'total': len(all_regs) + guests,
+                'menu': menu_entry.description,
+                'zwei_menues': True,
+                'menu1_name': menu_entry.menu1_name,
+                'menu2_name': menu_entry.menu2_name,
+                'menu1_count': menu1_regs,
+                'menu2_count': menu2_regs
+            })
+        else:
+            days.append({
+                'date': day,
+                'registrations': len(all_regs),
+                'guests': guests,
+                'total': len(all_regs) + guests,
+                'menu': menu_entry.description,
+                'zwei_menues': False
+            })
     
     # Durchschnittliche Teilnehmer
     totals = [d['total'] for d in days if d['total'] > 0]
@@ -44,7 +63,7 @@ def export_csv():
     """CSV-Export aller Tage mit Menü als CSV"""
     output = StringIO()
     writer = csv.writer(output)
-    writer.writerow(['Datum', 'Kameraden', 'Gäste', 'Gesamt', 'Menü'])
+    writer.writerow(['Datum', 'Kameraden', 'Gäste', 'Gesamt', 'Menü', 'Zwei Menüs', 'Menü 1', 'Menü 1 Anzahl', 'Menü 2', 'Menü 2 Anzahl'])
     
     # Hole alle Menü-Einträge der letzten 365 Tage
     start_date = date.today() - timedelta(days=365)
@@ -52,17 +71,39 @@ def export_csv():
     
     for menu_entry in menus:
         day = menu_entry.date
-        regs = Registration.query.filter_by(date=day).all()
+        all_regs = Registration.query.filter_by(date=day).all()
         guest_entry = Guest.query.filter_by(date=day).first()
         guests = guest_entry.count if guest_entry else 0
         
-        writer.writerow([
-            day.isoformat(),
-            len(regs),
-            guests,
-            len(regs) + guests,
-            menu_entry.description
-        ])
+        if menu_entry.zwei_menues_aktiv:
+            menu1_regs = sum(1 for r in all_regs if r.menu_choice == 1)
+            menu2_regs = sum(1 for r in all_regs if r.menu_choice == 2)
+            
+            writer.writerow([
+                day.isoformat(),
+                len(all_regs),
+                guests,
+                len(all_regs) + guests,
+                menu_entry.description,
+                'Ja',
+                menu_entry.menu1_name,
+                menu1_regs,
+                menu_entry.menu2_name,
+                menu2_regs
+            ])
+        else:
+            writer.writerow([
+                day.isoformat(),
+                len(all_regs),
+                guests,
+                len(all_regs) + guests,
+                menu_entry.description,
+                'Nein',
+                '',
+                '',
+                '',
+                ''
+            ])
     
     output.seek(0)
     return send_file(

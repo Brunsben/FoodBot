@@ -54,6 +54,65 @@
             align-items: center;
             flex-wrap: wrap;
         }
+        .menu-toggle {
+            width: 100%;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .menu-toggle label {
+            font-size: 1.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .menu-toggle input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+        .menu-inputs {
+            width: 100%;
+        }
+        .menu-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .menu-row label {
+            min-width: 80px;
+            font-weight: 600;
+        }
+        .single-menu-input {
+            width: 100%;
+        }
+        datalist option {
+            padding: 8px;
+            background: white;
+            color: #000;
+        }
+        select {
+            flex: 1;
+            min-width: 250px;
+            font-size: 1.2em;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.95);
+            transition: all 0.3s;
+            color: #000;
+        }
+        select:focus {
+            outline: none;
+            border-color: #fff;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.2);
+        }
         input[type="text"] { 
             flex: 1;
             min-width: 250px;
@@ -203,6 +262,12 @@
                     document.getElementById('guest-count').textContent = data.guest_count;
                     document.getElementById('guest-count-detail').textContent = data.guest_count;
                     
+                    // Aktualisiere Menüstatistiken falls vorhanden
+                    if (document.getElementById('menu1-count')) {
+                        document.getElementById('menu1-count').textContent = data.menu1_count;
+                        document.getElementById('menu2-count').textContent = data.menu2_count;
+                    }
+                    
                     // Aktualisiere Benutzerliste
                     const userList = document.getElementById('user-names');
                     userList.innerHTML = '';
@@ -235,15 +300,62 @@
         <div class="menu-section">
             <h2>🍽️ Heutiges Menü</h2>
             <form class="menu-form" method="post">
-                <input type="text" name="menu" value="{{ menu.description if menu else '' }}" placeholder="Was gibt es heute zu essen?" required>
+                <div class="menu-toggle">
+                    <label>
+                        <input type="checkbox" name="zwei_menues_aktiv" value="1" {% if menu and menu.zwei_menues_aktiv %}checked{% endif %} onchange="toggleMenuInputs(this.checked)">
+                        <span>Zwei Menüs anbieten</span>
+                    </label>
+                </div>
+                
+                <div id="menu-inputs" class="menu-inputs">
+                    <!-- Single Menu Mode -->
+                    <div id="single-menu" style="{% if menu and menu.zwei_menues_aktiv %}display:none;{% endif %}">
+                        <input type="text" list="menu-options" name="menu" value="{{ menu.description if menu and not menu.zwei_menues_aktiv else '' }}" placeholder="Was gibt es heute zu essen?" class="single-menu-input">
+                    </div>
+                    
+                    <!-- Dual Menu Mode -->
+                    <div id="dual-menu" style="{% if not menu or not menu.zwei_menues_aktiv %}display:none;{% endif %}">
+                        <div class="menu-row">
+                            <label>Menü 1:</label>
+                            <input type="text" list="menu-options" name="menu1" value="{{ menu.menu1_name if menu else '' }}" placeholder="Erstes Menü">
+                        </div>
+                        <div class="menu-row">
+                            <label>Menü 2:</label>
+                            <input type="text" list="menu-options" name="menu2" value="{{ menu.menu2_name if menu else '' }}" placeholder="Zweites Menü">
+                        </div>
+                    </div>
+                    
+                    <!-- Vordefinierte Menüs -->
+                    <datalist id="menu-options">
+                        {% for preset in preset_menus %}
+                        <option value="{{ preset.name }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                
                 <button class="btn" type="submit">✅ Speichern</button>
             </form>
         </div>
         
+        <script>
+        function toggleMenuInputs(isDual) {
+            document.getElementById('single-menu').style.display = isDual ? 'none' : 'block';
+            document.getElementById('dual-menu').style.display = isDual ? 'block' : 'none';
+        }
+        </script>
+        
         <div class="count-section">
             <div id="total-count" class="count">{{ total }}</div>
             <div class="count-detail">🍴 Personen zum Essen angemeldet</div>
-            <div style="font-size:0.9em;opacity:0.8;margin-bottom:20px;"><span id="user-count">{{ users|length }}</span> Kameraden + <span id="guest-count">{{ guest_count }}</span> Gäste</div>
+            <div style="font-size:0.9em;opacity:0.8;margin-bottom:20px;">
+                <span id="user-count">{{ users|length }}</span> Kameraden + <span id="guest-count">{{ guest_count }}</span> Gäste
+                {% if menu and menu.zwei_menues_aktiv %}
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid rgba(255,255,255,0.3);">
+                    <div style="font-size:1.1em; margin-bottom: 8px;">📊 Menüauswahl:</div>
+                    <div>Menü 1: <span id="menu1-count">{{ menu1_count }}</span> | Menü 2: <span id="menu2-count">{{ menu2_count }}</span></div>
+                </div>
+                {% endif %}
+            </div>
             <button class="btn" onclick="toggleList()">📜 Namen anzeigen</button>
         </div>
         

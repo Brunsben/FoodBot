@@ -180,17 +180,85 @@
         </div>
         <div id="system-message" style="display:none; padding:15px; border-radius:8px; margin-bottom:20px;"></div>
     <div class="section">
-        <h2>Menü verwalten</h2>
+        <h2>🍽️ Menü verwalten</h2>
         <form method="post">
-            <input type="text" name="menu_text" value="{{ menu.description if menu else '' }}" placeholder="Heutiges Menü" style="width:300px;">
-            <button type="submit">Speichern</button>
+            <div style="margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; cursor: pointer;">
+                    <input type="checkbox" name="zwei_menues_aktiv" value="1" {% if menu and menu.zwei_menues_aktiv %}checked{% endif %} onchange="toggleMenuInputsAdmin(this.checked)" style="width: 20px; height: 20px; cursor: pointer;">
+                    <span style="font-weight: 600; font-size: 1.1em;">Zwei Menüs anbieten</span>
+                </label>
+            </div>
+            
+            <div id="admin-menu-inputs">
+                <!-- Single Menu Mode -->
+                <div id="admin-single-menu" style="{% if menu and menu.zwei_menues_aktiv %}display:none;{% endif %}">
+                    <input type="text" list="admin-menu-options" name="menu_text" value="{{ menu.description if menu and not menu.zwei_menues_aktiv else '' }}" placeholder="Heutiges Menü" style="width:100%;max-width:500px;margin-bottom:10px;">
+                </div>
+                
+                <!-- Dual Menu Mode -->
+                <div id="admin-dual-menu" style="{% if not menu or not menu.zwei_menues_aktiv %}display:none;{% endif %}">
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-weight: 600; margin-right: 10px;">Menü 1:</label>
+                        <input type="text" list="admin-menu-options" name="menu1_text" value="{{ menu.menu1_name if menu else '' }}" placeholder="Erstes Menü" style="width:100%;max-width:400px;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-weight: 600; margin-right: 10px;">Menü 2:</label>
+                        <input type="text" list="admin-menu-options" name="menu2_text" value="{{ menu.menu2_name if menu else '' }}" placeholder="Zweites Menü" style="width:100%;max-width:400px;">
+                    </div>
+                </div>
+                
+                <!-- Vordefinierte Menüs -->
+                <datalist id="admin-menu-options">
+                    {% for preset in preset_menus %}
+                    <option value="{{ preset.name }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            
+            <button type="submit" name="save_menu" value="1">✅ Menü speichern</button>
         </form>
         {% if menu %}
-            <div style="margin-top:10px;color:#222;">Aktuelles Menü: <b>{{ menu.description }}</b></div>
+            <div style="margin-top:15px;padding:10px;background:rgba(69,10,10,0.3);border-radius:6px;border-left:4px solid #dc2626;">
+                <b>Aktuelles Menü:</b> 
+                {% if menu.zwei_menues_aktiv %}
+                    <div>Menü 1: {{ menu.menu1_name }}</div>
+                    <div>Menü 2: {{ menu.menu2_name }}</div>
+                {% else %}
+                    {{ menu.description }}
+                {% endif %}
+            </div>
         {% endif %}
     </div>
+    
     <div class="section">
-        <h2>Gästeverwaltung (heute)</h2>
+        <h2>📋 Vordefinierte Menüs verwalten</h2>
+        <form method="post" style="margin-bottom: 20px;">
+            <input type="text" name="new_preset_menu" placeholder="Neues Menü hinzufügen" style="width:300px;margin-right:10px;">
+            <button type="submit" name="add_preset_menu" value="1">➕ Hinzufügen</button>
+        </form>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px;">
+            {% for preset in preset_menus %}
+            <div style="background: rgba(69,10,10,0.3); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #dc2626;">
+                <span style="font-weight: 500;">{{ preset.name }}</span>
+                <form method="post" style="display: inline;">
+                    <input type="hidden" name="delete_preset_id" value="{{ preset.id }}">
+                    <button type="submit" name="delete_preset_menu" value="1" style="background: #7f1d1d; padding: 4px 10px; font-size: 0.85em;" onclick="return confirm('Menü löschen?')">🗑️</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script>
+    function toggleMenuInputsAdmin(isDual) {
+        document.getElementById('admin-single-menu').style.display = isDual ? 'none' : 'block';
+        document.getElementById('admin-dual-menu').style.display = isDual ? 'block' : 'none';
+    }
+    </script>
+    
+    <div class="section">
+        <h2>👥 Gästeverwaltung (heute)</h2>
         <form method="post">
             <p>Aktuelle Gästezahl: <b>{{ guest_count }}</b></p>
             <button name="guest_action" value="add" type="submit">+ Gast</button>
@@ -216,7 +284,9 @@
                             <button name="edit_user" value="{{ user.id }}" type="submit">Speichern</button>
                             <button name="delete_user" value="{{ user.id }}" type="submit" onclick="return confirm('Benutzer {{ user.name }} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.');">Löschen</button>
                         </td>
-                        <td><a href="/qr/{{ user.id }}" target="_blank">📱</a></td>
+                        <td>
+                            <a href="/qr/{{ user.id }}" target="_blank" style="text-decoration:none;font-size:1.3em;" title="QR-Code für {{ user.name }}">📱</a>
+                        </td>
                     </form>
                 </tr>
                 {% endfor %}

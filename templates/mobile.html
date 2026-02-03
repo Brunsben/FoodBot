@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Essensanmeldung - FoodBot</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0000 0%, #450a0a 50%, #1a0000 100%);
+            color: #fff; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2em;
+            color: #ef4444;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(220,38,38,0.6);
+        }
+        .user-name {
+            font-size: 1.3em;
+            color: #fca5a5;
+            margin-bottom: 5px;
+        }
+        .card {
+            background: rgba(20,20,20,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(220,38,38,0.4);
+            border: 2px solid #7f1d1d;
+            margin-bottom: 20px;
+        }
+        .menu-display {
+            background: rgba(69,10,10,0.4);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid #dc2626;
+        }
+        .menu-display h2 {
+            color: #ef4444;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+        .menu-item {
+            font-size: 1.1em;
+            padding: 10px 0;
+            color: #e5e7eb;
+        }
+        .menu-item b {
+            color: #fca5a5;
+        }
+        .action-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        .btn-register {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: #fff;
+            border: 3px solid #ef4444;
+        }
+        .btn-unregister {
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            color: #fff;
+            border: 3px solid #6b7280;
+        }
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        .status.registered {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+            color: #86efac;
+        }
+        .status.not-registered {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #fca5a5;
+        }
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 16px;
+            font-size: 1.5em;
+            font-weight: 700;
+            text-align: center;
+            z-index: 1000;
+            animation: slideIn 0.3s;
+            box-shadow: 0 10px 60px rgba(0,0,0,0.9);
+        }
+        .message.success {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            border: 4px solid #ef4444;
+        }
+        .message.info {
+            background: linear-gradient(135deg, #374151, #4b5563);
+            border: 4px solid #6b7280;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        .no-menu {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 1.1em;
+            padding: 40px 20px;
+        }
+        @media (max-width: 400px) {
+            .header h1 { font-size: 1.5em; }
+            .user-name { font-size: 1.1em; }
+            .action-btn { font-size: 1.1em; padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Essensanmeldung</h1>
+            <div class="user-name">{{ user.name }}</div>
+        </div>
+
+        {% if message %}
+        <div class="message {{ 'success' if status == 'success' else 'info' }}">
+            {{ message }}
+        </div>
+        <script>
+        setTimeout(function() {
+            window.location.reload();
+        }, 2000);
+        </script>
+        {% endif %}
+
+        {% if menu %}
+        <div class="card">
+            <div class="menu-display">
+                <h2>📋 Heutiges Menü</h2>
+                {% if menu.zwei_menues_aktiv %}
+                    <div class="menu-item"><b>Menü 1:</b> {{ menu.menu1_name }}</div>
+                    <div class="menu-item"><b>Menü 2:</b> {{ menu.menu2_name }}</div>
+                {% else %}
+                    <div class="menu-item">{{ menu.description }}</div>
+                {% endif %}
+            </div>
+
+            {% if is_registered %}
+            <div class="status registered">
+                ✓ Du bist angemeldet
+                {% if menu.zwei_menues_aktiv and registration %}
+                    <div style="margin-top: 8px; font-size: 0.9em;">
+                        für {{ 'Menü 1' if registration.menu_choice == 1 else 'Menü 2' }}
+                    </div>
+                {% endif %}
+            </div>
+            <form method="post">
+                <input type="hidden" name="action" value="unregister">
+                <button type="submit" class="action-btn btn-unregister">Abmelden</button>
+            </form>
+            {% else %}
+            <div class="status not-registered">
+                ✗ Noch nicht angemeldet
+            </div>
+            {% if menu.zwei_menues_aktiv %}
+                <form method="post">
+                    <input type="hidden" name="action" value="register">
+                    <input type="hidden" name="menu_choice" value="1">
+                    <button type="submit" class="action-btn btn-register">
+                        Anmelden für Menü 1<br>
+                        <span style="font-size: 0.8em; opacity: 0.9;">{{ menu.menu1_name }}</span>
+                    </button>
+                </form>
+                <form method="post">
+                    <input type="hidden" name="action" value="register">
+                    <input type="hidden" name="menu_choice" value="2">
+                    <button type="submit" class="action-btn btn-register">
+                        Anmelden für Menü 2<br>
+                        <span style="font-size: 0.8em; opacity: 0.9;">{{ menu.menu2_name }}</span>
+                    </button>
+                </form>
+            {% else %}
+                <form method="post">
+                    <input type="hidden" name="action" value="register">
+                    <button type="submit" class="action-btn btn-register">Zum Essen anmelden</button>
+                </form>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="no-menu">
+                Heute ist noch kein Menü eingetragen.<br>
+                Bitte später nochmal schauen.
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="text-align: center; color: #6b7280; font-size: 0.9em; margin-top: 20px;">
+            FoodBot Mobile
+        </div>
+    </div>
+</body>
+</html>

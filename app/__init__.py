@@ -10,7 +10,8 @@ def create_app():
     app = Flask(__name__, static_folder='../static', template_folder='../templates')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///foodbot.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(24).hex())
+    # Verwende festen Fallback-Key für Entwicklung, damit Sessions über Restarts hinweg funktionieren
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-feuerwehr-2026-change-in-production')
     app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 Stunde
     db.init_app(app)
     

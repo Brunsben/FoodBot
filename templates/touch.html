@@ -213,6 +213,52 @@
             margin-top: 5px;
             width: 100%;
         }
+        .menu-choice-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 3000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .menu-choice-dialog.show { display: flex; }
+        .menu-choice-dialog h2 {
+            color: #ef4444;
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(220,38,38,0.8);
+        }
+        .menu-choice-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .menu-choice-btn {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: #fff;
+            border: 3px solid #ef4444;
+            padding: 30px;
+            font-size: 1.8em;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(220,38,38,0.4);
+        }
+        .menu-choice-btn:hover,
+        .menu-choice-btn:active {
+            transform: scale(1.05);
+            box-shadow: 0 10px 35px rgba(220,38,38,0.6);
+            border-color: #fca5a5;
+        }
         @keyframes pop { 
             0% { transform: scale(0.8); opacity: 0; } 
             50% { transform: scale(1.05); }
@@ -224,7 +270,14 @@
     <h1>Essen</h1>
     <div class="menu" id="menu-display">
         {% if menu %}
-            <b>Heute:</b> <span id="menu-text">{{ menu.description }}</span>
+            {% if menu.zwei_menues_aktiv %}
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div><b>Menü 1:</b> <span id="menu1-text">{{ menu.menu1_name }}</span></div>
+                    <div><b>Menü 2:</b> <span id="menu2-text">{{ menu.menu2_name }}</span></div>
+                </div>
+            {% else %}
+                <b>Heute:</b> <span id="menu-text">{{ menu.description }}</span>
+            {% endif %}
         {% else %}
             <i style="color:#fca5a5;" id="menu-text">Kein Menü</i>
         {% endif %}
@@ -282,8 +335,75 @@
     <form id="rfid-form" action="/" method="post">
         <input type="text" name="card_id" id="rfid_input" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
     </form>
-    {% if message %}
-        <div id="feedback" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:280px;padding:20px;border-radius:12px;{% if status=='success' %}background:linear-gradient(135deg,#dc2626,#991b1b);border:2px solid #ef4444;{% elif status=='info' %}background:rgba(55,65,81,0.95);border:2px solid #6b7280;{% else %}background:linear-gradient(135deg,#7f1d1d,#450a0a);border:2px solid #991b1b;{% endif %};font-size:1.3em;animation:pop 0.3s;box-shadow:0 10px 40px rgba(0,0,0,0.8);font-weight:600;z-index:2000;">
+    
+    <!-- Menüauswahl-Dialog -->
+    <div id="menu-choice-dialog" class="menu-choice-dialog">
+        <h2>Welches Menü möchtest du?</h2>
+        <div class="menu-choice-buttons">
+            <button class="menu-choice-btn" onclick="selectMenu(1)">
+                <div>Menü 1</div>
+                <div id="menu-choice-1-text" style="font-size:0.6em;margin-top:10px;opacity:0.9;"></div>
+            </button>
+            <button class="menu-choice-btn" onclick="selectMenu(2)">
+                <div>Menü 2</div>
+                <div id="menu-choice-2-text" style="font-size:0.6em;margin-top:10px;opacity:0.9;"></div>
+            </button>
+        </div>
+    </div>
+    
+    {% if message and need_menu_choice %}
+        <script>
+        // Zeige Menüauswahl-Dialog
+        document.getElementById('menu-choice-1-text').textContent = "{{ menu.menu1_name }}";
+        document.getElementById('menu-choice-2-text').textContent = "{{ menu.menu2_name }}";
+        document.getElementById('menu-choice-dialog').classList.add('show');
+        
+        var pendingUserId = "{{ pending_user_id }}";
+        var pendingCardId = "{{ pending_card_id }}";
+        var pendingPersonalNumber = "{{ pending_personal_number }}";
+        
+        window.selectMenu = function(choice) {
+            // Sende die Menüauswahl
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/register_with_menu';
+            
+            if (pendingUserId) {
+                var userInput = document.createElement('input');
+                userInput.type = 'hidden';
+                userInput.name = 'user_id';
+                userInput.value = pendingUserId;
+                form.appendChild(userInput);
+            }
+            if (pendingCardId) {
+                var cardInput = document.createElement('input');
+                cardInput.type = 'hidden';
+                cardInput.name = 'card_id';
+                cardInput.value = pendingCardId;
+                form.appendChild(cardInput);
+            }
+            if (pendingPersonalNumber) {
+                var pnInput = document.createElement('input');
+                pnInput.type = 'hidden';
+                pnInput.name = 'personal_number';
+                pnInput.value = pendingPersonalNumber;
+                form.appendChild(pnInput);
+            }
+            
+            var choiceInput = document.createElement('input');
+            choiceInput.type = 'hidden';
+            choiceInput.name = 'menu_choice';
+            choiceInput.value = choice;
+            form.appendChild(choiceInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        };
+        </script>
+    {% endif %}
+    
+    {% if message and not need_menu_choice %}
+        <div id="feedback" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:480px;padding:40px;border-radius:16px;{% if status=='success' %}background:linear-gradient(135deg,#dc2626,#991b1b);border:4px solid #ef4444;{% elif status=='info' %}background:rgba(55,65,81,0.95);border:4px solid #6b7280;{% else %}background:linear-gradient(135deg,#7f1d1d,#450a0a);border:4px solid #991b1b;{% endif %};font-size:2.2em;line-height:1.4;animation:pop 0.3s;box-shadow:0 10px 60px rgba(0,0,0,0.9);font-weight:700;z-index:2000;text-align:center;">
             {{ message }}
         </div>
         <audio id="beep">
@@ -297,7 +417,7 @@
         
         setTimeout(function() {
             window.location.href = "/";
-        }, 2000);
+        }, 3500);
         </script>
     {% endif %}
 </body>
@@ -354,10 +474,14 @@ setInterval(async function() {
         let resp = await fetch('/menu/data');
         if (resp.ok) {
             let data = await resp.json();
-            let menuText = document.getElementById('menu-text');
             let menuDisplay = document.getElementById('menu-display');
             
-            if (data.menu) {
+            if (data.zwei_menues_aktiv && data.menu1 && data.menu2) {
+                menuDisplay.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' +
+                    '<div><b>Menü 1:</b> <span id="menu1-text">' + data.menu1 + '</span></div>' +
+                    '<div><b>Menü 2:</b> <span id="menu2-text">' + data.menu2 + '</span></div>' +
+                    '</div>';
+            } else if (data.menu) {
                 menuDisplay.innerHTML = '<b>Heute:</b> <span id="menu-text">' + data.menu + '</span>';
             } else {
                 menuDisplay.innerHTML = '<i style="color:#fca5a5;" id="menu-text">Kein Menü</i>';
