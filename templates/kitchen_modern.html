@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küche - FoodBot</title>
+    <style>
+        :root {
+            --primary: #dc2626;
+            --primary-dark: #991b1b;
+            --success: #10b981;
+            --dark: #0f172a;
+            --dark-card: #1e293b;
+            --border: #334155;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #1a1a2e 50%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(220, 38, 38, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .date {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        /* Count Card */
+        .count-card {
+            background: var(--dark-card);
+            border-radius: 16px;
+            padding: 50px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 10px 40px rgba(220, 38, 38, 0.2);
+        }
+        
+        .count-large {
+            font-size: 6em;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+            margin-bottom: 10px;
+            text-shadow: 0 0 40px rgba(220, 38, 38, 0.5);
+        }
+        
+        .count-label {
+            font-size: 1.5em;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        
+        .count-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid var(--border);
+        }
+        
+        .count-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .count-item-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--text);
+        }
+        
+        .count-item-label {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        
+        /* Menu Card */
+        .menu-card {
+            background: var(--dark-card);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .menu-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .menu-content {
+            font-size: 1.3em;
+            padding: 20px;
+            background: rgba(220, 38, 38, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            line-height: 1.6;
+        }
+        
+        .menu-dual {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .menu-option {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .menu-option-label {
+            font-size: 0.8em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        /* User List */
+        .user-list {
+            background: var(--dark-card);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .user-list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .user-list-header h2 {
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+        
+        .user-item {
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--success);
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-item:before {
+            content: '✓';
+            font-size: 1.2em;
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--dark-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .count-large {
+                font-size: 4em;
+            }
+            
+            .count-card {
+                padding: 30px 20px;
+            }
+            
+            .user-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span>🍳</span>
+                <span>Küchenansicht</span>
+            </h1>
+            <div class="date" id="current-date"></div>
+        </div>
+        
+        <!-- Count Card -->
+        <div class="count-card">
+            <div class="count-large" id="total-count">{{ total }}</div>
+            <div class="count-label">Personen zum Essen angemeldet</div>
+            
+            <div class="count-breakdown">
+                <div class="count-item">
+                    <div class="count-item-value" id="user-count">{{ users|length }}</div>
+                    <div class="count-item-label">Mitarbeiter</div>
+                </div>
+                <div class="count-item">
+                    <div class="count-item-value" id="guest-count">{{ guest_count }}</div>
+                    <div class="count-item-label">Gäste</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menu Card -->
+        {% if menu %}
+        <div class="menu-card">
+            <div class="menu-header">
+                <span>🍽️</span>
+                <span>Heutiges Menü</span>
+            </div>
+            
+            {% if menu.zwei_menues_aktiv %}
+            <div class="menu-content menu-dual">
+                <div class="menu-option">
+                    <div class="menu-option-label">MENÜ 1</div>
+                    {{ menu.menu1_name }}
+                </div>
+                <div class="menu-option">
+                    <div class="menu-option-label">MENÜ 2</div>
+                    {{ menu.menu2_name }}
+                </div>
+            </div>
+            {% else %}
+            <div class="menu-content">
+                {{ menu.description }}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- User List -->
+        <div class="user-list">
+            <div class="user-list-header">
+                <h2>
+                    <span>👥</span>
+                    <span>Angemeldete Personen</span>
+                </h2>
+            </div>
+            
+            {% if users %}
+            <div class="user-grid" id="user-grid">
+                {% for user in users %}
+                <div class="user-item">{{ user.name }}</div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <div style="font-size: 3em; margin-bottom: 15px;">🍽️</div>
+                <div style="font-size: 1.2em;">Noch keine Anmeldungen</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Navigation -->
+        <div class="nav-buttons">
+            <a href="/" class="btn">📡 Touch-Ansicht</a>
+            <a href="/admin" class="btn">🔧 Admin</a>
+            <a href="/stats" class="btn">📊 Statistiken</a>
+        </div>
+    </div>
+    
+    <script>
+        // Update Date
+        function updateDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('de-DE', options);
+        }
+        updateDate();
+        
+        // Auto-update data
+        async function updateData() {
+            try {
+                const resp = await fetch('/kitchen/data');
+                if (!resp.ok) return;
+                
+                const data = await resp.json();
+                
+                // Update counts
+                document.getElementById('total-count').textContent = data.total;
+                document.getElementById('user-count').textContent = data.users.length;
+                document.getElementById('guest-count').textContent = data.guest_count;
+                
+                // Update user list
+                const grid = document.getElementById('user-grid');
+                if (data.users.length > 0) {
+                    grid.innerHTML = data.users
+                        .map(u => `<div class="user-item">${u.name}</div>`)
+                        .join('');
+                } else {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+                            <div style="font-size: 3em; margin-bottom: 15px;">🍽️</div>
+                            <div style="font-size: 1.2em;">Noch keine Anmeldungen</div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.error('Update error:', e);
+            }
+        }
+        
+        // Update every 10 seconds
+        setInterval(updateData, 10000);
+    </script>
+</body>
+</html>
