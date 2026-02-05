@@ -75,10 +75,11 @@ def index():
                 existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
                 if existing_reg:
                     # Abmelden
+                    menu_name = today_menu.menu1_name if existing_reg.menu_choice == 1 else today_menu.menu2_name
                     db.session.delete(existing_reg)
                     db.session.commit()
-                    message = f"{user.name}, du hast dich abgemeldet."
-                    status = 'info'
+                    message = f"{user.name}, du wurdest abgemeldet.\n{menu_name}"
+                    status = 'cancel'
                     logger.info(f"Abmeldung: {user.name} ({user.personal_number})")
                 else:
                     # Zeige Menüauswahl
@@ -87,18 +88,20 @@ def index():
                     pending_card_id = card_id
                     pending_personal_number = personal_number
                     message = "Bitte wähle dein Menü"
-                    status = 'success'
+                    status = 'info'
             else:
                 # Normaler Modus ohne Menüauswahl
                 registered = register_user_for_today(user)
                 if registered:
-                    message = f"{user.name}, du hast dich zum Essen angemeldet."
+                    menu_text = today_menu.description if today_menu else "Kein Menü"
+                    message = f"{user.name}, du bist angemeldet!\n{menu_text}"
                     status = 'success'
                     logger.info(f"Anmeldung: {user.name} ({user.personal_number})")
                     notification_service.notify_new_registration(user.name)
                 else:
-                    message = f"{user.name}, du hast dich abgemeldet."
-                    status = 'info'
+                    menu_text = today_menu.description if today_menu else ""
+                    message = f"{user.name}, du wurdest abgemeldet.\n{menu_text}"
+                    status = 'cancel'
                     logger.info(f"Abmeldung: {user.name} ({user.personal_number})")
         else:
             message = "Unbekannte Personalnummer oder Karte. Bitte im Adminbereich anlegen."
@@ -137,7 +140,7 @@ def register_with_menu():
             
             return render_template('touch.html', 
                                  menu=today_menu,
-                                 message=f"{user.name}, du hast dich für Menü {menu_choice} angemeldet: {menu_name}",
+                                 message=f"{user.name}, du bist angemeldet!\nMenü {menu_choice}: {menu_name}",
                                  status='success')
     
     return redirect(url_for('main.index'))
