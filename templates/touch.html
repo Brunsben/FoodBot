@@ -6,153 +6,152 @@
     <meta name="google" content="notranslate">
     <title>Essensanmeldung - FoodBot</title>
     <style>
-        /* Google Translate komplett blockieren - MAXIMALE PRIORITÄT */
-        body > .skiptranslate,
-        body > .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
-        body > .goog-te-banner-frame,
-        .goog-te-banner-frame,
-        .goog-te-banner-frame.skiptranslate,
-        div#google_translate_element,
-        .goog-te-gadget,
-        #goog-gt-tt,
-        .goog-te-balloon-frame,
-        div.skiptranslate,
-        iframe.skiptranslate,
-        .goog-te-menu-frame,
-        #\:1\.container,
-        #\:2\.container,
-        #\:3\.container,
-        [id*="google_translate"],
-        [class*="goog-te"],
+        /* Google Translate blockieren */
+        body > .skiptranslate, body > .VIpgJd-ZVi9od-aZ2wEe-wOHMyf, body > .goog-te-banner-frame,
+        .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, div#google_translate_element,
+        .goog-te-gadget, #goog-gt-tt, .goog-te-balloon-frame, div.skiptranslate,
+        iframe.skiptranslate, .goog-te-menu-frame, [id*="google_translate"], [class*="goog-te"],
         iframe[src*="translate"] {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
             height: 0 !important;
-            width: 0 !important;
             position: absolute !important;
             top: -9999px !important;
-            left: -9999px !important;
             z-index: -9999 !important;
         }
-        body.translated-ltr,
-        body.translated-rtl { 
-            margin-top: 0 !important; 
-            padding-top: 0 !important;
+        body.translated-ltr, body.translated-rtl { margin-top: 0 !important; }
+        body, html { top: 0 !important; }
+        
+        :root {
+            --primary: #dc2626;
+            --primary-dark: #991b1b;
+            --success: #10b981;
+            --dark: #0f172a;
+            --dark-card: #1e293b;
+            --border: #334155;
         }
-        body { 
-            top: 0 !important; 
-            position: relative !important;
-        }
-        html { top: 0 !important; }
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            background: linear-gradient(135deg, #1a0000 0%, #450a0a 50%, #1a0000 100%);
-            color: #fff; 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            padding: 8px;
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, #1a1a2e 50%, var(--dark) 100%);
+            color: #fff;
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            padding: 8px;
         }
-        h1 { 
-            font-size: 1.8em; 
-            margin: 5px 0;
-            color: #ef4444;
-            text-shadow: 0 0 10px rgba(220,38,38,0.8);
+        
+        .header {
+            text-align: center;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 10px;
+            margin-bottom: 8px;
         }
-        .menu { 
-            font-size: 1.5em; 
-            padding: 20px 18px; 
-            background: rgba(20,20,20,0.8);
-            border-radius: 8px;
-            border: 1px solid #dc2626;
-            margin: 8px 0;
-            line-height: 1.6;
-            min-height: 70px;
+        
+        .header h1 {
+            font-size: 1.6em;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 10px;
         }
-        .menu b { 
-            color: #fca5a5;
-            font-size: 1em;
-        }
-        .rfid-zone {
-            background: rgba(20,20,20,0.9);
-            border: 3px dashed #dc2626;
-            border-radius: 15px;
-            padding: 15px 15px;
-            flex: 0 0 auto;
-            max-height: 140px;
+        
+        .menu-card {
+            background: var(--dark-card);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 8px;
+            border: 2px solid var(--border);
+            min-height: 70px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 30px rgba(220,38,38,0.4);
-            animation: pulse 2s infinite;
-            margin: 8px 0;
         }
-        .rfid-icon {
-            color: #ef4444;
-            margin-bottom: 5px;
-            filter: drop-shadow(0 0 15px rgba(220,38,38,0.6));
-        }
-        .rfid-icon svg {
-            width: 60px;
-            height: 60px;
-        }
-        .rfid-zone p {
-            font-size: 0.9em;
-            font-size: 1em;
-            color: #fca5a5;
-        }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 30px rgba(220,38,38,0.4); }
-            50% { box-shadow: 0 0 50px rgba(220,38,38,0.7); }
-        }
-        .fallback-btn {
-            background: transparent;
-            border: 1px solid #6b7280;
-            color: #9ca3af;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.75em;
-            width: 100%;
-            margin: 5px 0;
-        }
-        .keyboard {
-            background: transparent;
-            padding: 10px 0;
-            display: block;
-        }
-        .keyboard-row {
-            display: flex;
-            gap: 3px;
-            margin-bottom: 3px;
-            justify-content: center;
-        }
-        .key {
-            background: #374151;
-            color: #fff;
-            border: 1px solid #6b7280;
-            border-radius: 4px;
-            padding: 10px 15px;
-            font-size: 1em;
-            cursor: pointer;
-            min-width: 50px;
+        
+        .menu-single {
+            font-size: 1.4em;
+            line-height: 1.4;
             text-align: center;
         }
-        .key:active {
-            background: #dc2626;
-            transform: scale(0.95);
+        
+        .menu-dual {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-        .key.wide { min-width: 100px; }
+        
+        .menu-option {
+            background: rgba(220, 38, 38, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .menu-label {
+            font-size: 0.8em;
+            color: #fca5a5;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .menu-text {
+            font-size: 1.1em;
+        }
+        
+        .scanner-zone {
+            background: var(--dark-card);
+            border: 3px dashed var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 8px;
+            box-shadow: 0 0 30px rgba(220, 38, 38, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(220, 38, 38, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(220, 38, 38, 0.5); }
+        }
+        
+        .scanner-icon {
+            font-size: 3em;
+            margin-bottom: 8px;
+            color: var(--primary);
+            filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.5));
+        }
+        
+        .scanner-text {
+            font-size: 1em;
+            color: #fca5a5;
+            font-weight: 600;
+        }
+        
+        .fallback-btn {
+            background: var(--dark-card);
+            border: 1px solid var(--border);
+            color: #9ca3af;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .fallback-btn:active {
+            transform: scale(0.98);
+            background: rgba(55, 65, 81, 0.8);
+        }
+        
+        /* Fallback Form */
         .fallback-form {
             display: none;
             position: fixed;
@@ -160,18 +159,20 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 5000;
+            padding: 20px;
             flex-direction: column;
             justify-content: space-between;
-            padding: 20px;
         }
+        
         .fallback-form.show { display: flex; }
+        
         .close-btn {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: #dc2626;
+            background: var(--primary);
             border: none;
             color: #fff;
             width: 45px;
@@ -179,40 +180,93 @@
             border-radius: 50%;
             font-size: 1.5em;
             cursor: pointer;
-            z-index: 5001;
+            font-weight: 700;
         }
-        input[type="text"] { 
-            font-size: 1em; 
-            padding: 5px; 
-            border-radius: 4px; 
-            border: 2px solid #dc2626; 
-            background: #1a1a1a;
-            color: #fff; 
-            width: 100%;
-            margin: 5px 0;
-            font-weight: bold;
-            text-align: center;
-            letter-spacing: 3px;
-            min-height: 35px;
+        
+        .form-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
         }
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #dc2626;
-        }
-        input::placeholder { color: #6b7280; }
-        input[type="hidden"] { display: none; }
-        .submit-btn { 
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-            color: #fff; 
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            cursor: pointer;
+        
+        .form-title {
+            color: var(--primary);
             font-size: 1em;
-            font-weight: bold;
-            margin-top: 5px;
-            width: 100%;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 700;
         }
+        
+        input[type="text"] {
+            font-size: 1.3em;
+            padding: 10px;
+            border-radius: 8px;
+            border: 3px solid var(--primary);
+            background: var(--dark-card);
+            color: #fff;
+            text-align: center;
+            letter-spacing: 6px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .keyboard-container {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+        
+        .keyboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .keyboard-row {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+        }
+        
+        .key {
+            background: var(--dark-card);
+            color: #fff;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 1.1em;
+            cursor: pointer;
+            min-width: 55px;
+            font-weight: 700;
+            transition: all 0.1s;
+        }
+        
+        .key:active {
+            background: var(--primary);
+            transform: scale(0.95);
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 75px;
+            transition: all 0.2s;
+        }
+        
+        .submit-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Menu Choice Dialog */
         .menu-choice-dialog {
             display: none;
             position: fixed;
@@ -220,20 +274,24 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 3000;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 30px;
         }
+        
         .menu-choice-dialog.show { display: flex; }
-        .menu-choice-dialog h2 {
-            color: #ef4444;
-            font-size: 2em;
+        
+        .menu-choice-title {
+            color: var(--primary);
+            font-size: 1.8em;
             margin-bottom: 30px;
-            text-shadow: 0 0 10px rgba(220,38,38,0.8);
+            font-weight: 700;
+            text-align: center;
         }
+        
         .menu-choice-buttons {
             display: flex;
             flex-direction: column;
@@ -241,119 +299,186 @@
             width: 100%;
             max-width: 500px;
         }
+        
         .menu-choice-btn {
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: #fff;
             border: 3px solid #ef4444;
             padding: 30px;
-            font-size: 1.8em;
+            font-size: 1.6em;
             border-radius: 12px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            box-shadow: 0 8px 25px rgba(220,38,38,0.4);
+            font-weight: 700;
+            transition: all 0.2s;
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
         }
-        .menu-choice-btn:hover,
+        
         .menu-choice-btn:active {
             transform: scale(1.05);
-            box-shadow: 0 10px 35px rgba(220,38,38,0.6);
-            border-color: #fca5a5;
+            box-shadow: 0 10px 35px rgba(220, 38, 38, 0.6);
         }
-        @keyframes pop { 
-            0% { transform: scale(0.8); opacity: 0; } 
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); opacity: 1; } 
+        
+        .menu-choice-detail {
+            font-size: 0.6em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        
+        /* Feedback Message */
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 480px;
+            padding: 40px;
+            border-radius: 16px;
+            font-size: 2em;
+            line-height: 1.4;
+            font-weight: 700;
+            z-index: 2000;
+            text-align: center;
+            box-shadow: 0 10px 60px rgba(0, 0, 0, 0.9);
+            animation: pop 0.3s;
+        }
+        
+        .feedback-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            border: 4px solid #10b981;
+        }
+        
+        .feedback-cancel {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: 4px solid #ef4444;
+        }
+        
+        .feedback-info {
+            background: rgba(55, 65, 81, 0.95);
+            border: 4px solid #6b7280;
+        }
+        
+        .feedback-error {
+            background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%);
+            border: 4px solid #991b1b;
+        }
+        
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <h1>Essen</h1>
-    <div class="menu" id="menu-display">
+    <div class="header">
+        <h1>
+            <span>&#9776;</span>
+            <span>Essensanmeldung</span>
+        </h1>
+    </div>
+    
+    <div class="menu-card">
         {% if menu %}
             {% if menu.zwei_menues_aktiv %}
-                <div style="display:flex;flex-direction:column;gap:8px;">
-                    <div><b>Menü 1:</b> <span id="menu1-text">{{ menu.menu1_name }}</span></div>
-                    <div><b>Menü 2:</b> <span id="menu2-text">{{ menu.menu2_name }}</span></div>
+            <div class="menu-dual">
+                <div class="menu-option">
+                    <div class="menu-label">MENÜ 1</div>
+                    <div class="menu-text">{{ menu.menu1_name }}</div>
                 </div>
+                <div class="menu-option">
+                    <div class="menu-label">MENÜ 2</div>
+                    <div class="menu-text">{{ menu.menu2_name }}</div>
+                </div>
+            </div>
             {% else %}
-                <b>Heute:</b> <span id="menu-text">{{ menu.description }}</span>
+            <div class="menu-single">
+                <b>Heute:</b> {{ menu.description }}
+            </div>
             {% endif %}
         {% else %}
-            <i style="color:#fca5a5;" id="menu-text">Kein Menü</i>
+        <div class="menu-single" style="color: #9ca3af; font-style: italic;">
+            Kein Menü hinterlegt
+        </div>
         {% endif %}
     </div>
     
-    <div class="rfid-zone">
-        <div class="rfid-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="80" height="80">
-                <path d="M17 1H7c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm0 18H7V5h10v14zM9 7h6v2H9V7zm0 4h6v2H9v-2z"/>
-            </svg>
-        </div>
-        <p>Karte scannen</p>
+    <div class="scanner-zone">
+        <div class="scanner-icon">&#9783;</div>
+        <div class="scanner-text">Karte scannen</div>
     </div>
     
-    <button class="fallback-btn" onclick="openPersonalNumber()">Personalnummer</button>
+    <button class="fallback-btn" onclick="openPersonalNumber()">
+        &#9999; Personalnummer eingeben
+    </button>
     
+    <!-- Fallback Form -->
     <form id="fallback" class="fallback-form" action="/" method="post">
-        <button type="button" class="close-btn" onclick="closeForm()">✕</button>
-        <div style="padding: 10px 0;">
-            <h2 style="color: #ef4444; margin-bottom: 8px; font-size: 1em;">Personalnummer</h2>
-            <input type="text" inputmode="none" readonly name="personal_number" placeholder="------" id="personal_number_input">
-        </div>
-        <!-- Tastatur und Button nebeneinander -->
-        <div style="display: flex; gap: 10px; align-items: flex-start;">
-            <!-- On-Screen Keyboard -->
-            <div id="keyboard" class="keyboard" style="flex: 1;">
-                <div class="keyboard-row">
-                    <button type="button" class="key" onclick="addDigit('1')">1</button>
-                    <button type="button" class="key" onclick="addDigit('2')">2</button>
-                    <button type="button" class="key" onclick="addDigit('3')">3</button>
+        <button type="button" class="close-btn" onclick="closeForm()">&#10005;</button>
+        
+        <div class="form-content">
+            <div class="form-title">Personalnummer eingeben</div>
+            <input type="text" 
+                   inputmode="none" 
+                   readonly 
+                   name="personal_number" 
+                   placeholder="------" 
+                   id="personal_number_input">
+            
+            <div class="keyboard-container">
+                <div class="keyboard">
+                    <div class="keyboard-row">
+                        <button type="button" class="key" onclick="addDigit('1')">1</button>
+                        <button type="button" class="key" onclick="addDigit('2')">2</button>
+                        <button type="button" class="key" onclick="addDigit('3')">3</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button type="button" class="key" onclick="addDigit('4')">4</button>
+                        <button type="button" class="key" onclick="addDigit('5')">5</button>
+                        <button type="button" class="key" onclick="addDigit('6')">6</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button type="button" class="key" onclick="addDigit('7')">7</button>
+                        <button type="button" class="key" onclick="addDigit('8')">8</button>
+                        <button type="button" class="key" onclick="addDigit('9')">9</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button type="button" class="key" onclick="addDigit('0')" style="flex: 1;">0</button>
+                        <button type="button" class="key" onclick="backspace()">←</button>
+                    </div>
                 </div>
-                <div class="keyboard-row">
-                    <button type="button" class="key" onclick="addDigit('4')">4</button>
-                    <button type="button" class="key" onclick="addDigit('5')">5</button>
-                    <button type="button" class="key" onclick="addDigit('6')">6</button>
-                </div>
-                <div class="keyboard-row">
-                    <button type="button" class="key" onclick="addDigit('7')">7</button>
-                    <button type="button" class="key" onclick="addDigit('8')">8</button>
-                    <button type="button" class="key" onclick="addDigit('9')">9</button>
-                </div>
-                <div class="keyboard-row">
-                    <button type="button" class="key" onclick="addDigit('0')">0</button>
-                    <button type="button" class="key" onclick="backspace()">←</button>
-                </div>
-            </div>
-            <!-- OK Button rechts -->
-            <div style="display: flex; flex-direction: column; justify-content: space-between; min-width: 80px;">
-                <button class="submit-btn" type="submit" style="height: 100%; min-height: 140px;">OK</button>
+                
+                <button class="submit-btn" type="submit">OK</button>
             </div>
         </div>
     </form>
     
-    <!-- Verstecktes Formular für RFID -->
+    <!-- RFID Form -->
     <form id="rfid-form" action="/" method="post">
-        <input type="text" name="card_id" id="rfid_input" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+        <input type="text" 
+               name="card_id" 
+               id="rfid_input" 
+               autocomplete="off" 
+               style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
     </form>
     
-    <!-- Menüauswahl-Dialog -->
+    <!-- Menu Choice Dialog -->
     <div id="menu-choice-dialog" class="menu-choice-dialog">
-        <h2>Welches Menü möchtest du?</h2>
+        <div class="menu-choice-title">Welches Menü möchtest du?</div>
         <div class="menu-choice-buttons">
             <button class="menu-choice-btn" onclick="selectMenu(1)">
                 <div>Menü 1</div>
-                <div id="menu-choice-1-text" style="font-size:0.6em;margin-top:10px;opacity:0.9;"></div>
+                <div class="menu-choice-detail" id="menu-choice-1-text"></div>
             </button>
             <button class="menu-choice-btn" onclick="selectMenu(2)">
                 <div>Menü 2</div>
-                <div id="menu-choice-2-text" style="font-size:0.6em;margin-top:10px;opacity:0.9;"></div>
+                <div class="menu-choice-detail" id="menu-choice-2-text"></div>
             </button>
         </div>
     </div>
     
     {% if message and need_menu_choice %}
-        <script>
-        // Zeige Menüauswahl-Dialog
+    <script>
         document.getElementById('menu-choice-1-text').textContent = "{{ menu.menu1_name }}";
         document.getElementById('menu-choice-2-text').textContent = "{{ menu.menu2_name }}";
         document.getElementById('menu-choice-dialog').classList.add('show');
@@ -363,7 +488,6 @@
         var pendingPersonalNumber = "{{ pending_personal_number }}";
         
         window.selectMenu = function(choice) {
-            // Sende die Menüauswahl
             var form = document.createElement('form');
             form.method = 'POST';
             form.action = '/register_with_menu';
@@ -399,17 +523,17 @@
             document.body.appendChild(form);
             form.submit();
         };
-        </script>
+    </script>
     {% endif %}
     
     {% if message and not need_menu_choice %}
-        <div id="feedback" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:480px;padding:40px;border-radius:16px;{% if status=='success' %}background:linear-gradient(135deg,#10b981,#059669);border:4px solid #10b981;{% elif status=='cancel' %}background:linear-gradient(135deg,#dc2626,#991b1b);border:4px solid #ef4444;{% elif status=='info' %}background:rgba(55,65,81,0.95);border:4px solid #6b7280;{% else %}background:linear-gradient(135deg,#7f1d1d,#450a0a);border:4px solid #991b1b;{% endif %};font-size:2.2em;line-height:1.4;animation:pop 0.3s;box-shadow:0 10px 60px rgba(0,0,0,0.9);font-weight:700;z-index:2000;text-align:center;white-space:pre-line;">
-            {{ message }}
-        </div>
-        <audio id="beep">
-            <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjSH0fPTgjMGHm7A7+OZSA4PVK/n77BdGAg+ltryxnMoBSqAzvLaizsIGmi78OuhUBELTKXh8bllHgU2jdXyz3osBSR3x/DdkEAKFF607uunVBIKRp/h8r9wIQYzhM/y1IU1Bx9tvu7mnEwOD1Ow5u+zXRgIPpfb8sh0KAUqgM7y2os7CBppvO/noVASC0yl4fG5ZR4FNo3V8tB6LAUkd8fw3Y9ACRVet" type="audio/wav">
-        </audio>
-        <script>
+    <div class="feedback feedback-{{ status }}" style="white-space: pre-line;">
+        {{ message }}
+    </div>
+    <audio id="beep">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjSH0fPTgjMGHm7A7+OZSA4PVK/n77BdGAg+ltryxnMoBSqAzvLaizsIGmi78OuhUBELTKXh8bllHgU2jdXyz3osBSR3x/DdkEAKFF607uunVBIKRp/h8r9wIQYzhM/y1IU1Bx9tvu7mnEwOD1Ow5u+zXRgIPpfb8sh0KAUqgM7y2os7CBppvO/noVASC0yl4fG5ZR4FNo3V8tB6LAUkd8fw3Y9ACRVet" type="audio/wav">
+    </audio>
+    <script>
         {% if status == 'success' %}
         var beep = document.getElementById('beep');
         if (beep) beep.play().catch(function(){});
@@ -418,112 +542,108 @@
         setTimeout(function() {
             window.location.href = "/";
         }, 3500);
-        </script>
+    </script>
     {% endif %}
-</body>
-<script>
-// RFID HID Scanner Input Handler
-const rfidInput = document.getElementById('rfid_input');
-const rfidForm = document.getElementById('rfid-form');
-let scanBuffer = '';
-let scanTimeout;
-
-// Fokus immer auf RFID-Input halten (außer bei Personalnummer-Eingabe)
-document.addEventListener('click', function(e) {
-    if (!document.getElementById('fallback').classList.contains('show')) {
-        rfidInput.focus();
-    }
-});
-
-// Initial fokussieren
-rfidInput.focus();
-
-// Scanner-Input verarbeiten
-rfidInput.addEventListener('input', function() {
-    clearTimeout(scanTimeout);
-    scanBuffer = rfidInput.value;
     
-    // Warte kurz ob noch mehr Zeichen kommen
-    scanTimeout = setTimeout(function() {
-        if (scanBuffer.length > 3) { // Mindestens 4 Zeichen
-            rfidForm.submit();
-        }
-        scanBuffer = '';
-        rfidInput.value = '';
-    }, 100);
-});
-
-// Enter-Taste submitted sofort
-rfidInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        clearTimeout(scanTimeout);
-        if (rfidInput.value.length > 3) {
-            rfidForm.submit();
-        }
-        rfidInput.value = '';
-    }
-});
-
-// Altes RFID-Polling entfernen (nicht mehr nötig)
-// setInterval(async function() { ... }, 500);
-
-// Menü alle 10 Sekunden aktualisieren
-setInterval(async function() {
-    try {
-        let resp = await fetch('/menu/data');
-        if (resp.ok) {
-            let data = await resp.json();
-            let menuDisplay = document.getElementById('menu-display');
-            
-            if (data.zwei_menues_aktiv && data.menu1 && data.menu2) {
-                menuDisplay.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' +
-                    '<div><b>Menü 1:</b> <span id="menu1-text">' + data.menu1 + '</span></div>' +
-                    '<div><b>Menü 2:</b> <span id="menu2-text">' + data.menu2 + '</span></div>' +
-                    '</div>';
-            } else if (data.menu) {
-                menuDisplay.innerHTML = '<b>Heute:</b> <span id="menu-text">' + data.menu + '</span>';
-            } else {
-                menuDisplay.innerHTML = '<i style="color:#fca5a5;" id="menu-text">Kein Menü</i>';
+    <script>
+        // RFID Scanner Handler
+        const rfidInput = document.getElementById('rfid_input');
+        const rfidForm = document.getElementById('rfid-form');
+        let scanBuffer = '';
+        let scanTimeout;
+        
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('fallback').classList.contains('show')) {
+                rfidInput.focus();
             }
+        });
+        
+        rfidInput.focus();
+        
+        rfidInput.addEventListener('input', function() {
+            clearTimeout(scanTimeout);
+            scanBuffer = rfidInput.value;
+            
+            scanTimeout = setTimeout(function() {
+                if (scanBuffer.length > 3) {
+                    rfidForm.submit();
+                }
+                scanBuffer = '';
+                rfidInput.value = '';
+            }, 100);
+        });
+        
+        rfidInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(scanTimeout);
+                if (rfidInput.value.length > 3) {
+                    rfidForm.submit();
+                }
+                rfidInput.value = '';
+            }
+        });
+        
+        // Menu Auto-Update
+        setInterval(async function() {
+            try {
+                let resp = await fetch('/menu/data');
+                if (!resp.ok) return;
+                
+                let data = await resp.json();
+                let menuCard = document.querySelector('.menu-card');
+                
+                if (data.zwei_menues_aktiv && data.menu1 && data.menu2) {
+                    menuCard.innerHTML = `
+                        <div class="menu-dual">
+                            <div class="menu-option">
+                                <div class="menu-label">MENÜ 1</div>
+                                <div class="menu-text">${data.menu1}</div>
+                            </div>
+                            <div class="menu-option">
+                                <div class="menu-label">MENÜ 2</div>
+                                <div class="menu-text">${data.menu2}</div>
+                            </div>
+                        </div>
+                    `;
+                } else if (data.menu) {
+                    menuCard.innerHTML = `
+                        <div class="menu-single">
+                            <b>Heute:</b> ${data.menu}
+                        </div>
+                    `;
+                } else {
+                    menuCard.innerHTML = `
+                        <div class="menu-single" style="color: #9ca3af; font-style: italic;">
+                            Kein Menü hinterlegt
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                console.error('Menu update error:', e);
+            }
+        }, 10000);
+        
+        // Keyboard Functions
+        function openPersonalNumber() {
+            document.getElementById('fallback').classList.add('show');
+            document.getElementById('personal_number_input').focus();
         }
-    } catch (e) {}
-}, 10000);
-
-// HTML-Tastatur Funktionen
-function openPersonalNumber() {
-    var form = document.getElementById('fallback');
-    var keyboard = document.getElementById('keyboard');
-    form.classList.add('show');
-    keyboard.classList.add('show');
-    // Focus auf Input setzen
-    setTimeout(function() {
-        document.getElementById('personal_number_input').focus();
-    }, 50);
-}
-
-function showKeyboard() {
-    document.getElementById('keyboard').classList.add('show');
-}
-
-function hideKeyboard() {
-    document.getElementById('keyboard').classList.remove('show');
-}
-
-function addDigit(digit) {
-    var input = document.getElementById('personal_number_input');
-    input.value += digit;
-}
-
-function backspace() {
-    var input = document.getElementById('personal_number_input');
-    input.value = input.value.slice(0, -1);
-}
-
-function closeForm() {
-    document.getElementById('fallback').classList.remove('show');
-    hideKeyboard();
-    document.getElementById('personal_number_input').value = '';
-}
-</script>
+        
+        function closeForm() {
+            document.getElementById('fallback').classList.remove('show');
+            document.getElementById('personal_number_input').value = '';
+            rfidInput.focus();
+        }
+        
+        function addDigit(digit) {
+            document.getElementById('personal_number_input').value += digit;
+        }
+        
+        function backspace() {
+            var input = document.getElementById('personal_number_input');
+            input.value = input.value.slice(0, -1);
+        }
+    </script>
+</body>
 </html>
