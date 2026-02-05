@@ -5,15 +5,21 @@ Ein System zur Essensanmeldung für die Feuerwehr, optimiert für den Raspberry 
 ## ✨ Features
 
 ### Registrierung
-- 🆔 **RFID-Transponder**: Automatische Anmeldung per TWN4 MultiTec Reader
+- 🆔 **RFID-Transponder**: Automatische Anmeldung per ELATEC TWN4 HID Reader
 - 📱 **QR-Code**: Persönlicher QR-Code für jeden User zum Ausdrucken
-- 🔢 **Personalnummer**: Manuelle Eingabe am Touchscreen
+- 🔢 **Personalnummer**: Manuelle Eingabe am Touchscreen mit eingebetteter Tastatur
 - 👥 **Gäste**: Schnelle +/- Buttons für Besucher ohne Account
 
+### Menüverwaltung
+- 🍽️ **Zwei-Menü-System**: Optional zwei verschiedene Menüs pro Tag
+- 📝 **Menü-Auswahl**: Benutzer wählen bei Anmeldung ihr Wunschmenü
+- 📊 **Getrennte Zählung**: Separate Anzeige für Menü 1 und Menü 2
+- ✅ **Farbcodierte Bestätigung**: Grün für Anmeldung, Rot für Abmeldung
+
 ### Interfaces
-- 📱 **Touch-Display** (3,5"): Kompaktes Interface für Raspberry Pi, RFID Auto-Scan
-- 🍽️ **Küchenansicht**: Menü, Teilnehmerzahl, alphabetische Namensliste (Auto-Refresh 30s)
-- ⚙️ **Admin-Panel**: Benutzerverwaltung, CSV-Import, manuelle Registrierung, geschützt durch Login
+- 📱 **Touch-Display** (3,5" 320x480): Modernes Dark-Theme mit Card-Layout, optimiert für Raspberry Pi
+- 🍽️ **Küchenansicht**: Große Teilnehmerzahl-Anzeige, Menü-Breakdown, alphabetische Namensliste (Auto-Refresh 10s)
+- ⚙️ **Admin-Panel**: Card-basiertes Design, Drag & Drop CSV-Import, Beispiel-CSV-Download, manuelle Registrierung
 - 📊 **Statistiken**: 14-Tage-Übersicht, CSV-Export, geschützt durch Login
 - 📈 **Historie**: Top-10-Esser, persönliche Statistiken (90/30/7 Tage), monatliche Übersicht
 
@@ -30,9 +36,10 @@ Ein System zur Essensanmeldung für die Feuerwehr, optimiert für den Raspberry 
 - ⏰ **Cronjobs**: Vollständig konfigurierte automatische Aufgaben
 
 ### Design
-- 🎨 **Feuerwehr-Theme**: Dunkles Design mit rot-schwarzen Farbverläufen
-- 📐 **Touch-optimiert**: Große Buttons, keine Scrollbalken auf 3,5" Display
-- 📱 **Responsive**: Funktioniert auf allen Bildschirmgrößen
+- 🎨 **Modernes Dark-Theme**: CSS-Variablen, Gradients, Card-basiertes Layout
+- 📐 **Touch-optimiert**: Große Buttons, kompakte Tastatur, optimiert für 320px Display
+- 📱 **Responsive**: Grid-Layout passt sich an alle Bildschirmgrößen an
+- ⚡ **Hover-Effekte**: Smooth Transitions und visuelle Feedbacks
 
 ## 🚀 Installation
 
@@ -184,28 +191,31 @@ curl -X POST http://localhost:5000/api/register \
 FoodBot/
 ├── app/
 │   ├── __init__.py           # Flask App Factory
-│   ├── models.py             # Datenbank-Modelle (User, Registration, Menu)
+│   ├── models.py             # Datenbank-Modelle (User, Registration, Menu, AdminLog)
 │   ├── routes.py             # Hauptrouten (Touch, Kitchen, Admin)
 │   ├── api.py                # REST API mit Rate Limiting
 │   ├── stats.py              # Statistik-Routes
 │   ├── history.py            # Essenshistorie & Top-10
 │   ├── auth.py               # Admin-Authentifizierung
-│   ├── rfid.py               # RFID-Reader Integration
+│   ├── rfid.py               # RFID-Reader Integration (optional)
 │   └── gunicorn_config.py    # Gunicorn für Docker
 ├── templates/
-│   ├── touch.html            # 3,5" Touch-Interface
-│   ├── kitchen.html          # Küchenansicht
-│   ├── admin.html            # Admin-Panel
+│   ├── touch.html            # 3,5" Touch-Interface (modernes Dark-Theme)
+│   ├── kitchen.html          # Küchenansicht (Card-Layout)
+│   ├── admin.html            # Admin-Panel (Drag & Drop CSV-Import)
 │   ├── stats.html            # Statistiken
 │   ├── history.html          # Historie-Übersicht
-│   └── history_detail.html   # User-Detail-Historie
+│   ├── history_detail.html   # User-Detail-Historie
+│   ├── *_modern.html         # Moderne Design-Varianten (Backup)
+│   └── *_old.html            # Legacy-Templates (Backup)
 ├── deployment/
 │   ├── setup_production.sh   # Automatisches Production-Setup
 │   ├── setup_cronjobs.sh     # Cronjob-Installation
 │   ├── gunicorn.conf.py      # Gunicorn Konfiguration
 │   ├── foodbot.service       # Systemd Service
 │   ├── nginx-foodbot         # Nginx Reverse Proxy Config
-│   └── logrotate-foodbot     # Log-Rotation Config
+│   ├── logrotate-foodbot     # Log-Rotation Config
+│   └── DISPLAY_SETUP.md      # 3,5" Display Konfiguration (LCD-show)
 ├── backup_db.py              # Automatisches Datenbank-Backup
 ├── clear_registrations.py    # Täglich Anmeldungen löschen
 ├── docker-compose.yml        # Docker Deployment
@@ -323,9 +333,17 @@ sudo netstat -tlnp | grep 5001
 ### Stack
 - **Backend**: Python 3.11+, Flask 3.1
 - **Datenbank**: SQLite mit SQLAlchemy 2.0
-- **Server**: Gunicorn (Production)
+- **Server**: Gunicorn mit 4 Workern (Production)
 - **Reverse Proxy**: Nginx (optional)
-- **Hardware**: Raspberry Pi, TWN4 MultiTec RFID Reader, 3,5" Touchscreen
+- **Hardware**: Raspberry Pi 4, ELATEC TWN4 HID RFID Reader, 3,5" ILI9486 Touchscreen (320x480)
+- **Display**: LCD-show Treiber für SPI-basierte Displays
+
+### Design System
+- **CSS**: CSS Custom Properties (Variablen)
+- **Layout**: CSS Grid & Flexbox
+- **Theme**: Dark Mode (#0f172a Base, #dc2626 Primary, #10b981 Success)
+- **Typography**: System Fonts (-apple-system, BlinkMacSystemFont, Segoe UI)
+- **Components**: Card-basiert, Gradients, Shadow-Effekte
 
 ### Dependencies
 - `flask` - Web Framework
