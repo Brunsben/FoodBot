@@ -248,6 +248,29 @@ def kitchen_data():
         'menu2_count': menu2_count
     })
 
+@bp.route('/kitchen/print')
+def kitchen_print():
+    """Druckansicht für die Küche - gruppiert nach Menü"""
+    from .models import Guest
+    
+    today_menu = Menu.query.filter_by(date=date.today()).first()
+    registrations = Registration.query.filter_by(date=date.today()).all()
+    guest_entry = Guest.query.filter_by(date=date.today()).first()
+    guest_count = guest_entry.count if guest_entry else 0
+    
+    # Nach Menüwahl gruppieren und alphabetisch sortieren
+    menu1_users = sorted([r.user for r in registrations if r.menu_choice == 1], key=lambda u: u.name.lower())
+    menu2_users = sorted([r.user for r in registrations if r.menu_choice == 2], key=lambda u: u.name.lower())
+    
+    total = len(registrations) + guest_count
+    
+    return render_template('kitchen_print.html', 
+                         menu=today_menu,
+                         menu1_users=menu1_users,
+                         menu2_users=menu2_users,
+                         guest_count=guest_count,
+                         total=total)
+
 @bp.route('/menu/data', methods=['GET'])
 def menu_data():
     """API-Endpunkt für AJAX-Updates des Menüs auf der Touch-Seite"""
@@ -276,6 +299,8 @@ def admin():
         # Menü speichern (neue Logik für ein oder zwei Menüs)
         if 'save_menu' in request.form:
             zwei_menues = request.form.get('zwei_menues_aktiv') == '1'
+            deadline_enabled = request.form.get('deadline_enabled') == '1'
+            registration_deadline = request.form.get('registration_deadline', '19:45')
             
             if zwei_menues:
                 menu1_text = request.form.get('menu1_text', '').strip()
@@ -286,13 +311,17 @@ def admin():
                     today_menu.menu1_name = menu1_text
                     today_menu.menu2_name = menu2_text
                     today_menu.description = f"{menu1_text} / {menu2_text}"
+                    today_menu.deadline_enabled = deadline_enabled
+                    today_menu.registration_deadline = registration_deadline
                 else:
                     today_menu = Menu(
                         date=date.today(),
                         description=f"{menu1_text} / {menu2_text}",
                         zwei_menues_aktiv=True,
                         menu1_name=menu1_text,
-                        menu2_name=menu2_text
+                        menu2_name=menu2_text,
+                        deadline_enabled=deadline_enabled,
+                        registration_deadline=registration_deadline
                     )
                     db.session.add(today_menu)
             else:
@@ -303,11 +332,15 @@ def admin():
                     today_menu.description = menu_text
                     today_menu.menu1_name = None
                     today_menu.menu2_name = None
+                    today_menu.deadline_enabled = deadline_enabled
+                    today_menu.registration_deadline = registration_deadline
                 else:
                     today_menu = Menu(
                         date=date.today(),
                         description=menu_text,
-                        zwei_menues_aktiv=False
+                        zwei_menues_aktiv=False,
+                        deadline_enabled=deadline_enabled,
+                        registration_deadline=registration_deadline
                     )
                     db.session.add(today_menu)
             
@@ -440,6 +473,89 @@ def admin():
                          menu=today_menu, 
                          guest_count=guest_count,
                          preset_menus=preset_menus)
+
+@bp.route('/admin/weekly', methods=['GET', 'POST'])
+@login_required
+def admin_weekly():
+    from datetime import timedelta
+    from .models import PresetMenu
+    
+    message = None
+    
+    if request.method == 'POST':
+        date_str = request.form.get('date')
+        if date_str:
+            menu_date = date.fromisoformat(date_str)
+            zwei_menues = request.form.get('zwei_menues_aktiv') == '1'
+            deadline_enabled = request.form.get('deadline_enabled') == '1'
+            registration_deadline = request.form.get('registration_deadline', '19:45')
+            
+            menu = Menu.query.filter_by(date=menu_date).first()
+            
+            if zwei_menues:
+                menu1_text = request.form.get('menu1_text', '').strip()
+                menu2_text = request.form.get('menu2_text', '').strip()
+                
+                if menu:
+                    menu.zwei_menues_aktiv = True
+                    menu.menu1_name = menu1_text
+                    menu.menu2_name = menu2_text
+                    menu.description = f"{menu1_text} / {menu2_text}"
+                    menu.deadline_enabled = deadline_enabled
+                    menu.registration_deadline = registration_deadline
+                else:
+                    menu = Menu(
+                        date=menu_date,
+                        description=f"{menu1_text} / {menu2_text}",
+                        zwei_menues_aktiv=True,
+                        menu1_name=menu1_text,
+                        menu2_name=menu2_text,
+                        deadline_enabled=deadline_enabled,
+                        registration_deadline=registration_deadline
+                    )
+                    db.session.add(menu)
+            else:
+                menu_text = request.form.get('menu_text', '').strip()
+                
+                if menu:
+                    menu.zwei_menues_aktiv = False
+                    menu.description = menu_text
+                    menu.menu1_name = None
+                    menu.menu2_name = None
+                    menu.deadline_enabled = deadline_enabled
+                    menu.registration_deadline = registration_deadline
+                else:
+                    menu = Menu(
+                        date=menu_date,
+                        description=menu_text,
+                        zwei_menues_aktiv=False,
+                        deadline_enabled=deadline_enabled,
+                        registration_deadline=registration_deadline
+                    )
+                    db.session.add(menu)
+            
+            db.session.commit()
+            message = f"Menü für {menu_date.strftime('%d.%m.%Y')} gespeichert."
+    
+    # Nächsten 14 Tage generieren
+    today = date.today()
+    days = []
+    weekdays_de = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+    
+    for i in range(14):
+        day_date = today + timedelta(days=i)
+        menu = Menu.query.filter_by(date=day_date).first()
+        days.append({
+            'date_iso': day_date.isoformat(),
+            'date_str': day_date.strftime('%d.%m.%Y'),
+            'weekday': weekdays_de[day_date.weekday()],
+            'is_today': i == 0,
+            'menu': menu
+        })
+    
+    preset_menus = PresetMenu.get_all_ordered()
+    
+    return render_template('weekly.html', days=days, preset_menus=preset_menus, message=message)
 
 # API-Route für das Touch-Display, um den letzten Scan abzufragen
 @bp.route('/rfid_scan')

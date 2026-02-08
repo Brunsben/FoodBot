@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wochenplanung - FoodBot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #141414;
+            --border: #2a2a2a;
+            --text: #e5e7eb;
+            --text-dim: #9ca3af;
+            --primary: #dc2626;
+            --primary-hover: #b91c1c;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            font-size: 2em;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--primary);
+        }
+        
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .day-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .day-card:hover {
+            border-color: var(--primary);
+        }
+        
+        .day-card.today {
+            border-color: var(--primary);
+            background: rgba(220, 38, 38, 0.05);
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .day-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .day-date {
+            color: var(--text-dim);
+            font-size: 0.9em;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-dim);
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        input[type="text"], input[type="time"] {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 1em;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .menu-inputs {
+            display: none;
+        }
+        
+        .menu-inputs.active {
+            display: block;
+        }
+        
+        .btn-save {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: white;
+            margin-top: 15px;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+        }
+        
+        .current-menu {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--success);
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .no-menu {
+            color: var(--text-dim);
+            font-style: italic;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .week-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script>
+        function toggleDualMenu(dayIndex, checked) {
+            const singleDiv = document.getElementById(`single-${dayIndex}`);
+            const dualDiv = document.getElementById(`dual-${dayIndex}`);
+            if (checked) {
+                singleDiv.classList.remove('active');
+                dualDiv.classList.add('active');
+            } else {
+                singleDiv.classList.add('active');
+                dualDiv.classList.remove('active');
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Wochenplanung</h1>
+            <a href="/admin" class="btn btn-secondary">← Zurück zum Admin</a>
+        </div>
+        
+        {% if message %}
+        <div style="background: var(--success); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            {{ message }}
+        </div>
+        {% endif %}
+        
+        <div class="week-grid">
+            {% for day_info in days %}
+            <div class="day-card {% if day_info.is_today %}today{% endif %}">
+                <div class="day-header">
+                    <div>
+                        <div class="day-name">{{ day_info.weekday }}</div>
+                        <div class="day-date">{{ day_info.date_str }}</div>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    <input type="hidden" name="date" value="{{ day_info.date_iso }}">
+                    
+                    <!-- Zwei Menüs Checkbox -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" 
+                               id="zwei_menues_{{ loop.index0 }}" 
+                               name="zwei_menues_aktiv" 
+                               value="1" 
+                               {% if day_info.menu and day_info.menu.zwei_menues_aktiv %}checked{% endif %}
+                               onchange="toggleDualMenu({{ loop.index0 }}, this.checked)">
+                        <label for="zwei_menues_{{ loop.index0 }}" style="cursor: pointer; margin: 0;">Zwei Menüs</label>
+                    </div>
+                    
+                    <!-- Anmeldefrist -->
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" 
+                                   name="deadline_enabled" 
+                                   value="1" 
+                                   {% if not day_info.menu or day_info.menu.deadline_enabled %}checked{% endif %}
+                                   style="vertical-align: middle;">
+                            Anmeldefrist bis 
+                            <input type="time" 
+                                   name="registration_deadline" 
+                                   value="{{ day_info.menu.registration_deadline if day_info.menu else '19:45' }}" 
+                                   style="width: 100px; display: inline-block; padding: 4px 8px; vertical-align: middle;">
+                        </label>
+                    </div>
+                    
+                    <!-- Single Menu -->
+                    <div id="single-{{ loop.index0 }}" class="menu-inputs {% if not day_info.menu or not day_info.menu.zwei_menues_aktiv %}active{% endif %}">
+                        <div class="form-group">
+                            <label>Menü</label>
+                            <input type="text" 
+                                   list="menu-options" 
+                                   name="menu_text" 
+                                   value="{{ day_info.menu.description if day_info.menu and not day_info.menu.zwei_menues_aktiv else '' }}"
+                                   placeholder="z.B. Schnitzel mit Pommes">
+                        </div>
+                    </div>
+                    
+                    <!-- Dual Menu -->
+                    <div id="dual-{{ loop.index0 }}" class="menu-inputs {% if day_info.menu and day_info.menu.zwei_menues_aktiv %}active{% endif %}">
+                        <div class="form-group">
+                            <label>Menü 1</label>
+                            <input type="text" 
+                                   list="menu-options" 
+                                   name="menu1_text" 
+                                   value="{{ day_info.menu.menu1_name if day_info.menu else '' }}"
+                                   placeholder="Erstes Menü">
+                        </div>
+                        <div class="form-group">
+                            <label>Menü 2</label>
+                            <input type="text" 
+                                   list="menu-options" 
+                                   name="menu2_text" 
+                                   value="{{ day_info.menu.menu2_name if day_info.menu else '' }}"
+                                   placeholder="Zweites Menü">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" name="save_day" value="1" class="btn btn-save">
+                        💾 Speichern
+                    </button>
+                    
+                    {% if day_info.menu %}
+                    <div class="current-menu">
+                        <strong>Aktuell:</strong><br>
+                        {% if day_info.menu.zwei_menues_aktiv %}
+                            • {{ day_info.menu.menu1_name }}<br>
+                            • {{ day_info.menu.menu2_name }}
+                        {% else %}
+                            {{ day_info.menu.description }}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <datalist id="menu-options">
+            {% for preset in preset_menus %}
+            <option value="{{ preset.name }}">
+            {% endfor %}
+        </datalist>
+    </div>
+</body>
+</html>

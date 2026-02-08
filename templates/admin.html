@@ -420,6 +420,28 @@
                         <label for="zwei_menues" style="margin: 0; font-weight: 600;">Zwei Menüs anbieten</label>
                     </div>
                     
+                    <!-- Anmeldefrist -->
+                    <div class="info-box" style="margin: 20px 0;">
+                        <strong>⏰ Anmeldefrist</strong>
+                        <div style="display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" 
+                                       name="deadline_enabled" 
+                                       value="1" 
+                                       {% if not menu or menu.deadline_enabled %}checked{% endif %}>
+                                <span>Frist aktiv</span>
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>Bis:</span>
+                                <input type="time" 
+                                       name="registration_deadline" 
+                                       value="{{ menu.registration_deadline if menu else '19:45' }}" 
+                                       style="padding: 6px 10px; border: 2px solid var(--border); border-radius: 6px; background: var(--bg-secondary); color: var(--text);">
+                                <span>Uhr</span>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Single Menu -->
                     <div id="single-menu" style="{% if menu and menu.zwei_menues_aktiv %}display:none{% endif %}">
                         <div class="form-group">
@@ -459,8 +481,16 @@
                     </datalist>
                     
                     <button type="submit" name="save_menu" value="1" class="btn btn-primary" style="width: 100%;">
-                        ✅ Menü speichern
+                        ✅ Menü für heute speichern
                     </button>
+                </form>
+                
+                <!-- Wochenvorschau Button -->
+                <div style="margin-top: 15px; text-align: center;">
+                    <a href="/admin/weekly" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">
+                        📅 Wochenplanung
+                    </a>
+                </div>
                 </form>
                 
                 {% if menu %}
