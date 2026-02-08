@@ -37,6 +37,7 @@ def register():
     data = request.json
     card_id = data.get('card_id')
     personal_number = data.get('personal_number')
+    menu_choice = data.get('menu_choice', 1)  # Standard: Menü 1
     
     user = None
     if card_id:
@@ -47,6 +48,43 @@ def register():
     if not user:
         return jsonify({'success': False, 'message': 'User nicht gefunden'}), 404
     
+    # Prüfe ob zwei Menüs aktiv sind und noch keine Menüwahl getroffen wurde
+    today_menu = Menu.query.filter_by(date=date.today()).first()
+    if today_menu and today_menu.zwei_menues_aktiv:
+        # Prüfe ob User schon angemeldet ist
+        existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+        if existing_reg:
+            # Abmelden
+            db.session.delete(existing_reg)
+            db.session.commit()
+            return jsonify({
+                'success': True,
+                'registered': False,
+                'user': {'name': user.name, 'personal_number': user.personal_number}
+            })
+        else:
+            # Wenn menu_choice nicht übergeben wurde, Menüauswahl anfordern
+            if 'menu_choice' not in data:
+                return jsonify({
+                    'success': True,
+                    'need_menu_choice': True,
+                    'user_id': user.id,
+                    'menu1': today_menu.menu1_name,
+                    'menu2': today_menu.menu2_name,
+                    'user': {'name': user.name, 'personal_number': user.personal_number}
+                })
+            
+            # Anmeldung mit Menüwahl
+            reg = Registration(user_id=user.id, date=date.today(), menu_choice=menu_choice)
+            db.session.add(reg)
+            db.session.commit()
+            return jsonify({
+                'success': True,
+                'registered': True,
+                'user': {'name': user.name, 'personal_number': user.personal_number}
+            })
+    
+    # Normaler Modus ohne Menüauswahl
     from .utils import register_user_for_today
     registered = register_user_for_today(user)
     

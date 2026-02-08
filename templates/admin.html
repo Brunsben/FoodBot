@@ -36,6 +36,22 @@
             flex-wrap: wrap;
         }
         
+        .header-actions a {
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .header-actions a:hover {
+            transform: translateY(-2px);
+            background: rgba(255,255,255,0.15);
+        }
+        
         .btn {
             padding: 10px 20px;
             border-radius: 8px;
@@ -225,10 +241,12 @@
     <div class="header">
         <h1>🔧 Admin</h1>
         <div class="header-actions">
-            <a href="/admin/weekly" class="btn btn-primary">📅 Wochenplanung</a>
-            <a href="/kitchen" class="btn btn-secondary">🍳 Küche</a>
-            <a href="/" class="btn btn-secondary">📡 Touch</a>
-            <a href="/logout" class="btn btn-secondary">🚪 Logout</a>
+            <a href="/admin/weekly">📅 Wochenplanung</a>
+            <a href="/stats">📊 Statistiken</a>
+            <a href="/history">📜 Historie</a>
+            <a href="/kitchen">🍳 Küche</a>
+            <a href="/">📡 Touch</a>
+            <a href="/logout">🚪 Logout</a>
         </div>
     </div>
     
@@ -369,9 +387,10 @@
         <div class="card">
             <div class="card-header">
                 <span class="card-icon">➕</span>
-                <h2>Neuen User anlegen</h2>
+                <h2>User-Verwaltung</h2>
             </div>
             
+            <h3 style="margin-bottom: 15px; font-size: 1.3em;">Neuen User anlegen</h3>
             <form method="post">
                 <div class="grid grid-3">
                     <div class="form-group">
@@ -389,6 +408,130 @@
                 </div>
                 <button type="submit" class="btn btn-primary">User anlegen</button>
             </form>
+            
+            <h3 style="margin: 30px 0 15px; font-size: 1.3em;">CSV-Import</h3>
+            <form method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>CSV-Datei hochladen</label>
+                    <input type="file" name="csv_file" accept=".csv" required 
+                           style="padding: 10px; background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2);">
+                </div>
+                <button type="submit" class="btn btn-primary">CSV importieren</button>
+            </form>
+        </div>
+        
+        <!-- Preset-Menüs -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📝</span>
+                <h2>Vordefinierte Menüs</h2>
+            </div>
+            
+            <form method="post" style="margin-bottom: 20px;">
+                <div style="display: flex; gap: 15px;">
+                    <input type="text" name="new_preset_menu" placeholder="Neues Menü hinzufügen" 
+                           style="flex: 1;" required>
+                    <button type="submit" name="add_preset_menu" value="1" class="btn btn-primary">
+                        Hinzufügen
+                    </button>
+                </div>
+            </form>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                {% for preset in preset_menus %}
+                <div style="background: rgba(220,38,38,0.15); border: 1px solid rgba(220,38,38,0.3); 
+                            border-radius: 8px; padding: 10px 15px; display: flex; align-items: center; gap: 10px;">
+                    <span>{{ preset.name }}</span>
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="delete_preset_id" value="{{ preset.id }}">
+                        <button type="submit" name="delete_preset_menu" value="1" 
+                                style="background: none; border: none; color: #ef4444; cursor: pointer; 
+                                       font-size: 1.2em; padding: 0; line-height: 1;">
+                            ✕
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- User bearbeiten & löschen -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">✏️</span>
+                <h2>Alle User</h2>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Personalnummer</th>
+                        <th>Karten-ID</th>
+                        <th>QR-Code</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.personal_number }}</td>
+                        <td>{{ user.card_id or '-' }}</td>
+                        <td>
+                            <a href="/qr/{{ user.id }}" target="_blank" class="btn btn-secondary" 
+                               style="padding: 6px 12px; font-size: 0.85em;">
+                                📱 QR
+                            </a>
+                        </td>
+                        <td>
+                            <button onclick="editUser({{ user.id }}, '{{ user.name }}', '{{ user.personal_number }}', '{{ user.card_id or '' }}')" 
+                                    class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85em; margin-right: 5px;">
+                                ✏️
+                            </button>
+                            <form method="post" style="display: inline;">
+                                <input type="hidden" name="delete_user" value="{{ user.id }}">
+                                <button type="submit" class="btn btn-secondary" 
+                                        onclick="return confirm('User {{ user.name }} wirklich löschen?')"
+                                        style="padding: 6px 12px; font-size: 0.85em; background: rgba(239,68,68,0.2);">
+                                    🗑️
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Edit User Modal -->
+    <div id="editModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
+                                z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1a1a1a; border: 3px solid #dc2626; border-radius: 20px; 
+                    padding: 40px; max-width: 600px; width: 90%;">
+            <h2 style="margin-bottom: 25px; color: #dc2626;">User bearbeiten</h2>
+            <form method="post">
+                <input type="hidden" id="edit_user_id" name="edit_user">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="edit_name" name="edit_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Personalnummer</label>
+                    <input type="text" id="edit_personal_number" name="edit_personal_number" required>
+                </div>
+                <div class="form-group">
+                    <label>Karten-ID</label>
+                    <input type="text" id="edit_card_id" name="edit_card_id">
+                </div>
+                <div style="display: flex; gap: 15px; margin-top: 25px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Speichern</button>
+                    <button type="button" onclick="closeEditModal()" class="btn btn-secondary" style="flex: 1;">
+                        Abbrechen
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
     
@@ -396,6 +539,18 @@
         function toggleMenuInputs(isDual) {
             document.getElementById('single-menu').classList.toggle('active', !isDual);
             document.getElementById('dual-menu').classList.toggle('active', isDual);
+        }
+        
+        function editUser(id, name, personalNumber, cardId) {
+            document.getElementById('edit_user_id').value = id;
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_personal_number').value = personalNumber;
+            document.getElementById('edit_card_id').value = cardId;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
         }
     </script>
 </body>

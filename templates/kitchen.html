@@ -247,6 +247,39 @@
                     <span style="color: #64748b;">Kein Menü eingetragen</span>
                 {% endif %}
             </div>
+            
+            <!-- Menü bearbeiten -->
+            <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid rgba(220,38,38,0.2);">
+                <h3 style="margin-bottom: 20px; font-size: 1.3em;">Menü eingeben/ändern</h3>
+                <form method="post" style="display: flex; flex-direction: column; gap: 15px;">
+                    <label style="display: flex; align-items: center; gap: 10px; font-size: 1.1em;">
+                        <input type="checkbox" name="zwei_menues_aktiv" value="1" 
+                               {% if menu and menu.zwei_menues_aktiv %}checked{% endif %}
+                               onclick="document.getElementById('dual-menu-inputs').style.display = this.checked ? 'block' : 'none'; document.getElementById('single-menu-input').style.display = this.checked ? 'none' : 'block';">
+                        Zwei Menüs
+                    </label>
+                    
+                    <div id="single-menu-input" style="{% if menu and menu.zwei_menues_aktiv %}display:none{% endif %}">
+                        <input type="text" name="menu" placeholder="Menü eingeben" 
+                               value="{{ menu.description if menu and not menu.zwei_menues_aktiv else '' }}"
+                               style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); 
+                                      border: 2px solid rgba(220,38,38,0.3); color: #fff; font-size: 1em;">
+                    </div>
+                    
+                    <div id="dual-menu-inputs" style="{% if not menu or not menu.zwei_menues_aktiv %}display:none{% endif %}">
+                        <input type="text" name="menu1" placeholder="Menü 1" 
+                               value="{{ menu.menu1_name if menu and menu.zwei_menues_aktiv else '' }}"
+                               style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); 
+                                      border: 2px solid rgba(220,38,38,0.3); color: #fff; font-size: 1em; margin-bottom: 10px;">
+                        <input type="text" name="menu2" placeholder="Menü 2" 
+                               value="{{ menu.menu2_name if menu and menu.zwei_menues_aktiv else '' }}"
+                               style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); 
+                                      border: 2px solid rgba(220,38,38,0.3); color: #fff; font-size: 1em;">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: fit-content;">💾 Speichern</button>
+                </form>
+            </div>
         </div>
         
         <div class="users-section">
@@ -261,7 +294,7 @@
     
     <script>
         function updateKitchen() {
-            fetch('/kitchen/data')
+            fetch(`/kitchen/data?t=${Date.now()}`)
                 .then(r => r.json())
                 .then(data => {
                     document.getElementById('total-count').textContent = data.total;
@@ -274,10 +307,32 @@
                     list.innerHTML = data.users.map(u => 
                         `<div class="user-badge">${u.name}</div>`
                     ).join('');
+                    
+                    // Menü aktualisieren
+                    const menuDisplay = document.querySelector('.menu-display');
+                    if (data.menu.zwei_menues_aktiv) {
+                        menuDisplay.innerHTML = `
+                            <div class="menu-dual">
+                                <div class="menu-item">
+                                    <div class="menu-item-label">Menü 1</div>
+                                    <div class="menu-item-text">${data.menu.menu1_name || 'Nicht gesetzt'}</div>
+                                </div>
+                                <div class="menu-item">
+                                    <div class="menu-item-label">Menü 2</div>
+                                    <div class="menu-item-text">${data.menu.menu2_name || 'Nicht gesetzt'}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (data.menu.description) {
+                        menuDisplay.innerHTML = `<strong>${data.menu.description}</strong>`;
+                    } else {
+                        menuDisplay.innerHTML = '<span style="color: #64748b;">Kein Menü eingetragen</span>';
+                    }
                 });
         }
         
         setInterval(updateKitchen, 5000);
+        updateKitchen(); // Sofort beim Laden ausführen
     </script>
 </body>
 </html>

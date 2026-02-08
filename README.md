@@ -1,34 +1,37 @@
 # 🚒 FoodBot - Feuerwehr Essensanmeldung
 
-Ein System zur Essensanmeldung für die Feuerwehr, optimiert für den Raspberry Pi mit 3,5" Touchscreen.
+Ein modernes System zur Essensanmeldung für die Feuerwehr, optimiert für den Raspberry Pi mit 3,5" Touchscreen.
 
 ## ✨ Features
 
 ### Registrierung
 - 🆔 **RFID-Transponder**: Automatische Anmeldung per ELATEC TWN4 HID Reader
 - 📱 **QR-Code**: Persönlicher QR-Code für jeden User zum Ausdrucken
-- 🔢 **Personalnummer**: Manuelle Eingabe am Touchscreen mit eingebetteter Tastatur
+- 🔢 **Personalnummer**: Manuelle Eingabe am Touchscreen mit virtueller Tastatur (ausblendbar)
 - 👥 **Gäste**: Schnelle +/- Buttons für Besucher ohne Account
 
 ### Menüverwaltung
 - 🍽️ **Zwei-Menü-System**: Optional zwei verschiedene Menüs pro Tag
-- 📝 **Menü-Auswahl**: Benutzer wählen bei Anmeldung ihr Wunschmenü
+- 📝 **Menü-Auswahl**: Benutzer wählen bei Anmeldung ihr Wunschmenü (RFID + Personalnummer)
 - 📊 **Getrennte Zählung**: Separate Anzeige für Menü 1 und Menü 2
 - ✅ **Farbcodierte Bestätigung**: Grün für Anmeldung, Rot für Abmeldung
+- ⏰ **Anmeldefrist**: Konfigurierbarer Deadline-Zeitpunkt (Standard: 19:45)
+- 📅 **Wochenplanung**: 14-Tage-Vorausplanung mit Deadline-Einstellungen pro Tag
 
 ### Interfaces
-- 📱 **Touch-Display** (3,5" 320x480): Modernes Dark-Theme mit Card-Layout, optimiert für Raspberry Pi
-- 🍽️ **Küchenansicht**: Große Teilnehmerzahl-Anzeige, Menü-Breakdown, alphabetische Namensliste (Auto-Refresh 10s)
-- ⚙️ **Admin-Panel**: Card-basiertes Design, Drag & Drop CSV-Import, Beispiel-CSV-Download, manuelle Registrierung
-- 📊 **Statistiken**: 14-Tage-Übersicht, CSV-Export, geschützt durch Login
-- 📈 **Historie**: Top-10-Esser, persönliche Statistiken (90/30/7 Tage), monatliche Übersicht
+- 📱 **Touch-Display** (3,5" 320x480): Modernes Dark-Theme, optimiert für kleine Displays
+- 🍽️ **Küchenansicht**: Live-Statistiken, Menü-Eingabe, Druckansicht (Auto-Refresh 5s)
+- ⚙️ **Admin-Panel**: User-Verwaltung, CSV-Import, Preset-Menüs, Deadline-Konfiguration
+- 📊 **Statistiken**: 14-Tage-Übersicht, CSV-Export
+- 📈 **Historie**: Top-10-Esser, persönliche Statistiken, monatliche Übersicht
+- 🖨️ **Druckliste**: Gruppiert nach Menü mit Checkboxen für die Küche
 
 ### Security & Performance
 - 🔐 **Admin-Login**: Session-basierte Authentifizierung (Standard-Passwort: feuerwehr2026)
 - ⚡ **Rate Limiting**: Schutz vor API-Missbrauch (200/Tag, 50/Stunde)
 - 📝 **Logrotate**: Automatische Log-Verwaltung (täglich, 14 Tage Retention)
 - 🔔 **Webhooks**: Benachrichtigungen via Slack, Discord, etc.
-- 🔌 **REST-API**: Integration mit externen Systemen (z.B. FeuerON)
+- 🔌 **REST-API**: Integration mit externen Systemen
 
 ### Automation
 - 💾 **Auto-Backup**: Tägliches Datenbank-Backup (00:30 Uhr)
@@ -36,10 +39,11 @@ Ein System zur Essensanmeldung für die Feuerwehr, optimiert für den Raspberry 
 - ⏰ **Cronjobs**: Vollständig konfigurierte automatische Aufgaben
 
 ### Design
-- 🎨 **Modernes Dark-Theme**: CSS-Variablen, Gradients, Card-basiertes Layout
-- 📐 **Touch-optimiert**: Große Buttons, kompakte Tastatur, optimiert für 320px Display
+- 🎨 **Modernes Dark-Theme**: Gradient-Background (#1e1e1e → #2d2d2d), rote Akzente (#dc2626)
+- 📐 **Touch-optimiert**: Große Buttons, virtuelle Tastatur auf Abruf
 - 📱 **Responsive**: Grid-Layout passt sich an alle Bildschirmgrößen an
-- ⚡ **Hover-Effekte**: Smooth Transitions und visuelle Feedbacks
+- ⚡ **Live-Updates**: Menü-Aktualisierung alle 5 Sekunden (Touch + Küche)
+- 🎭 **Status-Popups**: Große, farbcodierte Bestätigungen mit Icons
 
 ## 🚀 Installation
 

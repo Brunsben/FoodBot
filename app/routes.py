@@ -231,6 +231,7 @@ def kitchen():
 @bp.route('/kitchen/data', methods=['GET'])
 def kitchen_data():
     """API-Endpunkt für AJAX-Updates der Küchenseite"""
+    today_menu = Menu.query.filter_by(date=date.today()).first()
     registrations = Registration.query.filter_by(date=date.today()).all()
     users = sorted([r.user for r in registrations], key=lambda u: u.name.lower())
     guest_entry = Guest.query.filter_by(date=date.today()).first()
@@ -245,7 +246,13 @@ def kitchen_data():
         'guest_count': guest_count,
         'total': len(users) + guest_count,
         'menu1_count': menu1_count,
-        'menu2_count': menu2_count
+        'menu2_count': menu2_count,
+        'menu': {
+            'zwei_menues_aktiv': today_menu.zwei_menues_aktiv if today_menu else False,
+            'menu1_name': today_menu.menu1_name if today_menu else None,
+            'menu2_name': today_menu.menu2_name if today_menu else None,
+            'description': today_menu.description if today_menu else None
+        }
     })
 
 @bp.route('/kitchen/print')

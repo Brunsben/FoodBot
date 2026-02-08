@@ -19,13 +19,13 @@
         
         .header {
             background: rgba(0,0,0,0.3);
-            padding: 25px;
+            padding: 10px;
             text-align: center;
             border-bottom: 4px solid #dc2626;
         }
         
         .header h1 {
-            font-size: 3em;
+            font-size: 1.8em;
             font-weight: 800;
             margin: 0;
             text-shadow: 0 2px 10px rgba(220, 38, 38, 0.5);
@@ -35,56 +35,56 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 40px 30px;
+            padding: 15px;
             overflow-y: auto;
         }
         
         .menu-box {
             background: rgba(255,255,255,0.05);
             border: 3px solid rgba(220,38,38,0.4);
-            border-radius: 20px;
-            padding: 35px;
-            margin-bottom: 40px;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
             backdrop-filter: blur(10px);
         }
         
         .menu-title {
-            font-size: 1.6em;
+            font-size: 1em;
             color: #94a3b8;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-align: center;
         }
         
         .menu-display {
-            font-size: 2.5em;
+            font-size: 1.4em;
             font-weight: 700;
             text-align: center;
             color: #fff;
-            line-height: 1.4;
+            line-height: 1.3;
         }
         
         .menu-dual {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 25px;
+            gap: 15px;
         }
         
         .menu-item {
             background: rgba(220,38,38,0.15);
             border: 2px solid #dc2626;
-            border-radius: 15px;
-            padding: 25px;
+            border-radius: 10px;
+            padding: 15px;
             text-align: center;
         }
         
         .menu-item-label {
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #94a3b8;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
         .menu-item-text {
-            font-size: 2em;
+            font-size: 1.3em;
             font-weight: 700;
         }
         
@@ -94,13 +94,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 300px;
+            min-height: 200px;
         }
         
         .scanner-icon {
-            font-size: 10em;
+            font-size: 8em;
             animation: pulse 2s ease-in-out infinite;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         @keyframes pulse {
@@ -109,7 +109,7 @@
         }
         
         .scanner-text {
-            font-size: 2.2em;
+            font-size: 2em;
             font-weight: 600;
             color: #94a3b8;
             text-align: center;
@@ -121,12 +121,12 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            background: rgba(0,0,0,0.95);
+            background: #1a1a1a;
             border-radius: 25px;
             padding: 70px 90px;
             text-align: center;
             z-index: 1000;
-            box-shadow: 0 25px 70px rgba(0,0,0,0.7);
+            box-shadow: 0 25px 70px rgba(0,0,0,0.9);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
@@ -134,9 +134,37 @@
             transform: translate(-50%, -50%) scale(1);
         }
         
-        .status-popup.success { border: 5px solid #10b981; }
-        .status-popup.error { border: 5px solid #dc2626; }
-        .status-popup.warning { border: 5px solid #f59e0b; }
+        .status-popup.success { 
+            border: 5px solid #10b981;
+            background: #1a1a1a;
+        }
+        .status-popup.success .status-icon {
+            color: #10b981;
+        }
+        
+        .status-popup.cancel { 
+            border: 5px solid #ef4444;
+            background: #1a1a1a;
+        }
+        .status-popup.cancel .status-icon {
+            color: #ef4444;
+        }
+        
+        .status-popup.error { 
+            border: 5px solid #dc2626;
+            background: #1a1a1a;
+        }
+        .status-popup.error .status-icon {
+            color: #dc2626;
+        }
+        
+        .status-popup.warning { 
+            border: 5px solid #f59e0b;
+            background: #1a1a1a;
+        }
+        .status-popup.warning .status-icon {
+            color: #f59e0b;
+        }
         
         .status-icon {
             font-size: 7em;
@@ -210,6 +238,23 @@
             box-shadow: 0 6px 20px rgba(220,38,38,0.3);
         }
         
+        .key-btn {
+            padding: 10px;\n            font-size: 1.1em;
+            font-weight: 700;
+            border: 2px solid rgba(220,38,38,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        
+        .key-btn:active {
+            transform: scale(0.95);
+            background: rgba(220,38,38,0.2);
+        }
+        
         @media (max-width: 900px) {
             .header h1 { font-size: 2.5em; }
             .menu-dual { grid-template-columns: 1fr; gap: 20px; }
@@ -256,6 +301,46 @@
         <div class="scanner-area">
             <div class="scanner-icon">📡</div>
             <div class="scanner-text">Karte auflegen</div>
+            
+            <!-- Button für Personalnummer -->
+            <button onclick="showKeyboard()" id="showKeyboardBtn" 
+                    style="margin-top: 30px; padding: 15px 40px; font-size: 1.2em; font-weight: 600;
+                           background: rgba(255,255,255,0.1); border: 2px solid rgba(220,38,38,0.3);
+                           border-radius: 10px; color: #94a3b8; cursor: pointer; transition: all 0.2s;">
+                oder mit Personalnummer
+            </button>
+            
+            <!-- Tastatur (versteckt) -->
+            <div id="keyboardArea" style="display: none; margin-top: 20px; text-align: center; width: 100%; max-width: 400px;">
+                <form onsubmit="submitPersonalNumber(event)" id="personalForm">
+                    <input type="text" id="personalInput" name="personal_number" placeholder="Personalnummer" 
+                           readonly
+                           style="width: 100%; padding: 12px; font-size: 1.3em; border-radius: 8px; 
+                                  background: rgba(255,255,255,0.05); border: 2px solid rgba(220,38,38,0.3); 
+                                  color: #fff; text-align: center; margin-bottom: 10px; cursor: pointer;">
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                        <button type="button" onclick="addDigit('1')" class="key-btn">1</button>
+                        <button type="button" onclick="addDigit('2')" class="key-btn">2</button>
+                        <button type="button" onclick="addDigit('3')" class="key-btn">3</button>
+                        <button type="button" onclick="addDigit('4')" class="key-btn">4</button>
+                        <button type="button" onclick="addDigit('5')" class="key-btn">5</button>
+                        <button type="button" onclick="addDigit('6')" class="key-btn">6</button>
+                        <button type="button" onclick="addDigit('7')" class="key-btn">7</button>
+                        <button type="button" onclick="addDigit('8')" class="key-btn">8</button>
+                        <button type="button" onclick="addDigit('9')" class="key-btn">9</button>
+                        <button type="button" onclick="clearInput()" class="key-btn" style="background: rgba(239,68,68,0.3);">⌫</button>
+                        <button type="button" onclick="addDigit('0')" class="key-btn">0</button>
+                        <button type="submit" class="key-btn" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);">✓</button>
+                    </div>
+                    <button type="button" onclick="hideKeyboard()" 
+                            style="margin-top: 10px; padding: 8px 20px; background: rgba(255,255,255,0.05);
+                                   border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #94a3b8;
+                                   cursor: pointer;">
+                        Abbrechen
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
     
@@ -282,6 +367,7 @@
     <script>
         let currentUserId = null;
         let currentCardId = null;
+        let currentPersonalNumber = null;
         
         function showStatus(type, title, name) {
             const popup = document.getElementById('status-popup');
@@ -311,13 +397,34 @@
         function selectMenu(choice) {
             document.getElementById('choice-overlay').classList.remove('show');
             
-            fetch('/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `user_id=${currentUserId}&card_id=${currentCardId}&menu_choice=${choice}`
-            }).then(r => r.json()).then(data => {
-                showStatus(data.status, data.message, data.name);
-            });
+            // Wenn Personalnummer verwendet wurde, nutze die API
+            if (currentPersonalNumber) {
+                fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        personal_number: currentPersonalNumber, 
+                        menu_choice: choice 
+                    })
+                }).then(r => r.json()).then(data => {
+                    if (data.success) {
+                        const message = `${data.user.name}, du bist angemeldet!`;
+                        showStatus('success', message, data.user.name);
+                        currentPersonalNumber = null;
+                        updateMenu();
+                    }
+                });
+            } else {
+                // RFID/Card-basierte Anmeldung
+                fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `user_id=${currentUserId}&card_id=${currentCardId}&menu_choice=${choice}`
+                }).then(r => r.json()).then(data => {
+                    showStatus(data.status, data.message, data.name);
+                    updateMenu();
+                });
+            }
         }
         
         function pollRFID() {
@@ -339,31 +446,88 @@
         }
         
         function updateMenu() {
-            fetch('/menu/data').then(r => r.json()).then(data => {
+            fetch(`/menu/data?t=${Date.now()}`).then(r => r.json()).then(data => {
                 const display = document.getElementById('menu-display');
                 if (data.zwei_menues_aktiv) {
                     display.innerHTML = `
                         <div class="menu-dual">
                             <div class="menu-item">
                                 <div class="menu-item-label">Menü 1</div>
-                                <div class="menu-item-text">${data.menu1}</div>
+                                <div class="menu-item-text">${data.menu1 || 'Nicht gesetzt'}</div>
                             </div>
                             <div class="menu-item">
                                 <div class="menu-item-label">Menü 2</div>
-                                <div class="menu-item-text">${data.menu2}</div>
+                                <div class="menu-item-text">${data.menu2 || 'Nicht gesetzt'}</div>
                             </div>
                         </div>
                     `;
-                } else if (data.menu) {
-                    display.innerHTML = data.menu;
                 } else {
-                    display.innerHTML = '<span style="color: #64748b;">Kein Menü verfügbar</span>';
+                    display.textContent = data.menu || 'Kein Menü verfügbar';
                 }
+            });
+        }
+        
+        function addDigit(digit) {
+            const input = document.getElementById('personalInput');
+            input.value += digit;
+        }
+        
+        function clearInput() {
+            const input = document.getElementById('personalInput');
+            input.value = input.value.slice(0, -1);
+        }
+        
+        function showKeyboard() {
+            document.getElementById('keyboardArea').style.display = 'block';
+            document.getElementById('showKeyboardBtn').style.display = 'none';
+        }
+        
+        function hideKeyboard() {
+            document.getElementById('keyboardArea').style.display = 'none';
+            document.getElementById('showKeyboardBtn').style.display = 'block';
+            document.getElementById('personalInput').value = '';
+        }
+        
+        function submitPersonalNumber(event) {
+            event.preventDefault();
+            const personalNumber = document.getElementById('personalInput').value;
+            
+            if (!personalNumber) return;
+            
+            fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ personal_number: personalNumber })
+            }).then(r => r.json()).then(data => {
+                if (data.success) {
+                    if (data.need_menu_choice) {
+                        // Menüauswahl anzeigen
+                        currentUserId = data.user_id;
+                        currentPersonalNumber = personalNumber;
+                        document.getElementById('menu1-choice').textContent = data.menu1;
+                        document.getElementById('menu2-choice').textContent = data.menu2;
+                        document.getElementById('choice-overlay').classList.add('show');
+                        hideKeyboard();
+                    } else {
+                        const message = data.registered ? 
+                            `${data.user.name}, du bist angemeldet!` : 
+                            `${data.user.name}, du wurdest abgemeldet.`;
+                        const status = data.registered ? 'success' : 'cancel';
+                        showStatus(status, message, data.user.name);
+                        hideKeyboard();
+                        updateMenu();
+                    }
+                } else {
+                    showStatus('error', data.message || 'Personalnummer nicht gefunden', '');
+                }
+            }).catch(err => {
+                showStatus('error', 'Fehler bei der Anmeldung', '');
             });
         }
         
         setInterval(pollRFID, 500);
         setInterval(updateMenu, 5000);
+        updateMenu(); // Sofort beim Laden ausführen
     </script>
 </body>
 </html>
