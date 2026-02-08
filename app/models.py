@@ -24,6 +24,9 @@ class Menu(db.Model):
     zwei_menues_aktiv = db.Column(db.Boolean, default=False)
     menu1_name = db.Column(db.String(200), nullable=True)  # Erstes Menü
     menu2_name = db.Column(db.String(200), nullable=True)  # Zweites Menü
+    # Anmeldefrist
+    registration_deadline = db.Column(db.String(5), default='19:45')  # Format: "HH:MM"
+    deadline_enabled = db.Column(db.Boolean, default=True)
     
     @property
     def menu1(self):
@@ -34,6 +37,17 @@ class Menu(db.Model):
     def menu2(self):
         """Zweites Menü oder None"""
         return self.menu2_name if self.zwei_menues_aktiv else None
+    
+    def is_registration_open(self):
+        """Prüft ob Anmeldefrist noch offen ist"""
+        if not self.deadline_enabled:
+            return True
+        from datetime import datetime
+        now = datetime.now()
+        if now.date() != self.date:
+            return True  # Andere Tage immer offen
+        deadline_time = datetime.strptime(self.registration_deadline, '%H:%M').time()
+        return now.time() < deadline_time
 
 class Registration(db.Model):
     id = db.Column(db.Integer, primary_key=True)

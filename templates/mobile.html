@@ -195,6 +195,12 @@
             <div class="status not-registered">
                 ✗ Noch nicht angemeldet
             </div>
+            {% if registration_closed %}
+            <div style="background: rgba(239,68,68,0.2); padding: 15px; border-radius: 10px; border: 2px solid #ef4444; margin-bottom: 15px; text-align: center;">
+                <div style="font-weight: 600; margin-bottom: 5px;">⏰ Anmeldefrist überschritten</div>
+                <div style="font-size: 0.9em; color: #fca5a5;">Anmeldeschluss war um {{ menu.registration_deadline }} Uhr</div>
+            </div>
+            {% else %}
             {% if menu.zwei_menues_aktiv %}
                 <form method="post">
                     <input type="hidden" name="action" value="register">
@@ -217,6 +223,7 @@
                     <input type="hidden" name="action" value="register">
                     <button type="submit" class="action-btn btn-register">Zum Essen anmelden</button>
                 </form>
+            {% endif %}
             {% endif %}
             {% endif %}
         </div>
