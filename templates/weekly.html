@@ -27,6 +27,7 @@
         <div class="card add-day-card">
             <h2>➕ Neuen Tag anlegen</h2>
             <form method="post" class="add-day-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-group">
                     <label for="new_date">Datum wählen:</label>
                     <input type="date" 
@@ -60,6 +61,7 @@
                 </div>
                 
                 <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <input type="hidden" name="date" value="{{ day_info.date_iso }}">
                     
                     <!-- Zwei Menüs Checkbox -->

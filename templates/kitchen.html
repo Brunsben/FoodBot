@@ -71,6 +71,7 @@
             <div class="menu-edit-section">
                 <h3>Menü eingeben/ändern</h3>
                 <form method="post" class="menu-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <label>
                         <input type="checkbox" name="zwei_menues_aktiv" value="1" 
                                {% if menu and menu.zwei_menues_aktiv %}checked{% endif %}>

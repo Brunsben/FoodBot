@@ -61,6 +61,7 @@
         
         <div class="action-buttons" style="margin-top: 20px;">
             <form method="post" action="/m/{{ token }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="action" value="unregister">
                 <button type="submit" class="btn btn-danger">
                     Abmelden
@@ -77,6 +78,7 @@
         <div class="action-buttons" style="margin-top: 20px;">
             {% if menu.zwei_menues_aktiv %}
             <form method="post" action="/m/{{ token }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="action" value="register">
                 <input type="hidden" name="menu_choice" value="1">
                 <button type="submit" class="btn btn-primary">
@@ -84,6 +86,7 @@
                 </button>
             </form>
             <form method="post" action="/m/{{ token }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="action" value="register">
                 <input type="hidden" name="menu_choice" value="2">
                 <button type="submit" class="btn btn-primary">
@@ -92,6 +95,7 @@
             </form>
             {% else %}
             <form method="post" action="/m/{{ token }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="action" value="register">
                 <button type="submit" class="btn btn-primary">
                     Jetzt anmelden
