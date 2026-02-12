@@ -32,26 +32,28 @@ def create_app():
     
     db.init_app(app)
     
-    # CSRF-Schutz initialisieren
-    from flask_wtf.csrf import CSRFProtect
-    csrf = CSRFProtect(app)
-    
     with app.app_context():
         db.create_all()
     
+    # Blueprints importieren
     from . import routes
     from . import api
     from .stats import stats_bp
     from .history import history_bp
     from .system import system_bp
     
+    # CSRF-Schutz initialisieren (NACH Blueprint-Import)
+    from flask_wtf.csrf import CSRFProtect
+    csrf = CSRFProtect(app)
+    
+    # API von CSRF ausnehmen (nutzt stattdessen Rate-Limiting)
+    csrf.exempt(api.api)
+    
     # Rate Limiter initialisieren
     from .api import limiter
     limiter.init_app(app)
     
-    # API-Routen von CSRF ausschließen (nutzen stattdessen Rate-Limiting)
-    csrf.exempt(api.api)
-    
+    # Blueprints registrieren
     app.register_blueprint(routes.bp)
     app.register_blueprint(api.api)
     app.register_blueprint(stats_bp)
