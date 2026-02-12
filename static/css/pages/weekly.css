@@ -294,22 +294,34 @@ input[type="checkbox"] {
         align-items: stretch;
     }
     
-    .btn {
+    .header .btn {
         width: 100%;
         text-align: center;
     }
     
-    h1 {
-        font-size: var(--font-size-3xl, 1.75em);
+    .header h1 {
+        font-size: var(--font-size-3xl);
+    }
+    
+    .add-day-form {
+        flex-direction: column;
+    }
+    
+    .add-day-form .form-group {
+        width: 100%;
     }
 }
 
 @media (max-width: 480px) {
     .container {
-        padding: var(--space-md, 15px) var(--space-sm, 10px);
+        padding: var(--space-md) var(--space-sm);
     }
     
     .day-card {
-        padding: var(--space-md, 15px);
+        padding: var(--space-md);
+    }
+    
+    .day-name {
+        font-size: var(--font-size-lg);
     }
 }
