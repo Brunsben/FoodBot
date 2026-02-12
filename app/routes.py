@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from .models import db, User, Menu, Registration
 from .utils import register_user_for_today
 from .rfid import find_user_by_card
-from .auth import login_required, check_auth, LOGIN_TEMPLATE
+from .auth import login_required, check_auth
 from datetime import date
 import csv
 from io import TextIOWrapper, StringIO
@@ -29,8 +29,8 @@ def login():
             next_page = request.args.get('next')
             return redirect(next_page or url_for('main.admin'))
         else:
-            error = 'Falsches Passwort'
-    return render_template_string(LOGIN_TEMPLATE, error=error)
+            error = '❌ Falsches Passwort'
+    return render_template('login.html', error=error)
 
 @bp.route('/logout')
 def logout():
