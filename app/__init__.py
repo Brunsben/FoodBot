@@ -10,14 +10,31 @@ def create_app():
     app = Flask(__name__, static_folder='../static', template_folder='../templates')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///foodbot.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    # Verwende festen Fallback-Key für Entwicklung, damit Sessions über Restarts hinweg funktionieren
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-feuerwehr-2026-change-in-production')
+    
+    # SECRET_KEY ist zwingend erforderlich
+    secret_key = os.environ.get('SECRET_KEY')
+    if not secret_key or secret_key == 'dev-secret-key-change-in-production':
+        raise ValueError("SECRET_KEY muss in .env gesetzt werden! Generiere einen mit: python3 -c 'import secrets; print(secrets.token_hex(32))'")
+    app.config['SECRET_KEY'] = secret_key
     app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 Stunde
+    
+    # Sichere Session-Cookies (Production)
+    app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    
+    # CSRF-Schutz
+    app.config['WTF_CSRF_ENABLED'] = True
+    app.config['WTF_CSRF_TIME_LIMIT'] = None  # Token läuft nicht ab
     
     # Performance: Static file caching
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # 1 Jahr für statische Assets
     
     db.init_app(app)
+    
+    # CSRF-Schutz initialisieren
+    from flask_wtf.csrf import CSRFProtect
+    csrf = CSRFProtect(app)
     
     with app.app_context():
         db.create_all()
@@ -32,11 +49,24 @@ def create_app():
     from .api import limiter
     limiter.init_app(app)
     
+    # API-Routen von CSRF ausschließen (nutzen stattdessen Rate-Limiting)
+    csrf.exempt(api.api)
+    
     app.register_blueprint(routes.bp)
     app.register_blueprint(api.api)
     app.register_blueprint(stats_bp)
     app.register_blueprint(history_bp)
     app.register_blueprint(system_bp)
+    
+    # Error Handler
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return {'error': 'Seite nicht gefunden'}, 404
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        db.session.rollback()
+        return {'error': 'Interner Serverfehler'}, 500
     
     # Performance: Add cache headers for static files
     @app.after_request

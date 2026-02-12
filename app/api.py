@@ -3,6 +3,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from .models import db, User, Menu, Registration, Guest
 from datetime import date, datetime, timedelta
+from sqlalchemy.orm import joinedload
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
@@ -17,12 +18,18 @@ limiter = Limiter(
 @limiter.limit("30 per minute")
 def status():
     """Aktueller Status: Menü, Anmeldungen, Gäste"""
-    today_menu = Menu.query.filter_by(date=date.today()).first()
-    registrations = Registration.query.filter_by(date=date.today()).all()
-    guest_entry = Guest.query.filter_by(date=date.today()).first()
+    today = date.today()
+    today_menu = Menu.query.filter_by(date=today).first()
+    
+    # Performance: N+1 Query-Problem behoben mit joinedload
+    registrations = Registration.query.options(
+        joinedload(Registration.user)
+    ).filter_by(date=today).all()
+    
+    guest_entry = Guest.query.filter_by(date=today).first()
     
     return jsonify({
-        'date': date.today().isoformat(),
+        'date': today.isoformat(),
         'menu': today_menu.description if today_menu else None,
         'registrations': len(registrations),
         'guests': guest_entry.count if guest_entry else 0,
@@ -34,10 +41,10 @@ def status():
 @limiter.limit("10 per minute")
 def register():
     """An-/Abmelden per API (Karten-ID oder Personalnummer)"""
-    data = request.json
-    card_id = data.get('card_id')
-    personal_number = data.get('personal_number')
-    menu_choice = data.get('menu_choice', 1)  # Standard: Menü 1
+    data = request.json or {}
+    card_id = data.get('card_id', '')[:50]  # Input-Validierung
+    personal_number = data.get('personal_number', '')[:20]  # Input-Validierung
+    menu_choice = data.get('menu_choice', 1)
     
     user = None
     if card_id:
@@ -46,13 +53,13 @@ def register():
         user = User.query.filter_by(personal_number=personal_number).first()
     
     if not user:
-        return jsonify({'success': False, 'message': 'User nicht gefunden'}), 404
+        return jsonify({'success': False, 'message': 'Benutzer nicht gefunden'}), 404
     
-    # Prüfe ob zwei Menüs aktiv sind und noch keine Menüwahl getroffen wurde
-    today_menu = Menu.query.filter_by(date=date.today()).first()
+    today = date.today()
+    today_menu = Menu.query.filter_by(date=today).first()
     if today_menu and today_menu.zwei_menues_aktiv:
         # Prüfe ob User schon angemeldet ist
-        existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+        existing_reg = Registration.query.filter_by(user_id=user.id, date=today).first()
         if existing_reg:
             # Abmelden
             db.session.delete(existing_reg)
@@ -75,7 +82,7 @@ def register():
                 })
             
             # Anmeldung mit Menüwahl
-            reg = Registration(user_id=user.id, date=date.today(), menu_choice=menu_choice)
+            reg = Registration(user_id=user.id, date=today, menu_choice=menu_choice)
             db.session.add(reg)
             db.session.commit()
             return jsonify({
@@ -95,13 +102,15 @@ def register():
     })
 
 @api.route('/stats', methods=['GET'])
+@limiter.limit("30 per minute")
 def stats():
     """Statistiken über die letzten 7 Tage"""
-    days = int(request.args.get('days', 7))
+    days = min(int(request.args.get('days', 7)), 90)  # Max 90 Tage
+    today = date.today()
     stats = []
     
     for i in range(days):
-        day = date.today() - timedelta(days=i)
+        day = today - timedelta(days=i)
         regs = Registration.query.filter_by(date=day).count()
         guest_entry = Guest.query.filter_by(date=day).first()
         guests = guest_entry.count if guest_entry else 0
@@ -118,9 +127,21 @@ def stats():
     return jsonify({'stats': stats})
 
 @api.route('/users', methods=['GET'])
+@limiter.limit("30 per minute")
 def users():
-    """Liste aller User"""
-    all_users = User.query.order_by(User.name).all()
+    """Liste aller User (mit Pagination)"""
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 50, type=int), 100)  # Max 100
+    
+    pagination = User.query.order_by(User.name).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
     return jsonify({
-        'users': [{'id': u.id, 'name': u.name, 'personal_number': u.personal_number, 'card_id': u.card_id} for u in all_users]
+        'users': [{'id': u.id, 'name': u.name, 'personal_number': u.personal_number, 'card_id': u.card_id} 
+                  for u in pagination.items],
+        'total': pagination.total,
+        'page': page,
+        'per_page': per_page,
+        'pages': pagination.pages
     })

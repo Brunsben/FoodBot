@@ -18,18 +18,26 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint('main', __name__)
 
+# Rate Limiter für Login
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
+
 # Login-Route
 @bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")  # Max 5 Login-Versuche pro Minute
 def login():
     error = None
     if request.method == 'POST':
         password = request.form.get('password')
         if check_auth(password):
             session['admin_logged_in'] = True
+            session.permanent = True  # Session bleibt 1 Stunde aktiv
             next_page = request.args.get('next')
             return redirect(next_page or url_for('main.admin'))
         else:
-            error = '❌ Falsches Passwort'
+            error = '❌ Authentifizierung fehlgeschlagen'
+            logger.warning(f"Fehlgeschlagener Login-Versuch von {get_remote_address()}")
     return render_template('login.html', error=error)
 
 @bp.route('/logout')
@@ -57,11 +65,17 @@ def index():
         
         # QR-Code-Format: FOODBOT:Personalnummer
         if personal_number and personal_number.startswith('FOODBOT:'):
-            personal_number = personal_number.replace('FOODBOT:', '')
+            personal_number = personal_number.replace('FOODBOT:', '').strip()
         if card_id and card_id.startswith('FOODBOT:'):
-            card_id = card_id.replace('FOODBOT:', '')
+            card_id = card_id.replace('FOODBOT:', '').strip()
             personal_number = card_id
             card_id = None
+        
+        # Input-Validierung
+        if personal_number:
+            personal_number = personal_number[:20]  # Max 20 Zeichen
+        if card_id:
+            card_id = card_id[:50]  # Max 50 Zeichen
         
         if personal_number:
             user = User.query.filter_by(personal_number=personal_number).first()
@@ -104,9 +118,9 @@ def index():
                     status = 'cancel'
                     logger.info(f"Abmeldung: {user.name} ({user.personal_number})")
         else:
-            message = "Unbekannte Personalnummer oder Karte. Bitte im Adminbereich anlegen."
+            message = "Benutzer nicht gefunden"
             status = 'error'
-            logger.warning(f"Fehlversuch Anmeldung: {personal_number or card_id}")
+            logger.warning(f"Fehlversuch Anmeldung von {get_remote_address()}")
     
     return render_template('touch.html', 
                          menu=today_menu, 
