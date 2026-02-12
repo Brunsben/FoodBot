@@ -1,46 +1,106 @@
 #!/bin/bash
-# Installations-Skript für Raspberry Pi
+# Automatisches Installations-Skript für FoodBot auf Raspberry Pi
 
-echo "=== FoodBot Installation ==="
+set -e  # Bei Fehler abbrechen
 
-# Ermittle Projektverzeichnis
+echo "====================================="
+echo "   FoodBot Installation (Raspberry Pi)"
+echo "====================================="
+echo ""
+
+# Ermittle Projektverzeichnis und aktuellen User
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CURRENT_USER=$(whoami)
 
-# Python und Pip prüfen
-if ! command -v python3 &> /dev/null; then
-    echo "Python 3 wird installiert..."
-    sudo apt update
-    sudo apt install -y python3 python3-pip
+cd "$SCRIPT_DIR"
+
+echo "[1/7] System-Pakete installieren..."
+sudo apt update
+sudo apt install -y python3 python3-pip python3-venv git
+
+echo "[2/7] Virtual Environment erstellen..."
+if [ ! -d "venv" ]; then
+    python3 -m venv venv
 fi
 
-# Dependencies installieren
-echo "Installiere Python-Abhängigkeiten..."
-pip3 install -r requirements.txt
+echo "[3/7] Python-Dependencies installieren..."
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 
-# .env-Datei erstellen falls nicht vorhanden
-if [ ! -f .env ]; then
-    echo "Erstelle .env-Datei..."
-    cp .env.example .env
-    
-    # Generiere SECRET_KEY
-    NEW_SECRET=$(python3 -c 'import os; print(os.urandom(24).hex())')
-    sed -i "s/dev-secret-key-change-in-production/$NEW_SECRET/" .env
-    
-    echo "Bitte bearbeite die .env-Datei und setze ein sicheres ADMIN_PASSWORD!"
-fi
+echo "[4/7] Logs-Verzeichnis erstellen..."
+mkdir -p logs
 
-# Cronjob für nächtliches Reset einrichten
-echo "Möchtest du einen Cronjob für das nächtliche Reset einrichten? (j/n)"
-read -r response
-if [[ "$response" =~ ^([jJ][aA]|[jJ])$ ]]; then
-    SCRIPT_PATH="$SCRIPT_DIR"
-    (crontab -l 2>/dev/null; echo "0 3 * * * cd $SCRIPT_PATH && python3 clear_registrations.py >> /var/log/foodbot.log 2>&1") | crontab -
-    echo "Cronjob wurde eingerichtet (täglich um 3 Uhr)"
-fi
+echo "[5/7] Gunicorn-Config anpassen..."
+cat > app/gunicorn_config.py << 'EOF'
+"""
+Gunicorn Konfiguration für Raspberry Pi
+"""
+import os
+
+# Server
+bind = "0.0.0.0:5001"
+workers = 2
+worker_class = "sync"
+timeout = 30
+keepalive = 2
+
+# Logging - automatische Pfaderkennung
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+accesslog = os.path.join(base_dir, "logs", "access.log")
+errorlog = os.path.join(base_dir, "logs", "error.log")
+loglevel = "info"
+
+# Process
+proc_name = "foodbot"
+EOF
+
+echo "[6/7] Systemd Service einrichten..."
+cat > /tmp/foodbot.service << EOF
+[Unit]
+Description=FoodBot Essensanmeldung
+After=network.target
+
+[Service]
+Type=simple
+User=$CURRENT_USER
+WorkingDirectory=$SCRIPT_DIR
+Environment="PATH=$SCRIPT_DIR/venv/bin:/usr/bin:/usr/local/bin"
+ExecStart=$SCRIPT_DIR/venv/bin/gunicorn -c $SCRIPT_DIR/app/gunicorn_config.py wsgi:app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo cp /tmp/foodbot.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable foodbot
+
+echo "[7/7] Service starten..."
+sudo systemctl start foodbot
 
 echo ""
-echo "=== Installation abgeschlossen ==="
-echo "Starte die App mit: python3 app/main.py"
-echo "Touch-Display: http://localhost:5000/"
-echo "Küche: http://localhost:5000/kitchen"
-echo "Admin: http://localhost:5000/admin"
+echo "====================================="
+echo "   Installation erfolgreich!"
+echo "====================================="
+echo ""
+echo "FoodBot läuft jetzt auf:"
+echo "  - http://$(hostname -I | awk '{print $1}'):5001"
+echo "  - http://localhost:5001"
+echo ""
+echo "Verfügbare Seiten:"
+echo "  /          - Touch-Display (RFID/Personalnummer)"
+echo "  /admin     - Admin-Bereich (Passwort: feuerwehr2026)"
+echo "  /kitchen   - Küchenansicht"
+echo "  /mobile    - Mobile QR-Anmeldung"
+echo ""
+echo "Nützliche Befehle:"
+echo "  sudo systemctl status foodbot   - Status prüfen"
+echo "  sudo systemctl restart foodbot  - Neu starten"
+echo "  sudo journalctl -u foodbot -f  - Logs anzeigen"
+echo ""
+echo "Update von GitHub:"
+echo "  cd $SCRIPT_DIR && git pull && sudo systemctl restart foodbot"
+echo ""
