@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Wochenplanung - FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/weekly.css') }}">
@@ -119,6 +119,6 @@
         </datalist>
     </div>
     
-    <script src="{{ url_for('static', filename='js/pages/weekly.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/pages/weekly.js') }}" defer></script>
 </body>
 </html>

@@ -82,6 +82,9 @@ body {
     background: linear-gradient(135deg, var(--bg-base) 0%, var(--bg-elevated) 100%);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Performance: Optimize rendering */
+    text-rendering: optimizeSpeed;
+    font-display: swap;
 }
 
 h1, h2, h3, h4, h5, h6 {
