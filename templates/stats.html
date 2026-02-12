@@ -5,23 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Statistiken - FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/stats.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
 </head>
 <body>
-    <div class="container">
-        <h1>📊 Statistiken</h1>
+    <div class="stats-container">
+        <div class="page-header">
+            <h1>📊 Statistiken</h1>
+            <p class="page-subtitle">Übersicht aller Dienste und Teilnehmerzahlen</p>
+        </div>
         
-        <div class="summary">
+        <div class="card summary-card">
             <h2>Zusammenfassung</h2>
-            <p><b>Durchschnittliche Teilnehmer (letzte 14 Dienste):</b> {{ average }}</p>
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <span class="stat-label">Durchschnittliche Teilnehmer (letzte 14 Dienste)</span>
+                    <span class="stat-value">{{ average }}</span>
+                </div>
+            </div>
             <div class="button-group">
-                <a href="/stats/export/csv" class="export-btn">📥 Als CSV exportieren (alle Dienste)</a>
-                <a href="/admin" class="export-btn btn-secondary">← Zurück zum Admin</a>
+                <a href="/stats/export/csv" class="btn btn-primary">📥 Als CSV exportieren (alle Dienste)</a>
+                <a href="/admin" class="btn btn-secondary">← Zurück zum Admin</a>
             </div>
         </div>
         
-        <h2>Letzte 14 Dienste mit Menü</h2>
-        <table>
+        <div class="card table-card">
+            <h2>Letzte 14 Dienste mit Menü</h2>
+            <div class="table-responsive">
+                <table class="data-table">
             <thead>
                 <tr>
                     <th>Datum</th>
@@ -52,7 +65,9 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
+                </table>
+            </div>
+        </div>
     </div>
     
     <script src="{{ url_for('static', filename='js/pages/stats.js') }}" defer></script>
