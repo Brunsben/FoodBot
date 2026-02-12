@@ -339,3 +339,318 @@ function setCookie(name, value, days = 365) {
     const expires = `expires=${date.toUTCString()}`;
     document.cookie = `${name}=${value};${expires};path=/`;
 }
+
+/* ===================================
+   DOM Manipulation Helpers
+   =================================== */
+
+/**
+ * Create element with attributes and content
+ * @param {string} tag - HTML tag name
+ * @param {Object} attributes - Element attributes
+ * @param {string|HTMLElement|Array} content - Element content
+ * @returns {HTMLElement} Created element
+ */
+function createElement(tag, attributes = {}, content = null) {
+    const element = document.createElement(tag);
+    
+    Object.entries(attributes).forEach(([key, value]) => {
+        if (key === 'class') {
+            element.className = value;
+        } else if (key === 'style' && typeof value === 'object') {
+            Object.assign(element.style, value);
+        } else if (key.startsWith('on') && typeof value === 'function') {
+            element.addEventListener(key.substring(2).toLowerCase(), value);
+        } else {
+            element.setAttribute(key, value);
+        }
+    });
+    
+    if (content) {
+        if (Array.isArray(content)) {
+            content.forEach(child => {
+                if (typeof child === 'string') {
+                    element.appendChild(document.createTextNode(child));
+                } else {
+                    element.appendChild(child);
+                }
+            });
+        } else if (typeof content === 'string') {
+            element.textContent = content;
+        } else {
+            element.appendChild(content);
+        }
+    }
+    
+    return element;
+}
+
+/**
+ * Toggle class on element
+ * @param {HTMLElement|string} element - Element or selector
+ * @param {string} className - Class name to toggle
+ */
+function toggleClass(element, className) {
+    const el = typeof element === 'string' ? document.querySelector(element) : element;
+    if (el) el.classList.toggle(className);
+}
+
+/**
+ * Add multiple event listeners
+ * @param {HTMLElement|string} element - Element or selector
+ * @param {string} events - Space-separated event names
+ * @param {Function} handler - Event handler
+ */
+function onMultiple(element, events, handler) {
+    const el = typeof element === 'string' ? document.querySelector(element) : element;
+    if (!el) return;
+    
+    events.split(' ').forEach(event => {
+        el.addEventListener(event, handler);
+    });
+}
+
+/* ===================================
+   Form Helpers
+   =================================== */
+
+/**
+ * Get form data as object
+ * @param {HTMLFormElement|string} form - Form element or selector
+ * @returns {Object} Form data
+ */
+function getFormData(form) {
+    const formEl = typeof form === 'string' ? document.querySelector(form) : form;
+    if (!formEl) return {};
+    
+    const formData = new FormData(formEl);
+    const data = {};
+    
+    formData.forEach((value, key) => {
+        if (data[key]) {
+            if (!Array.isArray(data[key])) {
+                data[key] = [data[key]];
+            }
+            data[key].push(value);
+        } else {
+            data[key] = value;
+        }
+    });
+    
+    return data;
+}
+
+/**
+ * Validate form fields
+ * @param {HTMLFormElement|string} form - Form element or selector
+ * @returns {Object} Validation result {valid: boolean, errors: Object}
+ */
+function validateForm(form) {
+    const formEl = typeof form === 'string' ? document.querySelector(form) : form;
+    if (!formEl) return { valid: false, errors: {} };
+    
+    const errors = {};
+    const inputs = formEl.querySelectorAll('input[required], textarea[required], select[required]');
+    
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            errors[input.name] = 'Dieses Feld ist erforderlich';
+        } else if (input.type === 'email' && !isValidEmail(input.value)) {
+            errors[input.name] = 'Ungültige E-Mail-Adresse';
+        } else if (input.pattern) {
+            const regex = new RegExp(input.pattern);
+            if (!regex.test(input.value)) {
+                errors[input.name] = input.title || 'Ungültiges Format';
+            }
+        }
+    });
+    
+    return {
+        valid: Object.keys(errors).length === 0,
+        errors
+    };
+}
+
+/**
+ * Show validation errors on form
+ * @param {HTMLFormElement|string} form - Form element or selector
+ * @param {Object} errors - Error object {fieldName: errorMessage}
+ */
+function showFormErrors(form, errors) {
+    const formEl = typeof form === 'string' ? document.querySelector(form) : form;
+    if (!formEl) return;
+    
+    // Clear previous errors
+    formEl.querySelectorAll('.error-message').forEach(el => el.remove());
+    formEl.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+    
+    Object.entries(errors).forEach(([field, message]) => {
+        const input = formEl.querySelector(`[name="${field}"]`);
+        if (input) {
+            input.classList.add('error');
+            const errorEl = createElement('div', { class: 'error-message' }, message);
+            input.parentElement.appendChild(errorEl);
+        }
+    });
+}
+
+/* ===================================
+   Data Fetching Helpers
+   =================================== */
+
+/**
+ * Fetch data with automatic retry and error handling
+ * @param {string} url - API endpoint
+ * @param {Object} options - Fetch options
+ * @param {number} retries - Number of retries (default: 2)
+ * @returns {Promise<any>} Response data
+ */
+async function fetchWithRetry(url, options = {}, retries = 2) {
+    for (let i = 0; i <= retries; i++) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            if (i === retries) {
+                console.error(`Fetch failed after ${retries + 1} attempts:`, error);
+                throw error;
+            }
+            // Wait before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        }
+    }
+}
+
+/**
+ * POST request helper
+ * @param {string} url - API endpoint
+ * @param {Object} data - Data to send
+ * @returns {Promise<any>} Response data
+ */
+async function post(url, data) {
+    return apiRequest(url, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+}
+
+/**
+ * PUT request helper
+ * @param {string} url - API endpoint
+ * @param {Object} data - Data to send
+ * @returns {Promise<any>} Response data
+ */
+async function put(url, data) {
+    return apiRequest(url, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+    });
+}
+
+/**
+ * DELETE request helper
+ * @param {string} url - API endpoint
+ * @returns {Promise<any>} Response data
+ */
+async function del(url) {
+    return apiRequest(url, {
+        method: 'DELETE'
+    });
+}
+
+/* ===================================
+   Storage Helpers
+   =================================== */
+
+/**
+ * Save to localStorage with JSON serialization
+ * @param {string} key - Storage key
+ * @param {any} value - Value to store
+ */
+function saveToStorage(key, value) {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+        console.error('Storage save failed:', error);
+    }
+}
+
+/**
+ * Load from localStorage with JSON deserialization
+ * @param {string} key - Storage key
+ * @param {any} defaultValue - Default value if not found
+ * @returns {any} Stored value or default
+ */
+function loadFromStorage(key, defaultValue = null) {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+        console.error('Storage load failed:', error);
+        return defaultValue;
+    }
+}
+
+/**
+ * Remove from localStorage
+ * @param {string} key - Storage key
+ */
+function removeFromStorage(key) {
+    try {
+        localStorage.removeItem(key);
+    } catch (error) {
+        console.error('Storage remove failed:', error);
+    }
+}
+
+/* ===================================
+   URL & Navigation Helpers
+   =================================== */
+
+/**
+ * Build URL with query parameters
+ * @param {string} baseUrl - Base URL
+ * @param {Object} params - Query parameters
+ * @returns {string} Full URL with parameters
+ */
+function buildUrl(baseUrl, params = {}) {
+    const url = new URL(baseUrl, window.location.origin);
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+            url.searchParams.append(key, value);
+        }
+    });
+    return url.toString();
+}
+
+/**
+ * Navigate to URL with optional delay
+ * @param {string} url - Target URL
+ * @param {number} delay - Delay in milliseconds
+ */
+function navigateTo(url, delay = 0) {
+    if (delay > 0) {
+        setTimeout(() => window.location.href = url, delay);
+    } else {
+        window.location.href = url;
+    }
+}
+
+/**
+ * Reload page with cache busting
+ * @param {boolean} forceReload - Force reload from server
+ */
+function reloadPage(forceReload = true) {
+    window.location.reload(forceReload);
+}

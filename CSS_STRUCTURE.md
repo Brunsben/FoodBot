@@ -12,9 +12,11 @@ static/
 │   ├── base.css           # Grundlegende Styles, CSS-Variablen, Reset
 │   ├── components.css     # Wiederverwendbare UI-Komponenten
 │   ├── layouts.css        # Layout-Systeme und Grid
+│   ├── shared.css         # Gemeinsame seitenübergreifende Elemente (NEU)
 │   └── pages/
 │       └── touch.css      # Touch-Screen spezifische Styles
 ├── js/
+│   ├── utils.js           # Gemeinsame Utility-Funktionen (ERWEITERT)
 │   └── pages/
 │       └── touch.js       # Touch-Screen JavaScript-Logik
 └── modern-design.css      # (veraltet, wird nicht mehr verwendet)
@@ -55,6 +57,18 @@ static/
   - `@media (min-width: 768px)`: Tablet
   - `@media (min-width: 1024px)`: Desktop
 
+### shared.css (NEU)
+**Zweck:** Gemeinsame seitenübergreifende Komponenten
+- **Header Variations**: `.header`, `.header-actions`
+- **Form Elements**: `.form-group`, `.form-row`, Input-Styles
+- **Tables**: `.data-table` mit responsivem Verhalten
+- **Action Buttons**: `.action-btn` (edit, delete, qr)
+- **Empty States**: `.empty-state`, `.empty-state-icon`
+- **Loading States**: `.skeleton` mit Animation
+- **Messages**: `.message-success`, `.message-error`, `.message-warning`, `.message-info`
+- **Stats Display**: `.stats-grid`, `.stat-card`
+- **Responsive Utilities**: Mobile-optimierte Tabellen und Forms
+
 ### pages/touch.css
 **Zweck:** Touch-Screen spezifische Styles
 - Seitenstruktur: `body`, `.page-header`, `.main-content`
@@ -91,6 +105,17 @@ static/
   - `addDigit(digit)`, `deleteDigit()`: Numpad-Eingabe
   - `handleSubmit(e)`: Verarbeitet Personalnummer-Eingabe
 
+### utils.js (ERWEITERT)
+**Zweck:** Gemeinsame Utility-Funktionen
+- **Date/Time**: `formatDate()`, `formatWeekday()`
+- **UI**: `showToast()`, `confirmDialog()`, `showLoadingSpinner()`, `hideLoadingSpinner()`
+- **API**: `apiRequest()`, `fetchWithRetry()`, `post()`, `put()`, `del()`
+- **DOM**: `createElement()`, `toggleClass()`, `onMultiple()`
+- **Forms**: `getFormData()`, `validateForm()`, `showFormErrors()`
+- **Storage**: `saveToStorage()`, `loadFromStorage()`, `removeFromStorage()`
+- **URL**: `buildUrl()`, `navigateTo()`, `reloadPage()`, `getQueryParams()`
+- **Utilities**: `debounce()`, `copyToClipboard()`, `escapeHtml()`, `formatNumber()`, `isValidEmail()`, `getCookie()`, `setCookie()`
+
 ## Template-Integration
 
 Templates müssen folgende Links enthalten:
@@ -100,10 +125,12 @@ Templates müssen folgende Links enthalten:
     <link rel="stylesheet" href="/static/css/base.css">
     <link rel="stylesheet" href="/static/css/components.css">
     <link rel="stylesheet" href="/static/css/layouts.css">
+    <link rel="stylesheet" href="/static/css/shared.css">
     <link rel="stylesheet" href="/static/css/pages/[pagename].css">
 </head>
 <body>
     <!-- Content -->
+    <script src="/static/js/utils.js"></script>
     <script src="/static/js/pages/[pagename].js"></script>
 </body>
 ```
@@ -112,10 +139,38 @@ Templates müssen folgende Links enthalten:
 
 1. **Wartbarkeit**: Styles und Scripts sind logisch getrennt und leicht zu finden
 2. **Wiederverwendbarkeit**: Komponenten können auf mehreren Seiten genutzt werden
-3. **Responsive Design**: Klare Breakpoints für verschiedene Geräte
-4. **Performance**: Browser kann CSS/JS-Dateien cachen
-5. **Entwicklung**: Änderungen an einer Komponente wirken sich auf alle Seiten aus
-6. **Übersichtlichkeit**: Templates sind deutlich schlanker und fokussierter
+3. **Deduplizierung**: Gemeinsame Elemente in shared.css und utils.js (NEU)
+4. **Responsive Design**: Klare Breakpoints für verschiedene Geräte
+5. **Performance**: Browser kann CSS/JS-Dateien cachen
+6. **Entwicklung**: Änderungen an einer Komponente wirken sich auf alle Seiten aus
+7. **Übersichtlichkeit**: Templates sind deutlich schlanker und fokussierter
+
+## Deduplizierung (NEU)
+
+### Was wurde zusammengelegt:
+
+**CSS (shared.css):**
+- Header-Styles (waren in 5+ Templates dupliziert)
+- Form-Elemente und Input-Styles (waren in 4+ Templates dupliziert)
+- Tabellen-Styles mit responsivem Verhalten (waren in 3+ Templates dupliziert)
+- Action-Buttons (Edit, Delete, QR)
+- Message/Alert-Komponenten
+- Loading States und Skeleton Screens
+- Stats-Display-Komponenten
+
+**JavaScript (utils.js erweitert):**
+- DOM-Manipulation: `createElement()`, `toggleClass()`, `onMultiple()`
+- Form-Handling: `getFormData()`, `validateForm()`, `showFormErrors()`
+- API-Requests: `fetchWithRetry()`, `post()`, `put()`, `del()`
+- Storage-Helpers: `saveToStorage()`, `loadFromStorage()`
+- URL-Building: `buildUrl()`, `navigateTo()`, `getQueryParams()`
+
+### Migration Guide:
+
+Bestehende Templates sollten aktualisiert werden:
+1. `<link rel="stylesheet" href="/static/css/shared.css">` hinzufügen
+2. Duplizierte Header/Form/Table-Styles aus page-CSS entfernen
+3. Gemeinsame Funktionen aus page-JS entfernen und utils.js nutzen
 
 ## CSS-Variablen verwenden
 
