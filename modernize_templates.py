@@ -1,4 +1,9 @@
-<!DOCTYPE html>
+#!/usr/bin/env python3
+"""
+Script to modernize all FoodBot templates with the new design system
+"""
+
+MODERN_TOUCH_TEMPLATE = """<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -486,3 +491,10 @@
     </script>
 </body>
 </html>
+"""
+
+# Write the new template
+with open('templates/touch.html', 'w', encoding='utf-8') as f:
+    f.write(MODERN_TOUCH_TEMPLATE)
+
+print("✓ touch.html modernisiert")

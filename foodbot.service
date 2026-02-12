@@ -4,11 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=%USER%
-WorkingDirectory=%INSTALL_DIR%
-Environment="PATH=/usr/bin:/usr/local/bin"
-EnvironmentFile=%INSTALL_DIR%/.env
-ExecStart=/usr/bin/python3 %INSTALL_DIR%/app/main.py
+User=brunsben
+WorkingDirectory=/home/brunsben/FoodBot
+Environment="PATH=/home/brunsben/FoodBot/venv/bin:/usr/bin:/usr/local/bin"
+ExecStart=/home/brunsben/FoodBot/venv/bin/gunicorn -c /home/brunsben/FoodBot/app/gunicorn_config.py wsgi:app
 Restart=always
 RestartSec=10
 
