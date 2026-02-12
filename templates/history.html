@@ -4,19 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Essenshistorie - FoodBot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/history.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
 </head>
 <body>
-    <div class="container">
-        <h1>Essenshistorie</h1>
+    <div class="history-container">
+        <div class="page-header">
+            <h1>📊 Essenshistorie</h1>
+            <p class="page-subtitle">Übersicht aller Anmeldungen und Top-Esser</p>
+        </div>
+        
         <div class="nav-buttons">
-            <a href="/admin" class="nav-btn">🔧 Zurück zum Admin</a>
-            <a href="/stats" class="nav-btn">📈 Statistiken</a>
+            <a href="/admin" class="btn btn-secondary">🔧 Zurück zum Admin</a>
+            <a href="/stats" class="btn btn-primary">📈 Statistiken</a>
         </div>
 
-        <div class="section">
-            <h2>Top 10 Esser (90 Tage)</h2>
-            <table>
+        <div class="card">
+            <h2>🏆 Top 10 Esser (90 Tage)</h2>
+            <div class="table-responsive">
+                <table class="data-table top-table">
                 <tr>
                     <th>Rang</th>
                     <th>Name</th>
@@ -40,12 +49,14 @@
                     <td>{{ user_stat.last_date.strftime('%d.%m.%Y') if user_stat.last_date else '-' }}</td>
                 </tr>
                 {% endfor %}
-            </table>
+                </table>
+            </div>
         </div>
 
-        <div class="section">
-            <h2>Alle Kameraden ({{ total_users }} gesamt)</h2>
-            <table>
+        <div class="card">
+            <h2>👥 Alle Kameraden ({{ total_users }} gesamt)</h2>
+            <div class="table-responsive">
+                <table class="data-table">
                 <tr>
                     <th>Name</th>
                     <th>90 Tage</th>
@@ -64,7 +75,8 @@
                     <td><a href="/history/user/{{ user_stat.user.id }}">📅 Details</a></td>
                 </tr>
                 {% endfor %}
-            </table>
+                </table>
+            </div>
         </div>
     </div>
 </body>
