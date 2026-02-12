@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FoodBot{% endblock %}</title>
+    
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+    
+    <!-- Page-specific Styles -->
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    {% block body %}
+    <header class="header">
+        <h1>{% block header_title %}FoodBot{% endblock %}</h1>
+        {% block header_actions %}{% endblock %}
+    </header>
+    
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    {% endblock %}
+    
+    <!-- Base Scripts -->
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    
+    <!-- Page-specific Scripts -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>
