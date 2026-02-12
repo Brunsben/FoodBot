@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Wochenplanung - FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/weekly.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
 </head>
 <body>
     <div class="container">
@@ -15,8 +18,34 @@
         </div>
         
         {% if message %}
-        <div style="background: var(--success); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <div class="message message-success">
             {{ message }}
+        </div>
+        {% endif %}
+        
+        <!-- Neuen Tag hinzufügen -->
+        <div class="card add-day-card">
+            <h2>➕ Neuen Tag anlegen</h2>
+            <form method="post" class="add-day-form">
+                <div class="form-group">
+                    <label for="new_date">Datum wählen:</label>
+                    <input type="date" 
+                           id="new_date" 
+                           name="new_date" 
+                           required
+                           min="{{ today }}"
+                           class="date-input">
+                </div>
+                <button type="submit" name="add_day" value="1" class="btn btn-primary">
+                    ➕ Tag hinzufügen
+                </button>
+            </form>
+        </div>
+        
+        {% if not days %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <p>Noch keine Tage geplant. Füge einen Tag hinzu, um zu starten.</p>
         </div>
         {% endif %}
         
@@ -96,7 +125,16 @@
                         💾 Speichern
                     </button>
                     
-                    {% if day_info.menu %}
+                    <!-- Löschen Button -->
+                    <button type="submit" 
+                            name="delete_day" 
+                            value="1" 
+                            class="btn btn-delete"
+                            onclick="return confirm('Tag {{ day_info.date_str }} wirklich löschen? Alle Anmeldungen gehen verloren!')">
+                        🗑️ Tag löschen
+                    </button>
+                    
+                    {% if day_info.menu and day_info.menu.description %}
                     <div class="current-menu">
                         <strong>Aktuell:</strong><br>
                         {% if day_info.menu.zwei_menues_aktiv %}

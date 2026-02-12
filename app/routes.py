@@ -490,79 +490,116 @@ def admin_weekly():
     message = None
     
     if request.method == 'POST':
-        date_str = request.form.get('date')
-        if date_str:
-            menu_date = date.fromisoformat(date_str)
-            zwei_menues = request.form.get('zwei_menues_aktiv') == '1'
-            deadline_enabled = request.form.get('deadline_enabled') == '1'
-            registration_deadline = request.form.get('registration_deadline', '19:45')
-            
-            menu = Menu.query.filter_by(date=menu_date).first()
-            
-            if zwei_menues:
-                menu1_text = request.form.get('menu1_text', '').strip()
-                menu2_text = request.form.get('menu2_text', '').strip()
-                
-                if menu:
-                    menu.zwei_menues_aktiv = True
-                    menu.menu1_name = menu1_text
-                    menu.menu2_name = menu2_text
-                    menu.description = f"{menu1_text} / {menu2_text}"
-                    menu.deadline_enabled = deadline_enabled
-                    menu.registration_deadline = registration_deadline
-                else:
+        # Neuen Tag anlegen
+        if 'add_day' in request.form:
+            new_date_str = request.form.get('new_date')
+            if new_date_str:
+                new_date = date.fromisoformat(new_date_str)
+                # Prüfen ob bereits Menü existiert
+                existing_menu = Menu.query.filter_by(date=new_date).first()
+                if not existing_menu:
+                    # Leeres Menü anlegen
                     menu = Menu(
-                        date=menu_date,
-                        description=f"{menu1_text} / {menu2_text}",
-                        zwei_menues_aktiv=True,
-                        menu1_name=menu1_text,
-                        menu2_name=menu2_text,
-                        deadline_enabled=deadline_enabled,
-                        registration_deadline=registration_deadline
-                    )
-                    db.session.add(menu)
-            else:
-                menu_text = request.form.get('menu_text', '').strip()
-                
-                if menu:
-                    menu.zwei_menues_aktiv = False
-                    menu.description = menu_text
-                    menu.menu1_name = None
-                    menu.menu2_name = None
-                    menu.deadline_enabled = deadline_enabled
-                    menu.registration_deadline = registration_deadline
-                else:
-                    menu = Menu(
-                        date=menu_date,
-                        description=menu_text,
+                        date=new_date,
+                        description='',
                         zwei_menues_aktiv=False,
-                        deadline_enabled=deadline_enabled,
-                        registration_deadline=registration_deadline
+                        deadline_enabled=True,
+                        registration_deadline='19:45'
                     )
                     db.session.add(menu)
-            
-            db.session.commit()
-            message = f"Menü für {menu_date.strftime('%d.%m.%Y')} gespeichert."
+                    db.session.commit()
+                    message = f"Tag {new_date.strftime('%d.%m.%Y')} hinzugefügt."
+                else:
+                    message = f"Menü für {new_date.strftime('%d.%m.%Y')} existiert bereits."
+        
+        # Tag löschen
+        elif 'delete_day' in request.form:
+            date_str = request.form.get('date')
+            if date_str:
+                menu_date = date.fromisoformat(date_str)
+                menu = Menu.query.filter_by(date=menu_date).first()
+                if menu:
+                    # Registrierungen für diesen Tag auch löschen
+                    Registration.query.filter_by(date=menu_date).delete()
+                    db.session.delete(menu)
+                    db.session.commit()
+                    message = f"Tag {menu_date.strftime('%d.%m.%Y')} gelöscht."
+        
+        # Tag speichern/bearbeiten
+        elif 'save_day' in request.form:
+            date_str = request.form.get('date')
+            if date_str:
+                menu_date = date.fromisoformat(date_str)
+                zwei_menues = request.form.get('zwei_menues_aktiv') == '1'
+                deadline_enabled = request.form.get('deadline_enabled') == '1'
+                registration_deadline = request.form.get('registration_deadline', '19:45')
+                
+                menu = Menu.query.filter_by(date=menu_date).first()
+                
+                if zwei_menues:
+                    menu1_text = request.form.get('menu1_text', '').strip()
+                    menu2_text = request.form.get('menu2_text', '').strip()
+                    
+                    if menu:
+                        menu.zwei_menues_aktiv = True
+                        menu.menu1_name = menu1_text
+                        menu.menu2_name = menu2_text
+                        menu.description = f"{menu1_text} / {menu2_text}"
+                        menu.deadline_enabled = deadline_enabled
+                        menu.registration_deadline = registration_deadline
+                    else:
+                        menu = Menu(
+                            date=menu_date,
+                            description=f"{menu1_text} / {menu2_text}",
+                            zwei_menues_aktiv=True,
+                            menu1_name=menu1_text,
+                            menu2_name=menu2_text,
+                            deadline_enabled=deadline_enabled,
+                            registration_deadline=registration_deadline
+                        )
+                        db.session.add(menu)
+                else:
+                    menu_text = request.form.get('menu_text', '').strip()
+                    
+                    if menu:
+                        menu.zwei_menues_aktiv = False
+                        menu.description = menu_text
+                        menu.menu1_name = None
+                        menu.menu2_name = None
+                        menu.deadline_enabled = deadline_enabled
+                        menu.registration_deadline = registration_deadline
+                    else:
+                        menu = Menu(
+                            date=menu_date,
+                            description=menu_text,
+                            zwei_menues_aktiv=False,
+                            deadline_enabled=deadline_enabled,
+                            registration_deadline=registration_deadline
+                        )
+                        db.session.add(menu)
+                
+                db.session.commit()
+                message = f"Menü für {menu_date.strftime('%d.%m.%Y')} gespeichert."
     
-    # Nächsten 14 Tage generieren
+    # Alle zukünftigen und heutigen Menüs laden (sortiert nach Datum)
     today = date.today()
-    days = []
+    menus = Menu.query.filter(Menu.date >= today).order_by(Menu.date).all()
+    
     weekdays_de = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
     
-    for i in range(14):
-        day_date = today + timedelta(days=i)
-        menu = Menu.query.filter_by(date=day_date).first()
+    days = []
+    for menu in menus:
         days.append({
-            'date_iso': day_date.isoformat(),
-            'date_str': day_date.strftime('%d.%m.%Y'),
-            'weekday': weekdays_de[day_date.weekday()],
-            'is_today': i == 0,
+            'date_iso': menu.date.isoformat(),
+            'date_str': menu.date.strftime('%d.%m.%Y'),
+            'weekday': weekdays_de[menu.date.weekday()],
+            'is_today': menu.date == today,
             'menu': menu
         })
     
     preset_menus = PresetMenu.get_all_ordered()
     
-    return render_template('weekly.html', days=days, preset_menus=preset_menus, message=message)
+    return render_template('weekly.html', days=days, preset_menus=preset_menus, message=message, today=today.isoformat())
 
 # API-Route für das Touch-Display, um den letzten Scan abzufragen
 @bp.route('/rfid_scan')
