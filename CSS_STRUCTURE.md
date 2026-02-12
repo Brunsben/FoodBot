@@ -1,0 +1,145 @@
+# CSS/JS Strukturdokumentation
+
+## Überblick
+
+Die CSS- und JavaScript-Dateien sind nun modular organisiert, um Wartbarkeit und responsive Design zu verbessern.
+
+## Verzeichnisstruktur
+
+```
+static/
+├── css/
+│   ├── base.css           # Grundlegende Styles, CSS-Variablen, Reset
+│   ├── components.css     # Wiederverwendbare UI-Komponenten
+│   ├── layouts.css        # Layout-Systeme und Grid
+│   └── pages/
+│       └── touch.css      # Touch-Screen spezifische Styles
+├── js/
+│   └── pages/
+│       └── touch.js       # Touch-Screen JavaScript-Logik
+└── modern-design.css      # (veraltet, wird nicht mehr verwendet)
+```
+
+## CSS-Struktur
+
+### base.css
+**Zweck:** Grundlegende Styles für alle Seiten
+- CSS Reset (`*, box-sizing`)
+- CSS Custom Properties (Variablen):
+  - Farben: `--primary`, `--accent`, `--bg-*`, `--text-*`
+  - Abstände: `--space-xs` bis `--space-2xl`
+  - Typografie: `--font-size-xs` bis `--font-size-4xl`
+  - Border Radius: `--radius-sm` bis `--radius-full`
+  - Schatten: `--shadow-sm` bis `--shadow-xl`
+  - Übergänge: `--transition-fast`, `--transition-base`
+- Utility-Klassen: `.text-*`, `.mt-*`, `.mb-*`, `.p-*`
+- Keyframe-Animationen: `fadeIn`, `pulse`, `slideIn`
+
+### components.css
+**Zweck:** Wiederverwendbare UI-Komponenten
+- Buttons: `.btn`, `.btn-primary`, `.btn-ghost`, `.btn-sm`, `.btn-lg`
+- Cards: `.card`, `.card-header`, `.card-title`, `.card-body`
+- Inputs: `.input`
+- Badges: `.badge`, `.badge-success`, `.badge-warning`, `.badge-error`
+- Modals: `.modal-overlay`, `.modal-content`
+- Status Popup: `.status-popup`, `.status-icon`, `.status-title`, `.status-subtitle`
+
+### layouts.css
+**Zweck:** Layout-Systeme und responsive Strukturen
+- Container: `.container`, `.container-fluid`
+- Page-Struktur: `.page-wrapper`, `.page-header`, `.page-title`, `.main-content`
+- Grid-System: `.grid`, `.grid-2`, `.grid-3`, `.grid-4`
+- Flexbox-Utilities: `.flex`, `.flex-center`, `.flex-between`, `.flex-col`
+- Responsive Breakpoints:
+  - `@media (max-width: 480px)`: Mobile/Raspberry Pi
+  - `@media (min-width: 768px)`: Tablet
+  - `@media (min-width: 1024px)`: Desktop
+
+### pages/touch.css
+**Zweck:** Touch-Screen spezifische Styles
+- Seitenstruktur: `body`, `.page-header`, `.main-content`
+- Menü-Anzeige: `.menu-card`, `.menu-grid`, `.menu-item`
+- Scanner-Bereich: `.scanner-area`, `.scanner-icon`
+- Numpad: `.numpad-wrapper`, `.numpad`, `.numpad-btn`, `.numpad-display`
+- Menü-Auswahl: `.choice-overlay`, `.choice-box`, `.choice-btn`
+- **Responsive Breakpoints** für optimale Darstellung:
+  - **Raspberry Pi 3.5" (max-width: 480px)**:
+    - Kleinere Paddings und Gaps
+    - Numpad-Buttons: `padding: 0.5rem`, `font-size: 1.125rem`, `min-height: 2.5rem`
+    - Optimiert für 320x480px Display
+  - **Tablet (min-width: 768px)**:
+    - Größere Abstände
+    - Numpad-Buttons: `padding: 1rem`, `font-size: 1.5rem`, `min-height: 3.5rem`
+    - 2-spaltiges Menu-Grid
+  - **Desktop (min-width: 1024px)**:
+    - Maximale Numpad-Breite: 400px
+    - Numpad-Buttons: `min-height: 4rem`
+    - Große Scanner-Icons: `font-size: 8rem`
+
+## JavaScript-Struktur
+
+### pages/touch.js
+**Zweck:** Touch-Screen Logik
+- **State Management**: `currentUserId`, `currentCardId`, `currentPersonalNumber`
+- **Funktionen**:
+  - `showStatus(type, title, subtitle)`: Zeigt Status-Popup an
+  - `showMenuChoice(userId, cardId, menu1, menu2)`: Zeigt Menü-Auswahl an
+  - `selectMenu(choice)`: Verarbeitet Menü-Auswahl
+  - `pollRFID()`: Fragt RFID-Scanner ab (alle 500ms)
+  - `updateMenu()`: Aktualisiert Menü-Anzeige (alle 5 Sekunden)
+  - `showNumpad()`, `hideNumpad()`: Zeigt/Versteckt Numpad
+  - `addDigit(digit)`, `deleteDigit()`: Numpad-Eingabe
+  - `handleSubmit(e)`: Verarbeitet Personalnummer-Eingabe
+
+## Template-Integration
+
+Templates müssen folgende Links enthalten:
+
+```html
+<head>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/layouts.css">
+    <link rel="stylesheet" href="/static/css/pages/[pagename].css">
+</head>
+<body>
+    <!-- Content -->
+    <script src="/static/js/pages/[pagename].js"></script>
+</body>
+```
+
+## Vorteile der neuen Struktur
+
+1. **Wartbarkeit**: Styles und Scripts sind logisch getrennt und leicht zu finden
+2. **Wiederverwendbarkeit**: Komponenten können auf mehreren Seiten genutzt werden
+3. **Responsive Design**: Klare Breakpoints für verschiedene Geräte
+4. **Performance**: Browser kann CSS/JS-Dateien cachen
+5. **Entwicklung**: Änderungen an einer Komponente wirken sich auf alle Seiten aus
+6. **Übersichtlichkeit**: Templates sind deutlich schlanker und fokussierter
+
+## CSS-Variablen verwenden
+
+In neuen Styles sollten immer die CSS-Variablen aus `base.css` verwendet werden:
+
+```css
+.mein-element {
+    color: var(--text-primary);
+    background: var(--bg-glass);
+    padding: var(--space-md);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-base);
+}
+```
+
+## Nächste Schritte
+
+1. Weitere Templates modularisieren:
+   - admin.html → pages/admin.css + pages/admin.js
+   - kitchen.html → pages/kitchen.css + pages/kitchen.js
+   - mobile.html → pages/mobile.css + pages/mobile.js
+   - weekly.html → pages/weekly.css + pages/weekly.js
+
+2. `modern-design.css` kann gelöscht werden, sobald alle Templates migriert sind
+
+3. JavaScript-Utilities in `js/utils.js` auslagern für gemeinsame Funktionen
