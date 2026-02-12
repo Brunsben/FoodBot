@@ -18,8 +18,9 @@ def create_app():
     app.config['SECRET_KEY'] = secret_key
     app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 Stunde
     
-    # Sichere Session-Cookies (Production)
-    app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'
+    # Sichere Session-Cookies
+    # SECURE nur bei HTTPS aktivieren (nicht bei HTTP!)
+    app.config['SESSION_COOKIE_SECURE'] = False  # Auf True setzen wenn HTTPS genutzt wird
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     
