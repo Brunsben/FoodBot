@@ -26,6 +26,8 @@ def create_app():
     # CSRF-Schutz
     app.config['WTF_CSRF_ENABLED'] = True
     app.config['WTF_CSRF_TIME_LIMIT'] = None  # Token läuft nicht ab
+    app.config['WTF_CSRF_SSL_STRICT'] = False  # Erlaube HTTP in Dev
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = True
     
     # Performance: Static file caching
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # 1 Jahr für statische Assets
