@@ -135,6 +135,8 @@ async function updateMenu() {
 function showNumpad() {
     document.getElementById('numpadWrapper').style.display = 'block';
     document.getElementById('showNumpadBtn').style.display = 'none';
+    document.getElementById('scannerIcon').style.display = 'none';
+    document.getElementById('scannerText').style.display = 'none';
 }
 
 /**
@@ -143,6 +145,8 @@ function showNumpad() {
 function hideNumpad() {
     document.getElementById('numpadWrapper').style.display = 'none';
     document.getElementById('showNumpadBtn').style.display = 'block';
+    document.getElementById('scannerIcon').style.display = 'block';
+    document.getElementById('scannerText').style.display = 'block';
     document.getElementById('numpadDisplay').value = '';
 }
 
