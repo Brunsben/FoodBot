@@ -1,0 +1,208 @@
+/* ===================================
+   Mobile Page Styles
+   Styles für die mobile Anmeldeansicht
+   =================================== */
+
+/* Mobile-spezifisches Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body & Layout */
+body {
+    font-family: var(--font-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif);
+    background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+    color: var(--text-primary, #fff);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 25px;
+    text-align: center;
+    border-bottom: 3px solid var(--accent, #dc2626);
+}
+
+.header h1 {
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.header .name {
+    font-size: 1.3em;
+    color: var(--text-secondary, #94a3b8);
+}
+
+/* Container */
+.container {
+    flex: 1;
+    padding: 30px 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Menu Box */
+.menu-box {
+    background: var(--bg-glass, rgba(255, 255, 255, 0.05));
+    border: 2px solid rgba(220, 38, 38, 0.3);
+    border-radius: var(--radius-xl, 16px);
+    padding: 30px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.menu-title {
+    font-size: 1.3em;
+    color: var(--text-secondary, #94a3b8);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.menu-display {
+    font-size: 1.8em;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Dual Menu Layout */
+.menu-dual {
+    display: grid;
+    gap: 20px;
+}
+
+.menu-item {
+    background: rgba(220, 38, 38, 0.15);
+    border: 2px solid var(--accent, #dc2626);
+    border-radius: var(--radius-md, 12px);
+    padding: 20px;
+    text-align: center;
+}
+
+.menu-item-label {
+    font-size: 0.9em;
+    color: var(--text-secondary, #94a3b8);
+    margin-bottom: 8px;
+}
+
+.menu-item-text {
+    font-size: 1.5em;
+    font-weight: 700;
+}
+
+/* Warning Box */
+.warning-box {
+    background: rgba(245, 158, 11, 0.15);
+    border: 2px solid var(--warning, #f59e0b);
+    border-radius: var(--radius-md, 12px);
+    padding: 20px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.warning-icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.warning-text {
+    font-size: 1.2em;
+    color: #fbbf24;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn {
+    padding: 20px;
+    border-radius: var(--radius-md, 12px);
+    border: none;
+    font-size: 1.3em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-base, all 0.2s);
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--success, #10b981) 0%, #059669 100%);
+    color: #fff;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--error, #dc2626) 0%, #991b1b 100%);
+    color: #fff;
+}
+
+.btn:active {
+    transform: translateY(2px);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Status Box */
+.status-box {
+    background: var(--bg-glass, rgba(255, 255, 255, 0.05));
+    border: 2px solid rgba(220, 38, 38, 0.3);
+    border-radius: var(--radius-md, 12px);
+    padding: 20px;
+    text-align: center;
+}
+
+.status-box.registered {
+    border-color: var(--success, #10b981);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.status-icon {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.status-text {
+    font-size: 1.2em;
+    color: var(--text-secondary, #94a3b8);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.5em;
+    }
+    
+    .header .name {
+        font-size: 1.1em;
+    }
+    
+    .container {
+        padding: 20px 15px;
+    }
+    
+    .menu-box {
+        padding: 20px;
+    }
+    
+    .menu-display {
+        font-size: 1.5em;
+    }
+    
+    .btn {
+        padding: 18px;
+        font-size: 1.2em;
+    }
+}

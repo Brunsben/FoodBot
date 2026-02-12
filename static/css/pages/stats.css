@@ -1,0 +1,282 @@
+/* ===================================
+   Statistics Page Styles
+   Styles für die Statistikansicht
+   =================================== */
+
+/* Reset */
+* {
+    box-sizing: border-box;
+}
+
+/* Body */
+body {
+    font-family: var(--font-base, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif);
+    background: linear-gradient(135deg, #1a0000 0%, #2d0a0a 25%, #450a0a 50%, #2d0a0a 75%, #1a0000 100%);
+    color: var(--text-primary, #fff);
+    margin: 0;
+    padding: var(--space-lg, 20px);
+    min-height: 100vh;
+}
+
+/* Container */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: rgba(20, 20, 20, 0.95);
+    border-radius: var(--radius-xl, 20px);
+    box-shadow: 0 20px 60px rgba(220, 38, 38, 0.4);
+    padding: var(--space-2xl, 40px);
+    border: 1px solid #7f1d1d;
+}
+
+/* Headings */
+h1 {
+    color: var(--error, #ef4444);
+    margin: 0 0 var(--space-xl, 30px) 0;
+    font-size: var(--font-size-4xl, 2.2em);
+    text-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+}
+
+h2 {
+    color: var(--error, #ef4444);
+    font-size: var(--font-size-3xl, 1.8em);
+    margin: var(--space-2xl, 40px) 0 var(--space-lg, 20px) 0;
+    border-bottom: 2px solid #7f1d1d;
+    padding-bottom: 10px;
+}
+
+/* Summary Section */
+.summary {
+    background: rgba(69, 10, 10, 0.4);
+    padding: var(--space-xl, 30px);
+    border-radius: var(--radius-lg, 12px);
+    margin: var(--space-lg, 20px) 0;
+    border: 1px solid #7f1d1d;
+}
+
+.summary h2 {
+    color: var(--error, #ef4444);
+    margin-top: 0;
+    font-size: var(--font-size-2xl, 1.5em);
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.summary p {
+    font-size: var(--font-size-lg, 1.2em);
+    color: var(--text-secondary, #e5e7eb);
+    margin: var(--space-md, 10px) 0;
+}
+
+.summary p b {
+    color: var(--error, #ef4444);
+}
+
+/* Button Group */
+.button-group {
+    display: flex;
+    gap: var(--space-md, 15px);
+    margin-top: var(--space-lg, 20px);
+    flex-wrap: wrap;
+}
+
+/* Export Button */
+.export-btn {
+    background: linear-gradient(135deg, var(--error, #dc2626) 0%, #991b1b 100%);
+    color: #fff;
+    padding: 14px 28px;
+    border: none;
+    border-radius: var(--radius-md, 10px);
+    font-size: var(--font-size-lg, 1.1em);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-base, all 0.3s);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+}
+
+.export-btn:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+.btn-secondary:hover {
+    box-shadow: 0 10px 25px rgba(75, 85, 99, 0.4);
+}
+
+/* Table Styles */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg, 0 10px 15px rgba(0, 0, 0, 0.4));
+}
+
+th,
+td {
+    padding: var(--space-md, 15px);
+    text-align: left;
+    border-bottom: 1px solid #374151;
+    color: var(--text-secondary, #e5e7eb);
+}
+
+th {
+    background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: var(--font-size-sm, 0.9em);
+    letter-spacing: 0.5px;
+}
+
+tr:hover {
+    background: rgba(69, 10, 10, 0.3);
+    transition: var(--transition-fast, all 0.15s);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Highlight total column */
+td:nth-child(4) {
+    font-weight: bold;
+    color: var(--error, #ef4444);
+    font-size: var(--font-size-lg, 1.1em);
+}
+
+/* Menu Breakdown */
+.menu-breakdown {
+    margin-top: 8px;
+    padding: 10px;
+    background: rgba(69, 10, 10, 0.3);
+    border-radius: var(--radius-sm, 6px);
+    font-size: var(--font-size-sm, 0.95em);
+    border-left: 3px solid var(--error, #dc2626);
+}
+
+.menu-breakdown div {
+    margin: 4px 0;
+}
+
+.menu-breakdown b {
+    color: #fca5a5;
+}
+
+/* Loading State */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+    font-size: var(--font-size-xl, 1.25em);
+    color: var(--text-muted, #94a3b8);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: var(--space-2xl, 40px);
+    color: var(--text-muted, #94a3b8);
+}
+
+.empty-state-icon {
+    font-size: 4em;
+    margin-bottom: var(--space-lg, 20px);
+    opacity: 0.5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: var(--space-md, 10px);
+    }
+    
+    .container {
+        padding: var(--space-lg, 20px);
+        border-radius: var(--radius-md, 12px);
+    }
+    
+    h1 {
+        font-size: var(--font-size-3xl, 1.75em);
+    }
+    
+    h2 {
+        font-size: var(--font-size-2xl, 1.5em);
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .export-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    table {
+        font-size: var(--font-size-sm, 0.875em);
+    }
+    
+    th,
+    td {
+        padding: var(--space-sm, 10px);
+    }
+}
+
+@media (max-width: 480px) {
+    /* Stack table on very small screens */
+    table,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
+        display: block;
+    }
+    
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    tr {
+        margin-bottom: var(--space-md, 15px);
+        border: 1px solid #374151;
+        border-radius: var(--radius-sm, 6px);
+        overflow: hidden;
+    }
+    
+    td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+    }
+    
+    td:before {
+        position: absolute;
+        left: var(--space-md, 15px);
+        width: 45%;
+        padding-right: var(--space-md, 15px);
+        white-space: nowrap;
+        font-weight: bold;
+        color: var(--error, #ef4444);
+    }
+    
+    td:nth-of-type(1):before { content: "Datum"; }
+    td:nth-of-type(2):before { content: "Kameraden"; }
+    td:nth-of-type(3):before { content: "Gäste"; }
+    td:nth-of-type(4):before { content: "Gesamt"; }
+    td:nth-of-type(5):before { content: "Menü"; }
+}

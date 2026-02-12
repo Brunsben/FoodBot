@@ -4,238 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - FoodBot</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
-            color: #fff;
-            min-height: 100vh;
-        }
-        
-        .header {
-            background: rgba(0,0,0,0.3);
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid #dc2626;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .header h1 {
-            font-size: 2.5em;
-            font-weight: 700;
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .header-actions a {
-            padding: 10px 20px;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        
-        .header-actions a:hover {
-            transform: translateY(-2px);
-            background: rgba(255,255,255,0.15);
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            font-size: 0.95em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-            color: #fff;
-        }
-        
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(220,38,38,0.3);
-        }
-        
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-        
-        .grid { display: grid; gap: 25px; margin-bottom: 30px; }
-        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); }
-        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
-        
-        .card {
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(220,38,38,0.3);
-            border-radius: 16px;
-            padding: 25px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(220,38,38,0.3);
-        }
-        
-        .card-icon {
-            font-size: 2em;
-        }
-        
-        .card h2 {
-            font-size: 1.6em;
-            color: #dc2626;
-        }
-        
-        .form-group {
-            margin-bottom: 18px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #94a3b8;
-            font-size: 0.95em;
-        }
-        
-        input[type="text"], input[type="time"], input[type="number"], textarea, select {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1em;
-            font-family: inherit;
-        }
-        
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #dc2626;
-        }
-        
-        input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-        
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            margin-bottom: 15px;
-        }
-        
-        .info-box {
-            background: rgba(220,38,38,0.1);
-            border: 2px solid rgba(220,38,38,0.3);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .info-box strong {
-            color: #dc2626;
-            display: block;
-            margin-bottom: 12px;
-            font-size: 1.1em;
-        }
-        
-        .menu-inputs {
-            display: none;
-        }
-        
-        .menu-inputs.active {
-            display: block;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        
-        th {
-            background: rgba(220,38,38,0.2);
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid #dc2626;
-        }
-        
-        td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        tr:hover {
-            background: rgba(255,255,255,0.02);
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-        
-        .badge-success {
-            background: rgba(16,185,129,0.2);
-            color: #10b981;
-        }
-        
-        .message {
-            background: rgba(16,185,129,0.2);
-            border: 2px solid #10b981;
-            color: #fff;
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        @media (max-width: 1200px) {
-            .grid-2, .grid-3 { grid-template-columns: 1fr; }
-        }
-        
-        @media (max-width: 768px) {
-            .header h1 { font-size: 2em; }
-            .header-actions { width: 100%; }
-            .btn { width: 100%; text-align: center; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/admin.css') }}">
 </head>
 <body>
     <div class="header">
@@ -439,14 +211,11 @@
             
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                 {% for preset in preset_menus %}
-                <div style="background: rgba(220,38,38,0.15); border: 1px solid rgba(220,38,38,0.3); 
-                            border-radius: 8px; padding: 10px 15px; display: flex; align-items: center; gap: 10px;">
+                <div class="preset-tag">
                     <span>{{ preset.name }}</span>
                     <form method="post" style="display: inline;">
                         <input type="hidden" name="delete_preset_id" value="{{ preset.id }}">
-                        <button type="submit" name="delete_preset_menu" value="1" 
-                                style="background: none; border: none; color: #ef4444; cursor: pointer; 
-                                       font-size: 1.2em; padding: 0; line-height: 1;">
+                        <button type="submit" name="delete_preset_menu" value="1" class="preset-delete-btn">
                             ✕
                         </button>
                     </form>
@@ -506,11 +275,9 @@
     </div>
     
     <!-- Edit User Modal -->
-    <div id="editModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
-                                z-index: 1000; align-items: center; justify-content: center;">
-        <div style="background: #1a1a1a; border: 3px solid #dc2626; border-radius: 20px; 
-                    padding: 40px; max-width: 600px; width: 90%;">
-            <h2 style="margin-bottom: 25px; color: #dc2626;">User bearbeiten</h2>
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2>User bearbeiten</h2>
             <form method="post">
                 <input type="hidden" id="edit_user_id" name="edit_user">
                 <div class="form-group">
@@ -525,7 +292,7 @@
                     <label>Karten-ID</label>
                     <input type="text" id="edit_card_id" name="edit_card_id">
                 </div>
-                <div style="display: flex; gap: 15px; margin-top: 25px;">
+                <div class="modal-actions">
                     <button type="submit" class="btn btn-primary" style="flex: 1;">Speichern</button>
                     <button type="button" onclick="closeEditModal()" class="btn btn-secondary" style="flex: 1;">
                         Abbrechen
@@ -535,23 +302,6 @@
         </div>
     </div>
     
-    <script>
-        function toggleMenuInputs(isDual) {
-            document.getElementById('single-menu').classList.toggle('active', !isDual);
-            document.getElementById('dual-menu').classList.toggle('active', isDual);
-        }
-        
-        function editUser(id, name, personalNumber, cardId) {
-            document.getElementById('edit_user_id').value = id;
-            document.getElementById('edit_name').value = name;
-            document.getElementById('edit_personal_number').value = personalNumber;
-            document.getElementById('edit_card_id').value = cardId;
-            document.getElementById('editModal').style.display = 'flex';
-        }
-        
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/pages/admin.js') }}"></script>
 </body>
 </html>
