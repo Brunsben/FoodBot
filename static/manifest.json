@@ -1,0 +1,26 @@
+{
+    "name": "FoodBot",
+    "short_name": "FoodBot",
+    "description": "Feuerwehr Essensanmeldung - Schnell und einfach zum Essen anmelden",
+    "start_url": "/m/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0f172a",
+    "theme_color": "#6366f1",
+    "lang": "de",
+    "icons": [
+        {
+            "src": "/static/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}
