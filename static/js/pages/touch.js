@@ -137,6 +137,7 @@ function showNumpad() {
     document.getElementById('showNumpadBtn').style.display = 'none';
     document.getElementById('scannerIcon').style.display = 'none';
     document.getElementById('scannerText').style.display = 'none';
+    document.querySelector('.main-content').classList.add('numpad-active');
 }
 
 /**
@@ -148,6 +149,7 @@ function hideNumpad() {
     document.getElementById('scannerIcon').style.display = 'block';
     document.getElementById('scannerText').style.display = 'block';
     document.getElementById('numpadDisplay').value = '';
+    document.querySelector('.main-content').classList.remove('numpad-active');
 }
 
 /**

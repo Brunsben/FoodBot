@@ -130,6 +130,25 @@ body {
     flex-shrink: 0;
 }
 
+.numpad-cancel {
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    margin-top: var(--space-sm);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    background: rgba(239, 68, 68, 0.15);
+    border: 2px solid rgba(239, 68, 68, 0.4);
+    border-radius: var(--radius-md);
+    color: var(--error);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.numpad-cancel:active {
+    background: rgba(239, 68, 68, 0.3);
+    transform: scale(0.98);
+}
+
 .numpad-display {
     width: 100%;
     padding: clamp(0.75rem, 2vw, 1rem);
@@ -355,6 +374,26 @@ body {
     .choice-buttons {
         grid-template-columns: 1fr 1fr;
     }
+    
+    /* Wenn Numpad offen: Rest verstecken */
+    .numpad-active .menu-card {
+        display: none;
+    }
+    
+    .numpad-active .scanner-icon,
+    .numpad-active .scanner-text,
+    .numpad-active #showNumpadBtn {
+        display: none;
+    }
+    
+    .numpad-active .numpad-wrapper {
+        margin-top: 0;
+    }
+    
+    .numpad-cancel {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.85rem;
+    }
 }
 
 /* Extra kleines Display (320px Breite, z.B. Pi 3.5") */
@@ -408,6 +447,12 @@ body {
     .numpad-display {
         padding: 0.3rem;
         font-size: 0.9rem;
+    }
+    
+    .numpad-cancel {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
     }
 }
 
