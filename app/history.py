@@ -38,7 +38,7 @@ def index():
     user_stats = []
     for row in stats_query:
         user_stats.append({
-            'user': User.query.get(row.id),
+            'user': type('User', (), {'id': row.id, 'name': row.name, 'personal_number': row.personal_number})(),
             'count_90': row.count_90,
             'count_30': row.count_30,
             'count_7': row.count_7,

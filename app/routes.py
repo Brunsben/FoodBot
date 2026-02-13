@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, render_template_string, make_response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, make_response
 from .models import db, User, Menu, Registration
 from .utils import register_user_for_today, save_menu
 from .rfid import find_user_by_card
@@ -585,105 +585,7 @@ def qr_code(user_id):
     mobile_url = f"{base_url}/m/{user.mobile_token}"
     qr_image = generate_qr_code(mobile_url)
     
-    from flask import render_template_string
-    template = """
-    <!DOCTYPE html>
-    <html lang="de">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>QR-Code für {{ user.name }}</title>
-        <style>
-            body { 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
-                text-align: center; 
-                padding: 40px; 
-                background: linear-gradient(135deg, #1a0000 0%, #450a0a 50%, #1a0000 100%);
-                color: #fff;
-                min-height: 100vh;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-            }
-            .qr-card { 
-                display: inline-block; 
-                background: rgba(20,20,20,0.95);
-                border: 3px solid #dc2626; 
-                padding: 30px; 
-                border-radius: 16px;
-                box-shadow: 0 20px 60px rgba(220,38,38,0.5);
-            }
-            h1 { 
-                color: #ef4444; 
-                margin-top: 0;
-                font-size: 2em;
-                text-shadow: 0 0 20px rgba(220,38,38,0.6);
-            }
-            img { margin: 20px 0; background: white; padding: 15px; border-radius: 8px; }
-            .info { color: #9ca3af; margin: 15px 0; }
-            .info b { color: #fca5a5; }
-            .url { 
-                background: rgba(69,10,10,0.4); 
-                padding: 10px 15px; 
-                border-radius: 8px; 
-                font-family: monospace; 
-                font-size: 0.9em;
-                color: #d1d5db;
-                word-break: break-all;
-                margin: 15px 0;
-            }
-            .buttons { margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
-            button, .btn { 
-                padding: 12px 24px; 
-                font-size: 1.1em; 
-                cursor: pointer; 
-                border: none;
-                border-radius: 8px;
-                font-weight: 600;
-                transition: all 0.3s;
-                text-decoration: none;
-                display: inline-block;
-            }
-            .btn-print {
-                background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-                color: white;
-                border: 2px solid #ef4444;
-            }
-            .btn-back {
-                background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-                color: white;
-                border: 2px solid #6b7280;
-            }
-            button:hover, .btn:hover { transform: translateY(-2px); }
-            @media print {
-                body { background: white; color: black; }
-                .qr-card { border-color: black; box-shadow: none; background: white; }
-                h1 { color: black; text-shadow: none; }
-                .info, .info b, .url { color: black; background: white; }
-                .no-print { display: none; }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="qr-card">
-            <h1>📱 Mobile Anmeldung</h1>
-            <img src="{{ qr_image }}" alt="QR Code" style="max-width: 300px;">
-            <div class="info"><b>Name:</b> {{ user.name }}</div>
-            <div class="info"><b>Personalnummer:</b> {{ user.personal_number }}</div>
-            <div class="url">{{ mobile_url }}</div>
-            <div class="info" style="font-size: 0.9em; color: #6b7280; margin-top: 20px;">
-                QR-Code mit Smartphone scannen für schnelle Essensanmeldung
-            </div>
-        </div>
-        <div class="no-print buttons">
-            <button onclick="window.print()" class="btn-print">🖨️ Drucken</button>
-            <a href="/admin" class="btn btn-back">← Zurück zum Admin</a>
-        </div>
-    </body>
-    </html>
-    """
-    return render_template_string(template, user=user, qr_image=qr_image, mobile_url=mobile_url)
+    return render_template('qr.html', user=user, qr_image=qr_image, mobile_url=mobile_url)
 
 
 @bp.route('/admin/example-csv')
@@ -715,15 +617,7 @@ def example_csv():
 def mobile_registration(token):
     user = User.query.filter_by(mobile_token=token).first()
     if not user:
-        return render_template_string("""
-        <!DOCTYPE html>
-        <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Ungültiger Link</title></head>
-        <body style="font-family: sans-serif; text-align: center; padding: 50px; background: #1a0000; color: #fff;">
-        <h1 style="color: #ef4444;">❌ Ungültiger Link</h1>
-        <p style="font-size: 1.2em; color: #9ca3af;">Dieser QR-Code ist nicht mehr gültig.</p>
-        </body></html>
-        """), 404
+        return render_template('invalid_token.html'), 404
     
     today_menu = Menu.query.filter_by(date=date.today()).first()
     registration = Registration.query.filter_by(user_id=user.id, date=date.today()).first()

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR-Code für {{ user.name }}</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            text-align: center; 
+            padding: 40px; 
+            background: linear-gradient(135deg, var(--bg-base, #0f172a) 0%, var(--bg-elevated, #1e293b) 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .qr-card { 
+            display: inline-block; 
+            background: rgba(30, 41, 59, 0.95);
+            border: 3px solid #6366f1; 
+            padding: 30px; 
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.4);
+        }
+        h1 { 
+            color: #818cf8; 
+            margin-top: 0;
+            font-size: 2em;
+        }
+        img { margin: 20px 0; background: white; padding: 15px; border-radius: 8px; }
+        .info { color: #94a3b8; margin: 15px 0; }
+        .info b { color: #c7d2fe; }
+        .url { 
+            background: rgba(99, 102, 241, 0.1); 
+            padding: 10px 15px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            font-size: 0.9em;
+            color: #cbd5e1;
+            word-break: break-all;
+            margin: 15px 0;
+        }
+        .buttons { margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        button, .btn { 
+            padding: 12px 24px; 
+            font-size: 1.1em; 
+            cursor: pointer; 
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-print {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: 2px solid #818cf8;
+        }
+        .btn-back {
+            background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+            color: white;
+            border: 2px solid #6b7280;
+        }
+        button:hover, .btn:hover { transform: translateY(-2px); }
+        @media print {
+            body { background: white; color: black; }
+            .qr-card { border-color: black; box-shadow: none; background: white; }
+            h1 { color: black; }
+            .info, .info b, .url { color: black; background: white; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="qr-card">
+        <h1>&#128241; Mobile Anmeldung</h1>
+        <img src="{{ qr_image }}" alt="QR Code" style="max-width: 300px;">
+        <div class="info"><b>Name:</b> {{ user.name }}</div>
+        <div class="info"><b>Personalnummer:</b> {{ user.personal_number }}</div>
+        <div class="url">{{ mobile_url }}</div>
+        <div class="info" style="font-size: 0.9em; color: #64748b; margin-top: 20px;">
+            QR-Code mit Smartphone scannen für schnelle Essensanmeldung
+        </div>
+    </div>
+    <div class="no-print buttons">
+        <button onclick="window.print()" class="btn-print">&#128424; Drucken</button>
+        <a href="/admin" class="btn btn-back">&#8592; Zurück zum Admin</a>
+    </div>
+</body>
+</html>
