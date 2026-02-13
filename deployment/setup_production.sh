@@ -55,8 +55,10 @@ echo -e "${GREEN}✓${NC} Projektverzeichnis gefunden"
 echo -e "${YELLOW}📁 Erstelle Verzeichnisse...${NC}"
 mkdir -p "$LOG_DIR"
 mkdir -p "$BACKUP_DIR"
+mkdir -p "$PROJECT_DIR/logs"  # Lokales logs Verzeichnis für Gunicorn
 chown -R "$PROJECT_USER:$PROJECT_USER" "$LOG_DIR"
 chown -R "$PROJECT_USER:$PROJECT_USER" "$BACKUP_DIR"
+chown -R "$PROJECT_USER:$PROJECT_USER" "$PROJECT_DIR/logs"
 echo -e "${GREEN}✓${NC} Verzeichnisse erstellt"
 echo ""
 
@@ -85,19 +87,26 @@ echo ""
 # .env Datei erstellen falls nicht vorhanden
 if [ ! -f "$PROJECT_DIR/.env" ]; then
     echo -e "${YELLOW}🔐 Erstelle .env Datei...${NC}"
-    cp "$PROJECT_DIR/.env.example" "$PROJECT_DIR/.env"
     
     # Generiere SECRET_KEY
-    NEW_SECRET=$(python3 -c 'import os; print(os.urandom(24).hex())')
-    sed -i "s/dev-secret-key-change-in-production/$NEW_SECRET/" "$PROJECT_DIR/.env"
+    SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
     
-    # Frage nach Admin-Passwort
-    read -sp "Bitte gib ein Admin-Passwort ein: " ADMIN_PASS
-    echo
-    sed -i "s/change-this-password/$ADMIN_PASS/" "$PROJECT_DIR/.env"
+    # Erstelle .env
+    cat > "$PROJECT_DIR/.env" <<EOF
+SECRET_KEY=$SECRET_KEY
+ADMIN_PASSWORD=feuerwehr2026
+FLASK_ENV=production
+EOF
     
     chown "$PROJECT_USER:$PROJECT_USER" "$PROJECT_DIR/.env"
     chmod 600 "$PROJECT_DIR/.env"
+    echo -e "${GREEN}✓${NC} .env Datei erstellt"
+    echo -e "${YELLOW}⚠️  Standard Admin-Passwort: feuerwehr2026${NC}"
+    echo -e "${YELLOW}   Bitte nach dem ersten Login ändern!${NC}"
+else
+    echo -e "${GREEN}✓${NC} .env Datei existiert bereits"
+fi
+echo ""
     echo -e "${GREEN}✓${NC} .env Datei erstellt mit sicheren Zugangsdaten"
 else
     echo -e "${GREEN}✓${NC} .env Datei existiert bereits"
@@ -106,10 +115,38 @@ echo ""
 
 # Systemd Service installieren
 echo -e "${YELLOW}⚙️  Systemd Service installieren...${NC}"
-# Ersetze Platzhalter in Service-Datei
-sed -e "s|%USER%|$PROJECT_USER|g" \
-    -e "s|%INSTALL_DIR%|$PROJECT_DIR|g" \
-    "$PROJECT_DIR/deployment/foodbot.service" > /etc/systemd/system/foodbot.service
+
+# Service-Datei erstellen (ohne restriktive Security-Settings)
+cat > /etc/systemd/system/foodbot.service <<EOF
+[Unit]
+Description=FoodBot - Feuerwehr Essensanmeldung
+After=network.target
+
+[Service]
+Type=simple
+User=$PROJECT_USER
+Group=$PROJECT_USER
+WorkingDirectory=$PROJECT_DIR
+Environment="PATH=$PROJECT_DIR/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="FLASK_ENV=production"
+EnvironmentFile=$PROJECT_DIR/.env
+ExecStart=$PROJECT_DIR/venv/bin/gunicorn -c $PROJECT_DIR/deployment/gunicorn.conf.py wsgi:app
+ExecReload=/bin/kill -s HUP \$MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=on-failure
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=foodbot
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 systemctl daemon-reload
 systemctl enable foodbot.service
 echo -e "${GREEN}✓${NC} Service installiert und aktiviert"
