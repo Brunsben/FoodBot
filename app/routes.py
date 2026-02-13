@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, render_template_string, make_response
 from .models import db, User, Menu, Registration
-from .utils import register_user_for_today
+from .utils import register_user_for_today, save_menu
 from .rfid import find_user_by_card
 from .auth import login_required, check_auth
 from datetime import date
+from urllib.parse import urlparse
 import csv
 from io import TextIOWrapper, StringIO
 import threading
@@ -18,10 +19,8 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint('main', __name__)
 
-# Rate Limiter für Login
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
+# Rate Limiter aus api.py verwenden (nur ein Limiter pro App)
+from .api import limiter
 
 # Login-Route
 @bp.route('/login', methods=['GET', 'POST'])
@@ -34,7 +33,10 @@ def login():
             session['admin_logged_in'] = True
             session.permanent = True  # Session bleibt 1 Stunde aktiv
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('main.admin'))
+            # Open Redirect verhindern: Nur relative URLs erlauben
+            if next_page and urlparse(next_page).netloc == '':
+                return redirect(next_page)
+            return redirect(url_for('main.admin'))
         else:
             error = '❌ Authentifizierung fehlgeschlagen'
             logger.warning(f"Fehlgeschlagener Login-Versuch von {get_remote_address()}")
@@ -83,6 +85,15 @@ def index():
             user = find_user_by_card(card_id)
             
         if user:
+            # Deadline-Prüfung
+            if today_menu and not today_menu.is_registration_open():
+                # Abmeldung auch nach Deadline erlauben
+                existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+                if not existing_reg:
+                    message = f"Anmeldefrist abgelaufen ({today_menu.registration_deadline} Uhr)"
+                    status = 'error'
+                    return render_template('touch.html', menu=today_menu, message=message, status=status)
+            
             # Prüfe ob zwei Menüs aktiv sind
             if today_menu and today_menu.zwei_menues_aktiv:
                 # Prüfe ob User schon angemeldet ist
@@ -90,8 +101,14 @@ def index():
                 if existing_reg:
                     # Abmelden
                     menu_name = today_menu.menu1_name if existing_reg.menu_choice == 1 else today_menu.menu2_name
-                    db.session.delete(existing_reg)
-                    db.session.commit()
+                    try:
+                        db.session.delete(existing_reg)
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
+                        message = "Datenbankfehler bei Abmeldung"
+                        status = 'error'
+                        return render_template('touch.html', menu=today_menu, message=message, status=status)
                     message = f"{user.name}, du wurdest abgemeldet.\n{menu_name}"
                     status = 'cancel'
                     logger.info(f"Abmeldung: {user.name} ({user.personal_number})")
@@ -143,8 +160,12 @@ def register_with_menu():
         existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
         if not existing_reg:
             reg = Registration(user_id=user.id, date=date.today(), menu_choice=menu_choice)
-            db.session.add(reg)
-            db.session.commit()
+            try:
+                db.session.add(reg)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                return redirect(url_for('main.index'))
             
             today_menu = Menu.query.filter_by(date=date.today()).first()
             menu_name = today_menu.menu1_name if menu_choice == 1 else today_menu.menu2_name
@@ -180,44 +201,11 @@ def kitchen():
     if request.method == 'POST':
         # Menü speichern
         if 'menu' in request.form or 'menu1' in request.form:
-            zwei_menues = request.form.get('zwei_menues_aktiv') == '1'
-            
-            if zwei_menues:
-                menu1_text = request.form.get('menu1', '').strip()
-                menu2_text = request.form.get('menu2', '').strip()
-                
-                if today_menu:
-                    today_menu.zwei_menues_aktiv = True
-                    today_menu.menu1_name = menu1_text
-                    today_menu.menu2_name = menu2_text
-                    today_menu.description = f"{menu1_text} / {menu2_text}"  # Für Kompatibilität
-                else:
-                    today_menu = Menu(
-                        date=date.today(),
-                        description=f"{menu1_text} / {menu2_text}",
-                        zwei_menues_aktiv=True,
-                        menu1_name=menu1_text,
-                        menu2_name=menu2_text
-                    )
-                    db.session.add(today_menu)
-            else:
-                menu_text = request.form.get('menu', '').strip()
-                
-                if today_menu:
-                    today_menu.zwei_menues_aktiv = False
-                    today_menu.description = menu_text
-                    today_menu.menu1_name = None
-                    today_menu.menu2_name = None
-                else:
-                    today_menu = Menu(
-                        date=date.today(),
-                        description=menu_text,
-                        zwei_menues_aktiv=False
-                    )
-                    db.session.add(today_menu)
-                    
-            db.session.commit()
-            flash('Menü aktualisiert!')
+            try:
+                today_menu = save_menu(date.today(), request.form)
+                flash('Menü aktualisiert!')
+            except Exception:
+                flash('Fehler beim Speichern des Menüs.')
             
         # Gäste hinzufügen/entfernen
         elif 'guest_action' in request.form:
@@ -319,54 +307,11 @@ def admin():
     if request.method == 'POST':
         # Menü speichern (neue Logik für ein oder zwei Menüs)
         if 'save_menu' in request.form:
-            zwei_menues = request.form.get('zwei_menues_aktiv') == '1'
-            deadline_enabled = request.form.get('deadline_enabled') == '1'
-            registration_deadline = request.form.get('registration_deadline', '19:45')
-            
-            if zwei_menues:
-                menu1_text = request.form.get('menu1_text', '').strip()
-                menu2_text = request.form.get('menu2_text', '').strip()
-                
-                if today_menu:
-                    today_menu.zwei_menues_aktiv = True
-                    today_menu.menu1_name = menu1_text
-                    today_menu.menu2_name = menu2_text
-                    today_menu.description = f"{menu1_text} / {menu2_text}"
-                    today_menu.deadline_enabled = deadline_enabled
-                    today_menu.registration_deadline = registration_deadline
-                else:
-                    today_menu = Menu(
-                        date=date.today(),
-                        description=f"{menu1_text} / {menu2_text}",
-                        zwei_menues_aktiv=True,
-                        menu1_name=menu1_text,
-                        menu2_name=menu2_text,
-                        deadline_enabled=deadline_enabled,
-                        registration_deadline=registration_deadline
-                    )
-                    db.session.add(today_menu)
-            else:
-                menu_text = request.form.get('menu_text', '').strip()
-                
-                if today_menu:
-                    today_menu.zwei_menues_aktiv = False
-                    today_menu.description = menu_text
-                    today_menu.menu1_name = None
-                    today_menu.menu2_name = None
-                    today_menu.deadline_enabled = deadline_enabled
-                    today_menu.registration_deadline = registration_deadline
-                else:
-                    today_menu = Menu(
-                        date=date.today(),
-                        description=menu_text,
-                        zwei_menues_aktiv=False,
-                        deadline_enabled=deadline_enabled,
-                        registration_deadline=registration_deadline
-                    )
-                    db.session.add(today_menu)
-            
-            db.session.commit()
-            message = "Menü gespeichert."
+            try:
+                today_menu = save_menu(date.today(), request.form)
+                message = "Menü gespeichert."
+            except Exception:
+                message = "Fehler beim Speichern des Menüs."
             
         # Vordefiniertes Menü hinzufügen
         elif 'add_preset_menu' in request.form:
@@ -425,11 +370,27 @@ def admin():
             user_id = request.form.get('edit_user')
             user = User.query.get(user_id)
             if user:
-                user.name = request.form.get('edit_name').strip()
-                user.personal_number = request.form.get('edit_personal_number').strip()
-                user.card_id = request.form.get('edit_card_id').strip() or None
-                db.session.commit()
-                message = f"User {user.name} aktualisiert."
+                edit_name = request.form.get('edit_name', '')
+                edit_pn = request.form.get('edit_personal_number', '')
+                if not edit_name or not edit_pn:
+                    message = "Name und Personalnummer dürfen nicht leer sein."
+                else:
+                    edit_name = edit_name.strip()
+                    edit_pn = edit_pn.strip()
+                    # Duplikat-Prüfung (andere User mit gleicher Personalnummer)
+                    duplicate = User.query.filter(User.personal_number == edit_pn, User.id != user.id).first()
+                    if duplicate:
+                        message = f"Personalnummer {edit_pn} ist bereits vergeben."
+                    else:
+                        user.name = edit_name
+                        user.personal_number = edit_pn
+                        user.card_id = (request.form.get('edit_card_id') or '').strip() or None
+                        try:
+                            db.session.commit()
+                            message = f"User {user.name} aktualisiert."
+                        except Exception:
+                            db.session.rollback()
+                            message = "Fehler beim Speichern."
         # User löschen
         elif 'delete_user' in request.form:
             user_id = request.form.get('delete_user')
@@ -544,56 +505,11 @@ def admin_weekly():
             date_str = request.form.get('date')
             if date_str:
                 menu_date = date.fromisoformat(date_str)
-                zwei_menues = request.form.get('zwei_menues_aktiv') == '1'
-                deadline_enabled = request.form.get('deadline_enabled') == '1'
-                registration_deadline = request.form.get('registration_deadline', '19:45')
-                
-                menu = Menu.query.filter_by(date=menu_date).first()
-                
-                if zwei_menues:
-                    menu1_text = request.form.get('menu1_text', '').strip()
-                    menu2_text = request.form.get('menu2_text', '').strip()
-                    
-                    if menu:
-                        menu.zwei_menues_aktiv = True
-                        menu.menu1_name = menu1_text
-                        menu.menu2_name = menu2_text
-                        menu.description = f"{menu1_text} / {menu2_text}"
-                        menu.deadline_enabled = deadline_enabled
-                        menu.registration_deadline = registration_deadline
-                    else:
-                        menu = Menu(
-                            date=menu_date,
-                            description=f"{menu1_text} / {menu2_text}",
-                            zwei_menues_aktiv=True,
-                            menu1_name=menu1_text,
-                            menu2_name=menu2_text,
-                            deadline_enabled=deadline_enabled,
-                            registration_deadline=registration_deadline
-                        )
-                        db.session.add(menu)
-                else:
-                    menu_text = request.form.get('menu_text', '').strip()
-                    
-                    if menu:
-                        menu.zwei_menues_aktiv = False
-                        menu.description = menu_text
-                        menu.menu1_name = None
-                        menu.menu2_name = None
-                        menu.deadline_enabled = deadline_enabled
-                        menu.registration_deadline = registration_deadline
-                    else:
-                        menu = Menu(
-                            date=menu_date,
-                            description=menu_text,
-                            zwei_menues_aktiv=False,
-                            deadline_enabled=deadline_enabled,
-                            registration_deadline=registration_deadline
-                        )
-                        db.session.add(menu)
-                
-                db.session.commit()
-                message = f"Menü für {menu_date.strftime('%d.%m.%Y')} gespeichert."
+                try:
+                    save_menu(menu_date, request.form)
+                    message = f"Menü für {menu_date.strftime('%d.%m.%Y')} gespeichert."
+                except Exception:
+                    message = "Fehler beim Speichern des Menüs."
     
     # Alle zukünftigen und heutigen Menüs laden (sortiert nach Datum)
     today = date.today()
@@ -823,11 +739,14 @@ def mobile_registration(token):
             if not today_menu:
                 message = "Heute ist kein Menü verfügbar"
                 status_type = "info"
+            elif today_menu and not today_menu.is_registration_open():
+                message = f"Anmeldefrist abgelaufen ({today_menu.registration_deadline} Uhr)"
+                status_type = "error"
             elif is_registered:
                 message = "Du bist bereits angemeldet"
                 status_type = "info"
             else:
-                menu_choice = None
+                menu_choice = 1
                 if today_menu.zwei_menues_aktiv:
                     menu_choice = int(request.form.get('menu_choice', 1))
                 
@@ -836,21 +755,32 @@ def mobile_registration(token):
                     date=date.today(),
                     menu_choice=menu_choice
                 )
-                db.session.add(new_registration)
-                db.session.commit()
-                message = "✓ Erfolgreich angemeldet!"
-                status_type = "success"
-                is_registered = True
-                registration = new_registration
+                try:
+                    db.session.add(new_registration)
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback()
+                    message = "Datenbankfehler"
+                    status_type = "error"
+                else:
+                    message = "✓ Erfolgreich angemeldet!"
+                    status_type = "success"
+                    is_registered = True
+                    registration = new_registration
                 
         elif action == 'unregister':
             if registration:
-                db.session.delete(registration)
-                db.session.commit()
-                message = "✓ Erfolgreich abgemeldet"
-                status_type = "info"
-                is_registered = False
-                registration = None
+                try:
+                    db.session.delete(registration)
+                    db.session.commit()
+                    message = "✓ Erfolgreich abgemeldet"
+                    status_type = "info"
+                    is_registered = False
+                    registration = None
+                except Exception:
+                    db.session.rollback()
+                    message = "Datenbankfehler"
+                    status_type = "error"
             else:
                 message = "Du warst nicht angemeldet"
                 status_type = "info"
@@ -862,5 +792,3 @@ def mobile_registration(token):
                          registration=registration,
                          message=message,
                          status=status_type)
-
-start_rfid_thread()

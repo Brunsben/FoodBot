@@ -13,43 +13,36 @@ history_bp = Blueprint('history', __name__, url_prefix='/history')
 @login_required
 def index():
     """Essenshistorie aller User"""
-    # Zeitraum: Letzte 90 Tage
-    start_date = date.today() - timedelta(days=90)
+    today = date.today()
+    start_90 = today - timedelta(days=90)
+    start_30 = today - timedelta(days=30)
+    start_7 = today - timedelta(days=7)
     
-    # User mit Statistiken
-    users = User.query.order_by(User.name).all()
+    # Aggregierte Query statt N+1 (eine Query statt 4 pro User)
+    from sqlalchemy import case
+    
+    stats_query = db.session.query(
+        User.id,
+        User.name,
+        User.personal_number,
+        func.count(case((Registration.date >= start_90, 1))).label('count_90'),
+        func.count(case((Registration.date >= start_30, 1))).label('count_30'),
+        func.count(case((Registration.date >= start_7, 1))).label('count_7'),
+        func.max(Registration.date).label('last_date')
+    ).outerjoin(
+        Registration, 
+        (User.id == Registration.user_id) & (Registration.date >= start_90)
+    ).group_by(User.id, User.name, User.personal_number)\
+     .order_by(User.name).all()
+    
     user_stats = []
-    
-    for user in users:
-        # Anzahl Anmeldungen in den letzten 90 Tagen
-        count_90 = Registration.query.filter(
-            Registration.user_id == user.id,
-            Registration.date >= start_date
-        ).count()
-        
-        # Anzahl Anmeldungen in den letzten 30 Tagen
-        count_30 = Registration.query.filter(
-            Registration.user_id == user.id,
-            Registration.date >= date.today() - timedelta(days=30)
-        ).count()
-        
-        # Anzahl Anmeldungen in den letzten 7 Tagen
-        count_7 = Registration.query.filter(
-            Registration.user_id == user.id,
-            Registration.date >= date.today() - timedelta(days=7)
-        ).count()
-        
-        # Letzte Anmeldung
-        last_reg = Registration.query.filter(
-            Registration.user_id == user.id
-        ).order_by(Registration.date.desc()).first()
-        
+    for row in stats_query:
         user_stats.append({
-            'user': user,
-            'count_90': count_90,
-            'count_30': count_30,
-            'count_7': count_7,
-            'last_date': last_reg.date if last_reg else None
+            'user': User.query.get(row.id),
+            'count_90': row.count_90,
+            'count_30': row.count_30,
+            'count_7': row.count_7,
+            'last_date': row.last_date
         })
     
     # Top 10 Esser (90 Tage)
@@ -58,7 +51,7 @@ def index():
     return render_template('history.html', 
                          user_stats=user_stats, 
                          top_users=top_users,
-                         total_users=len(users))
+                         total_users=len(user_stats))
 
 @history_bp.route('/user/<int:user_id>')
 @login_required

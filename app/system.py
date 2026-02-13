@@ -76,7 +76,13 @@ def git_update():
 def create_backup():
     """Datenbank-Backup erstellen"""
     try:
-        db_path = os.environ.get('DATABASE_PATH', 'instance/foodbot.db')
+        from flask import current_app
+        # DB-Pfad aus SQLAlchemy Config extrahieren
+        db_uri = current_app.config['SQLALCHEMY_DATABASE_URI']
+        db_path = db_uri.replace('sqlite:///', '')
+        if not os.path.isabs(db_path):
+            db_path = os.path.join(current_app.instance_path, os.path.basename(db_path))
+        
         backup_dir = 'backups'
         os.makedirs(backup_dir, exist_ok=True)
         

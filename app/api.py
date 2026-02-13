@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from .models import db, User, Menu, Registration, Guest
+from .auth import login_required
 from datetime import date, datetime, timedelta
 from sqlalchemy.orm import joinedload
 
@@ -34,7 +35,7 @@ def status():
         'registrations': len(registrations),
         'guests': guest_entry.count if guest_entry else 0,
         'total': len(registrations) + (guest_entry.count if guest_entry else 0),
-        'users': [{'name': r.user.name, 'personal_number': r.user.personal_number} for r in registrations]
+        'users': [{'name': r.user.name} for r in registrations]
     })
 
 @api.route('/register', methods=['POST'])
@@ -57,13 +58,27 @@ def register():
     
     today = date.today()
     today_menu = Menu.query.filter_by(date=today).first()
+    
+    # Deadline-Prüfung (Abmeldung nach Deadline erlauben)
+    if today_menu and not today_menu.is_registration_open():
+        existing_reg = Registration.query.filter_by(user_id=user.id, date=today).first()
+        if not existing_reg:
+            return jsonify({
+                'success': False,
+                'message': f'Anmeldefrist abgelaufen ({today_menu.registration_deadline} Uhr)'
+            }), 403
+    
     if today_menu and today_menu.zwei_menues_aktiv:
         # Prüfe ob User schon angemeldet ist
         existing_reg = Registration.query.filter_by(user_id=user.id, date=today).first()
         if existing_reg:
             # Abmelden
-            db.session.delete(existing_reg)
-            db.session.commit()
+            try:
+                db.session.delete(existing_reg)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Datenbankfehler'}), 500
             return jsonify({
                 'success': True,
                 'registered': False,
@@ -83,8 +98,12 @@ def register():
             
             # Anmeldung mit Menüwahl
             reg = Registration(user_id=user.id, date=today, menu_choice=menu_choice)
-            db.session.add(reg)
-            db.session.commit()
+            try:
+                db.session.add(reg)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                return jsonify({'success': False, 'message': 'Datenbankfehler'}), 500
             return jsonify({
                 'success': True,
                 'registered': True,
@@ -127,6 +146,7 @@ def stats():
     return jsonify({'stats': stats})
 
 @api.route('/users', methods=['GET'])
+@login_required
 @limiter.limit("30 per minute")
 def users():
     """Liste aller User (mit Pagination)"""

@@ -35,9 +35,15 @@ Thumbs.db
 *.log
 logs/
 
+# Instance (SQLite DB)
+instance/
+
 # Backups
 backups/
 *.backup
+
+# Server output
+server_output.log
 
 # Testing
 .pytest_cache/

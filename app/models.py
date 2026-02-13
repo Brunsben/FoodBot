@@ -75,8 +75,11 @@ class AdminLog(db.Model):
     details = db.Column(db.Text, nullable=True)
     
     def save(self):
-        db.session.add(self)
-        db.session.commit()
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
 class PresetMenu(db.Model):
     """Vordefinierte Menüs zur Auswahl"""
