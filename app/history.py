@@ -57,7 +57,10 @@ def index():
 @login_required
 def user_detail(user_id):
     """Detail-Ansicht für einen User"""
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id)
+    if not user:
+        from flask import abort
+        abort(404)
     
     # Alle Anmeldungen des Users (letzte 180 Tage)
     start_date = date.today() - timedelta(days=180)

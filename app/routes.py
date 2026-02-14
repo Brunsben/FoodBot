@@ -1,8 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, make_response
-from .models import db, User, Menu, Registration
+from .models import db, User, Menu, Registration, Guest, PresetMenu
 from .utils import register_user_for_today, save_menu
 from .rfid import find_user_by_card
 from .auth import login_required, check_auth
+from .api import limiter
+from .qr_generator import generate_qr_code
+from .notifications import notification_service
+from sqlalchemy.orm import joinedload
+from flask_limiter.util import get_remote_address
 from datetime import date
 from urllib.parse import urlparse
 import csv
@@ -10,17 +15,11 @@ from io import TextIOWrapper, StringIO
 import threading
 import time
 import logging
-from .qr_generator import generate_qr_code
-from .notifications import notification_service
+import os
 
-# Logging zentral konfigurieren
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 bp = Blueprint('main', __name__)
-
-# Rate Limiter aus api.py verwenden (nur ein Limiter pro App)
-from .api import limiter
 
 # Login-Route
 @bp.route('/login', methods=['GET', 'POST'])
@@ -464,36 +463,43 @@ def admin_weekly():
         if 'add_day' in request.form:
             new_date_str = request.form.get('new_date')
             if new_date_str:
-                new_date = date.fromisoformat(new_date_str)
-                # Prüfen ob bereits Menü existiert
-                existing_menu = Menu.query.filter_by(date=new_date).first()
-                if not existing_menu:
-                    # Leeres Menü anlegen
-                    menu = Menu(
-                        date=new_date,
-                        description='',
-                        zwei_menues_aktiv=False,
-                        deadline_enabled=True,
-                        registration_deadline='19:45'
-                    )
-                    db.session.add(menu)
-                    db.session.commit()
-                    message = f"Tag {new_date.strftime('%d.%m.%Y')} hinzugefügt."
-                else:
-                    message = f"Menü für {new_date.strftime('%d.%m.%Y')} existiert bereits."
+                try:
+                    new_date = date.fromisoformat(new_date_str)
+                except ValueError:
+                    new_date = None
+                    message = "Ungültiges Datumsformat."
+                if new_date:
+                    existing_menu = Menu.query.filter_by(date=new_date).first()
+                    if not existing_menu:
+                        menu = Menu(
+                            date=new_date,
+                            description='',
+                            zwei_menues_aktiv=False,
+                            deadline_enabled=True,
+                            registration_deadline='19:45'
+                        )
+                        db.session.add(menu)
+                        db.session.commit()
+                        message = f"Tag {new_date.strftime('%d.%m.%Y')} hinzugefügt."
+                    else:
+                        message = f"Menü für {new_date.strftime('%d.%m.%Y')} existiert bereits."
         
         # Tag löschen
         elif 'delete_day' in request.form:
             date_str = request.form.get('date')
             if date_str:
-                menu_date = date.fromisoformat(date_str)
-                menu = Menu.query.filter_by(date=menu_date).first()
-                if menu:
-                    # Registrierungen für diesen Tag auch löschen
-                    Registration.query.filter_by(date=menu_date).delete()
-                    db.session.delete(menu)
-                    db.session.commit()
-                    message = f"Tag {menu_date.strftime('%d.%m.%Y')} gelöscht."
+                try:
+                    menu_date = date.fromisoformat(date_str)
+                except ValueError:
+                    menu_date = None
+                    message = "Ungültiges Datumsformat."
+                if menu_date:
+                    menu = Menu.query.filter_by(date=menu_date).first()
+                    if menu:
+                        Registration.query.filter_by(date=menu_date).delete()
+                        db.session.delete(menu)
+                        db.session.commit()
+                        message = f"Tag {menu_date.strftime('%d.%m.%Y')} gelöscht."
         
         # Tag speichern/bearbeiten
         elif 'save_day' in request.form:
@@ -617,6 +623,7 @@ def mobile_registration(token):
     today_menu = Menu.query.filter_by(date=date.today()).first()
     registration = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
     is_registered = registration is not None
+    registration_closed = today_menu and not today_menu.is_registration_open() if today_menu else False
     
     message = None
     status_type = None
@@ -679,5 +686,6 @@ def mobile_registration(token):
                          menu=today_menu,
                          is_registered=is_registered,
                          registration=registration,
+                         registration_closed=registration_closed,
                          message=message,
                          status=status_type)

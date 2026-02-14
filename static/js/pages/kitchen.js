@@ -16,10 +16,15 @@ function updateKitchen() {
             document.getElementById('guest-count').textContent = data.guest_count;
             document.getElementById('user-count').textContent = data.users.length;
             
-            // Update users list
+            // Update users list (escape names to prevent XSS)
             const usersList = document.getElementById('users-list');
             usersList.innerHTML = data.users
-                .map(user => `<div class="user-badge">${user.name}</div>`)
+                .map(user => {
+                    const safe = document.createElement('div');
+                    safe.className = 'user-badge';
+                    safe.textContent = user.name;
+                    return safe.outerHTML;
+                })
                 .join('');
             
             // Update menu display
