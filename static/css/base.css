@@ -103,13 +103,10 @@ body {
     background: linear-gradient(135deg, var(--bg-base) 0%, var(--bg-elevated) 100%);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Performance */
     text-rendering: optimizeSpeed;
-    /* Modern mobile support */
-    min-height: 100vh;
-    min-height: 100dvh;
     -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-y: contain;
+    /* No min-height, no display:flex, no overflow control here.
+       Each page handles its own layout via page-specific CSS. */
 }
 
 h1, h2, h3, h4, h5, h6 {

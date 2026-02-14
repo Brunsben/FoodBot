@@ -3,113 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="google" content="notranslate">
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#0f172a">
-    <title>Anmelden - FoodBot</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <meta name="google" content="notranslate">
+    <title>Anmelden – FoodBot</title>
+    <!-- Self-contained: only mobile.css, no base.css needed -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/mobile.css') }}">
 </head>
 <body>
-    <div class="header">
-        <h1>🍽️ Essensanmeldung</h1>
-        <div class="name">{{ user.name }}</div>
-    </div>
-    
-    <div class="container">
-        {% if registration_closed %}
-        <div class="warning-box">
-            <div class="warning-icon">⚠️</div>
-            <div class="warning-text">
-                <strong>Anmeldefrist überschritten</strong><br>
-                Keine neuen Anmeldungen mehr möglich
+    <div class="page">
+
+        <header class="header">
+            <h1 class="header__title">🍽️ Essensanmeldung</h1>
+            <p class="header__subtitle">{{ user.name }}</p>
+        </header>
+
+        <main class="content">
+
+            {% if registration_closed %}
+            <div class="alert">
+                <span class="alert__icon">⚠️</span>
+                <p class="alert__text">Anmeldefrist überschritten – keine Anmeldung mehr möglich</p>
             </div>
-        </div>
-        {% endif %}
-        
-        <div class="menu-box">
-            <div class="menu-title">Heutiges Menü</div>
-            <div class="menu-display">
+            {% endif %}
+
+            <section class="card">
+                <h2 class="card__label">Heutiges Menü</h2>
                 {% if menu %}
                     {% if menu.zwei_menues_aktiv %}
-                        <div class="menu-dual">
-                            <div class="menu-item">
-                                <div class="menu-item-label">Menü 1</div>
-                                <div class="menu-item-text">{{ menu.menu1_name }}</div>
-                            </div>
-                            <div class="menu-item">
-                                <div class="menu-item-label">Menü 2</div>
-                                <div class="menu-item-text">{{ menu.menu2_name }}</div>
-                            </div>
+                    <div class="menu-choices">
+                        <div class="menu-choice">
+                            <span class="menu-choice__label">Menü 1</span>
+                            <span class="menu-choice__name">{{ menu.menu1_name }}</span>
                         </div>
+                        <div class="menu-choice">
+                            <span class="menu-choice__label">Menü 2</span>
+                            <span class="menu-choice__name">{{ menu.menu2_name }}</span>
+                        </div>
+                    </div>
                     {% else %}
-                        {{ menu.description }}
+                    <p class="card__text">{{ menu.description }}</p>
                     {% endif %}
                 {% else %}
-                    <span style="color: #64748b;">Kein Menü verfügbar</span>
+                    <p class="card__text card__text--muted">Kein Menü verfügbar</p>
                 {% endif %}
-            </div>
-        </div>
-        
-        {% if is_registered %}
-        <div class="status-box registered">
-            <div class="status-icon">✓</div>
-            <div class="status-text">
-                Du bist angemeldet
-                {% if menu and menu.zwei_menues_aktiv and menu_choice %}
-                    für <strong>{{ 'Menü 1' if menu_choice == 1 else 'Menü 2' }}</strong>
+            </section>
+
+            <section class="card">
+                {% if is_registered %}
+                <div class="status status--registered">
+                    <span class="status__icon">✅</span>
+                    <p class="status__text">
+                        Du bist angemeldet
+                        {% if menu and menu.zwei_menues_aktiv and menu_choice %}
+                            für <strong>{{ 'Menü 1' if menu_choice == 1 else 'Menü 2' }}</strong>
+                        {% endif %}
+                    </p>
+                </div>
+                {% else %}
+                <div class="status">
+                    <span class="status__icon">⭕</span>
+                    <p class="status__text">Noch nicht angemeldet</p>
+                </div>
                 {% endif %}
-            </div>
-        </div>
-        
-        <div class="action-buttons">
+            </section>
+
+        </main>
+
+        <div class="actions">
+            {% if is_registered %}
             <form method="post" action="/m/{{ token }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="action" value="unregister">
-                <button type="submit" class="btn btn-danger">
-                    Abmelden
-                </button>
+                <button type="submit" class="btn btn--danger">Abmelden</button>
             </form>
-        </div>
-        {% else %}
-        <div class="status-box">
-            <div class="status-icon">○</div>
-            <div class="status-text">Du bist noch nicht angemeldet</div>
-        </div>
-        
-        {% if not registration_closed and menu %}
-        <div class="action-buttons">
-            {% if menu.zwei_menues_aktiv %}
-            <form method="post" action="/m/{{ token }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input type="hidden" name="action" value="register">
-                <input type="hidden" name="menu_choice" value="1">
-                <button type="submit" class="btn btn-primary">
-                    Anmelden für Menü 1
-                </button>
-            </form>
-            <form method="post" action="/m/{{ token }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input type="hidden" name="action" value="register">
-                <input type="hidden" name="menu_choice" value="2">
-                <button type="submit" class="btn btn-primary">
-                    Anmelden für Menü 2
-                </button>
-            </form>
-            {% else %}
-            <form method="post" action="/m/{{ token }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input type="hidden" name="action" value="register">
-                <button type="submit" class="btn btn-primary">
-                    Jetzt anmelden
-                </button>
-            </form>
+
+            {% elif not registration_closed and menu %}
+                {% if menu.zwei_menues_aktiv %}
+                <form method="post" action="/m/{{ token }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="action" value="register">
+                    <input type="hidden" name="menu_choice" value="1">
+                    <button type="submit" class="btn btn--primary">Anmelden – Menü 1</button>
+                </form>
+                <form method="post" action="/m/{{ token }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="action" value="register">
+                    <input type="hidden" name="menu_choice" value="2">
+                    <button type="submit" class="btn btn--primary">Anmelden – Menü 2</button>
+                </form>
+                {% else %}
+                <form method="post" action="/m/{{ token }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="action" value="register">
+                    <button type="submit" class="btn btn--primary">Jetzt anmelden</button>
+                </form>
+                {% endif %}
             {% endif %}
         </div>
-        {% endif %}
-        {% endif %}
+
     </div>
-    
+
     <script src="{{ url_for('static', filename='js/pages/mobile.js') }}" defer></script>
 </body>
 </html>

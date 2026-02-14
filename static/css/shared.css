@@ -3,6 +3,12 @@
    Wiederverwendbare seitenübergreifende Komponenten
    =================================== */
 
+/* Ensure pages using shared.css fill the viewport */
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
 /* Header Variations */
 .header {
     background: rgba(0, 0, 0, 0.3);
