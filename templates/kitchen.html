@@ -26,14 +26,26 @@
                 <span class="stat__num" id="total-count">0</span>
                 <span class="stat__label">Gesamt</span>
             </div>
-            <div class="stat stat--m1">
-                <span class="stat__num" id="menu1-count">0</span>
-                <span class="stat__label">Menü 1</span>
-            </div>
-            <div class="stat stat--m2">
-                <span class="stat__num" id="menu2-count">0</span>
-                <span class="stat__label">Menü 2</span>
-            </div>
+            {% if menu and menu.zwei_menues_aktiv %}
+                <div class="stat stat--m1">
+                    <span class="stat__num" id="menu1-count">0</span>
+                    <span class="stat__label">{{ menu.menu1_name if menu.menu1_name else 'Menü 1' }}</span>
+                </div>
+                <div class="stat stat--m2">
+                    <span class="stat__num" id="menu2-count">0</span>
+                    <span class="stat__label">{{ menu.menu2_name if menu.menu2_name else 'Menü 2' }}</span>
+                </div>
+            {% elif menu and menu.description %}
+                <div class="stat stat--m1">
+                    <span class="stat__num" id="menu1-count">0</span>
+                    <span class="stat__label">{{ menu.description }}</span>
+                </div>
+            {% else %}
+                <div class="stat stat--m1">
+                    <span class="stat__num" id="menu1-count">0</span>
+                    <span class="stat__label">Menü 1</span>
+                </div>
+            {% endif %}
             <div class="stat stat--guest">
                 <span class="stat__num" id="guest-count">{{ guest_count }}</span>
                 <span class="stat__label">Gäste</span>
