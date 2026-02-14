@@ -46,7 +46,8 @@ def logout():
     session.pop('admin_logged_in', None)
     return redirect(url_for('main.index'))
 
-# Simulierter Speicher für den letzten RFID-Scan (in echt: Queue, Shared Memory, etc.)
+# Thread-sicherer Speicher für den letzten RFID-Scan
+_rfid_lock = threading.Lock()
 last_card_id = {'value': None}
 
 @bp.route('/', methods=['GET', 'POST'])
@@ -153,7 +154,15 @@ def register_with_menu():
     user_id = request.form.get('user_id')
     menu_choice = request.form.get('menu_choice', 1, type=int)
     
-    user = db.session.get(User, int(user_id))
+    # Input-Validierung
+    try:
+        user_id_int = int(user_id)
+    except (TypeError, ValueError):
+        return redirect(url_for('main.index'))
+    if menu_choice not in (1, 2):
+        menu_choice = 1
+    
+    user = db.session.get(User, user_id_int)
     if user:
         # Erstelle neue Registration mit Menüwahl
         existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
@@ -243,7 +252,7 @@ def kitchen_data():
     menu2_count = sum(1 for r in registrations if r.menu_choice == 2)
     
     return jsonify({
-        'users': [{'id': u.id, 'name': u.name} for u in users],
+        'users': [{'name': u.name} for u in users],
         'guest_count': guest_count,
         'total': len(users) + guest_count,
         'menu1_count': menu1_count,
@@ -399,7 +408,7 @@ def admin():
         # CSV-Import
         elif 'csv_file' in request.files:
             file = request.files['csv_file']
-            if file and file.filename.endswith('.csv'):
+            if file and file.filename and file.filename.endswith('.csv'):
                 try:
                     reader = csv.DictReader(TextIOWrapper(file, encoding='utf-8'))
                     count = 0
@@ -419,7 +428,8 @@ def admin():
                     message = f"{count} User importiert, {skipped} übersprungen (bereits vorhanden)."
                     logger.info(f"CSV-Import: {count} User importiert, {skipped} übersprungen")
                 except Exception as e:
-                    message = f"Fehler beim Import: {str(e)}"
+                    db.session.rollback()
+                    message = "Fehler beim CSV-Import. Bitte Format prüfen."
                     logger.error(f"CSV-Import-Fehler: {e}")
         # Gäste verwalten
         elif 'guest_action' in request.form:
@@ -505,12 +515,17 @@ def admin_weekly():
         elif 'save_day' in request.form:
             date_str = request.form.get('date')
             if date_str:
-                menu_date = date.fromisoformat(date_str)
                 try:
-                    save_menu(menu_date, request.form)
-                    message = f"Menü für {menu_date.strftime('%d.%m.%Y')} gespeichert."
-                except Exception:
-                    message = "Fehler beim Speichern des Menüs."
+                    menu_date = date.fromisoformat(date_str)
+                except ValueError:
+                    message = "Ungültiges Datumsformat."
+                    menu_date = None
+                if menu_date:
+                    try:
+                        save_menu(menu_date, request.form)
+                        message = f"Menü für {menu_date.strftime('%d.%m.%Y')} gespeichert."
+                    except Exception:
+                        message = "Fehler beim Speichern des Menüs."
     
     # Alle zukünftigen und heutigen Menüs laden (sortiert nach Datum)
     today = date.today()
@@ -534,9 +549,11 @@ def admin_weekly():
 
 # API-Route für das Touch-Display, um den letzten Scan abzufragen
 @bp.route('/rfid_scan')
+@limiter.limit("60 per minute")
 def rfid_scan():
-    card_id = last_card_id['value']
-    last_card_id['value'] = None  # Nach Abfrage löschen
+    with _rfid_lock:
+        card_id = last_card_id['value']
+        last_card_id['value'] = None  # Nach Abfrage löschen
     return jsonify({'card_id': card_id})
 
 # Hintergrundthread zum Polling des RFID-Lesers
@@ -546,7 +563,8 @@ def rfid_background():
         try:
             card_id = read_rfid()
             if card_id:
-                last_card_id['value'] = card_id
+                with _rfid_lock:
+                    last_card_id['value'] = card_id
         except Exception as e:
             logger.error(f"RFID-Fehler: {e}")
         time.sleep(0.1)
@@ -570,6 +588,7 @@ def on_load(state):
     start_rfid_thread()
 
 @bp.route('/qr/<int:user_id>')
+@login_required
 def qr_code(user_id):
     """Generiere QR-Code für User - Mobile Registrierung"""
     user = db.session.get(User, user_id)
@@ -644,7 +663,12 @@ def mobile_registration(token):
             else:
                 menu_choice = 1
                 if today_menu.zwei_menues_aktiv:
-                    menu_choice = int(request.form.get('menu_choice', 1))
+                    try:
+                        menu_choice = int(request.form.get('menu_choice', 1))
+                    except (TypeError, ValueError):
+                        menu_choice = 1
+                    if menu_choice not in (1, 2):
+                        menu_choice = 1
                 
                 new_registration = Registration(
                     user_id=user.id,

@@ -7,13 +7,20 @@ server {
 
     client_max_body_size 10M;
     
+    # Security Headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    
     # Logging
     access_log /var/log/nginx/foodbot_access.log;
     error_log /var/log/nginx/foodbot_error.log;
 
-    # Static files
+    # Static files (Pfad muss bei Installation angepasst werden)
     location /static {
-        alias %INSTALL_DIR%/app/static;
+        alias /home/pi/FoodBot/static;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }

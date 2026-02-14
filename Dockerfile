@@ -41,6 +41,7 @@ ENV PYTHONUNBUFFERED=1
 # Application Code kopieren
 COPY --chown=foodbot:foodbot app/ ./app/
 COPY --chown=foodbot:foodbot templates/ ./templates/
+COPY --chown=foodbot:foodbot static/ ./static/
 COPY --chown=foodbot:foodbot backup_db.py clear_registrations.py ./
 
 # Verzeichnisse für Daten erstellen
@@ -55,7 +56,7 @@ EXPOSE 5001
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:5001/api/status')" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5001/api/status')" || exit 1
 
 # Gunicorn starten
 CMD ["gunicorn", "-c", "python:app.gunicorn_config", "app:create_app()"]

@@ -261,15 +261,19 @@
                             </a>
                         </td>
                         <td>
-                            <button onclick="editUser({{ user.id }}, '{{ user.name }}', '{{ user.personal_number }}', '{{ user.card_id or '' }}')" 
-                                    class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85em; margin-right: 5px;">
+                            <button class="btn btn-secondary edit-user-btn"
+                                    data-id="{{ user.id }}"
+                                    data-name="{{ user.name }}"
+                                    data-pnr="{{ user.personal_number }}"
+                                    data-card="{{ user.card_id or '' }}"
+                                    style="padding: 6px 12px; font-size: 0.85em; margin-right: 5px;">
                                 ✏️
                             </button>
                             <form method="post" style="display: inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <input type="hidden" name="delete_user" value="{{ user.id }}">
-                                <button type="submit" class="btn btn-secondary" 
-                                        onclick="return confirm('User {{ user.name }} wirklich löschen?')"
+                                <button type="submit" class="btn btn-secondary delete-user-btn"
+                                        data-name="{{ user.name }}"
                                         style="padding: 6px 12px; font-size: 0.85em; background: rgba(239,68,68,0.2);">
                                     🗑️
                                 </button>

@@ -34,8 +34,7 @@ def status():
         'menu': today_menu.description if today_menu else None,
         'registrations': len(registrations),
         'guests': guest_entry.count if guest_entry else 0,
-        'total': len(registrations) + (guest_entry.count if guest_entry else 0),
-        'users': [{'name': r.user.name} for r in registrations]
+        'total': len(registrations) + (guest_entry.count if guest_entry else 0)
     })
 
 @api.route('/register', methods=['POST'])
@@ -45,7 +44,12 @@ def register():
     data = request.json or {}
     card_id = data.get('card_id', '')[:50]  # Input-Validierung
     personal_number = data.get('personal_number', '')[:20]  # Input-Validierung
-    menu_choice = data.get('menu_choice', 1)
+    try:
+        menu_choice = int(data.get('menu_choice', 1))
+    except (TypeError, ValueError):
+        menu_choice = 1
+    if menu_choice not in (1, 2):
+        menu_choice = 1
     
     user = None
     if card_id:
@@ -124,26 +128,43 @@ def register():
 @limiter.limit("30 per minute")
 def stats():
     """Statistiken über die letzten 7 Tage"""
-    days = min(int(request.args.get('days', 7)), 90)  # Max 90 Tage
+    try:
+        days = min(int(request.args.get('days', 7)), 90)  # Max 90 Tage
+    except (TypeError, ValueError):
+        days = 7
     today = date.today()
-    stats = []
+    start_date = today - timedelta(days=days - 1)
     
+    # Batch-Queries statt N+1
+    from sqlalchemy import func
+    reg_counts = dict(
+        db.session.query(Registration.date, func.count(Registration.id))
+        .filter(Registration.date >= start_date, Registration.date <= today)
+        .group_by(Registration.date).all()
+    )
+    guest_entries = {
+        g.date: g.count for g in
+        Guest.query.filter(Guest.date >= start_date, Guest.date <= today).all()
+    }
+    menu_entries = {
+        m.date: m.description for m in
+        Menu.query.filter(Menu.date >= start_date, Menu.date <= today).all()
+    }
+    
+    result = []
     for i in range(days):
         day = today - timedelta(days=i)
-        regs = Registration.query.filter_by(date=day).count()
-        guest_entry = Guest.query.filter_by(date=day).first()
-        guests = guest_entry.count if guest_entry else 0
-        menu_entry = Menu.query.filter_by(date=day).first()
-        
-        stats.append({
+        regs = reg_counts.get(day, 0)
+        guests = guest_entries.get(day, 0)
+        result.append({
             'date': day.isoformat(),
             'registrations': regs,
             'guests': guests,
             'total': regs + guests,
-            'menu': menu_entry.description if menu_entry else None
+            'menu': menu_entries.get(day)
         })
     
-    return jsonify({'stats': stats})
+    return jsonify({'stats': result})
 
 @api.route('/users', methods=['GET'])
 @login_required

@@ -14,7 +14,7 @@ def create_app():
     
     # SECRET_KEY ist zwingend erforderlich
     secret_key = os.environ.get('SECRET_KEY')
-    if not secret_key or secret_key == 'dev-secret-key-change-in-production':
+    if not secret_key or secret_key in ('dev-secret-key-change-in-production', 'change-me-in-production'):
         raise ValueError("SECRET_KEY muss in .env gesetzt werden! Generiere einen mit: python3 -c 'import secrets; print(secrets.token_hex(32))'")
     app.config['SECRET_KEY'] = secret_key
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
@@ -27,7 +27,7 @@ def create_app():
     
     # CSRF-Schutz
     app.config['WTF_CSRF_ENABLED'] = True
-    app.config['WTF_CSRF_TIME_LIMIT'] = None  # Token läuft nicht ab
+    app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # Token 1 Stunde gültig
     app.config['WTF_CSRF_SSL_STRICT'] = False  # Erlaube HTTP in Dev
     app.config['WTF_CSRF_CHECK_DEFAULT'] = True
     

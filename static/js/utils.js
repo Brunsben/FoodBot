@@ -101,15 +101,32 @@ function confirmDialog(message) {
     return new Promise((resolve) => {
         const overlay = document.createElement('div');
         overlay.className = 'confirm-overlay';
-        overlay.innerHTML = `
-            <div class="confirm-dialog">
-                <p class="confirm-message">${message}</p>
-                <div class="confirm-buttons">
-                    <button class="btn btn-secondary" id="confirmNo">Abbrechen</button>
-                    <button class="btn btn-primary" id="confirmYes">Bestätigen</button>
-                </div>
-            </div>
-        `;
+        
+        const dialog = document.createElement('div');
+        dialog.className = 'confirm-dialog';
+        
+        const msgEl = document.createElement('p');
+        msgEl.className = 'confirm-message';
+        msgEl.textContent = message;
+        
+        const buttons = document.createElement('div');
+        buttons.className = 'confirm-buttons';
+        
+        const btnNo = document.createElement('button');
+        btnNo.className = 'btn btn-secondary';
+        btnNo.id = 'confirmNo';
+        btnNo.textContent = 'Abbrechen';
+        
+        const btnYes = document.createElement('button');
+        btnYes.className = 'btn btn-primary';
+        btnYes.id = 'confirmYes';
+        btnYes.textContent = 'Bestätigen';
+        
+        buttons.appendChild(btnNo);
+        buttons.appendChild(btnYes);
+        dialog.appendChild(msgEl);
+        dialog.appendChild(buttons);
+        overlay.appendChild(dialog);
         
         // Add styles if not present
         if (!document.getElementById('confirm-styles')) {
@@ -337,7 +354,7 @@ function setCookie(name, value, days = 365) {
     const date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
     const expires = `expires=${date.toUTCString()}`;
-    document.cookie = `${name}=${value};${expires};path=/`;
+    document.cookie = `${name}=${value};${expires};path=/;SameSite=Lax`;
 }
 
 /* ===================================

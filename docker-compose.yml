@@ -9,8 +9,8 @@ services:
       - "5001:5001"
     environment:
       - FLASK_ENV=production
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-feuerwehr2026}
-      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?ADMIN_PASSWORD muss in .env gesetzt werden}
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY muss in .env gesetzt werden}
     volumes:
       # Persistente Datenbank
       - ./data:/app/data

@@ -1,4 +1,5 @@
-const CACHE_NAME = 'foodbot-v1';
+const CACHE_VERSION = 2;
+const CACHE_NAME = `foodbot-v${CACHE_VERSION}`;
 const STATIC_ASSETS = [
     '/static/css/base.css',
     '/static/css/components.css',
@@ -28,9 +29,15 @@ self.addEventListener('activate', event => {
     );
 });
 
-// Fetch: Network-first for HTML/API, cache-first for static assets
+// Fetch: Network-first for HTML, cache-first for static assets, no cache for API
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
+
+    // API-Anfragen: Nie cachen (sensible Daten)
+    if (url.pathname.startsWith('/api/') || url.pathname === '/rfid_scan' || url.pathname.startsWith('/kitchen/data') || url.pathname.startsWith('/menu/data')) {
+        event.respondWith(fetch(event.request));
+        return;
+    }
 
     // Static assets: cache-first
     if (url.pathname.startsWith('/static/')) {
@@ -45,11 +52,11 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // HTML/API: network-first with fallback
+    // HTML: network-first with offline fallback
     event.respondWith(
         fetch(event.request)
             .then(resp => {
-                if (event.request.method === 'GET') {
+                if (event.request.method === 'GET' && resp.status === 200) {
                     const clone = resp.clone();
                     caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
                 }

@@ -68,7 +68,7 @@ def git_update():
         logger.error(f"Update-Fehler: {e}")
         return jsonify({
             'success': False,
-            'message': f'Fehler: {str(e)}'
+            'message': 'Interner Fehler beim Update'
         })
 
 @system_bp.route('/backup', methods=['POST'])
@@ -108,7 +108,7 @@ def create_backup():
         logger.error(f"Backup-Fehler: {e}")
         return jsonify({
             'success': False,
-            'message': f'Fehler: {str(e)}'
+            'message': 'Interner Fehler beim Backup'
         })
 
 @system_bp.route('/logs', methods=['GET'])
@@ -152,4 +152,5 @@ def system_info():
         })
         
     except Exception as e:
-        return jsonify({'error': str(e)})
+        logger.error(f"System-Info-Fehler: {e}")
+        return jsonify({'error': 'System-Information nicht verfügbar'})

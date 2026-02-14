@@ -109,18 +109,35 @@ async function updateMenu() {
         const display = document.getElementById('menuDisplay');
         
         if (data.zwei_menues_aktiv) {
-            display.innerHTML = `
-                <div class="menu-grid">
-                    <div class="menu-item">
-                        <div class="menu-item-label">Menü 1</div>
-                        <div class="menu-item-name">${data.menu1 || 'Nicht gesetzt'}</div>
-                    </div>
-                    <div class="menu-item">
-                        <div class="menu-item-label">Menü 2</div>
-                        <div class="menu-item-name">${data.menu2 || 'Nicht gesetzt'}</div>
-                    </div>
-                </div>
-            `;
+            display.textContent = '';
+            const grid = document.createElement('div');
+            grid.className = 'menu-grid';
+            
+            const item1 = document.createElement('div');
+            item1.className = 'menu-item';
+            const label1 = document.createElement('div');
+            label1.className = 'menu-item-label';
+            label1.textContent = 'Menü 1';
+            const name1 = document.createElement('div');
+            name1.className = 'menu-item-name';
+            name1.textContent = data.menu1 || 'Nicht gesetzt';
+            item1.appendChild(label1);
+            item1.appendChild(name1);
+            
+            const item2 = document.createElement('div');
+            item2.className = 'menu-item';
+            const label2 = document.createElement('div');
+            label2.className = 'menu-item-label';
+            label2.textContent = 'Menü 2';
+            const name2 = document.createElement('div');
+            name2.className = 'menu-item-name';
+            name2.textContent = data.menu2 || 'Nicht gesetzt';
+            item2.appendChild(label2);
+            item2.appendChild(name2);
+            
+            grid.appendChild(item1);
+            grid.appendChild(item2);
+            display.appendChild(grid);
         } else {
             display.textContent = data.menu || 'Kein Menü verfügbar';
         }

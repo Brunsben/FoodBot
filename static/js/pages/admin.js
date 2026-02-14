@@ -66,6 +66,28 @@ function closeEditModal() {
  * Initialize event listeners when DOM is loaded
  */
 document.addEventListener('DOMContentLoaded', function() {
+    // Edit user buttons - read data from data-attributes (XSS-safe)
+    document.querySelectorAll('.edit-user-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            editUser(
+                this.dataset.id,
+                this.dataset.name,
+                this.dataset.pnr,
+                this.dataset.card
+            );
+        });
+    });
+    
+    // Delete user buttons - confirm with safe textContent
+    document.querySelectorAll('.delete-user-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            const userName = this.dataset.name;
+            if (!confirm('User ' + userName + ' wirklich löschen?')) {
+                e.preventDefault();
+            }
+        });
+    });
+    
     // Close modal when clicking outside the modal content
     const modal = document.getElementById('editModal');
     if (modal) {

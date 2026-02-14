@@ -27,25 +27,45 @@ function updateKitchen() {
                 })
                 .join('');
             
-            // Update menu display
+            // Update menu display (safe DOM manipulation)
             const menuDisplay = document.querySelector('.menu-display');
             if (data.menu.zwei_menues_aktiv) {
-                menuDisplay.innerHTML = `
-                    <div class="menu-dual">
-                        <div class="menu-item">
-                            <div class="menu-item-label">Menü 1</div>
-                            <div class="menu-item-text">${data.menu.menu1_name || 'Nicht gesetzt'}</div>
-                        </div>
-                        <div class="menu-item">
-                            <div class="menu-item-label">Menü 2</div>
-                            <div class="menu-item-text">${data.menu.menu2_name || 'Nicht gesetzt'}</div>
-                        </div>
-                    </div>
-                `;
+                menuDisplay.textContent = '';
+                const dual = document.createElement('div');
+                dual.className = 'menu-dual';
+                
+                const item1 = document.createElement('div');
+                item1.className = 'menu-item';
+                const label1 = document.createElement('div');
+                label1.className = 'menu-item-label';
+                label1.textContent = 'Menü 1';
+                const text1 = document.createElement('div');
+                text1.className = 'menu-item-text';
+                text1.textContent = data.menu.menu1_name || 'Nicht gesetzt';
+                item1.appendChild(label1);
+                item1.appendChild(text1);
+                
+                const item2 = document.createElement('div');
+                item2.className = 'menu-item';
+                const label2 = document.createElement('div');
+                label2.className = 'menu-item-label';
+                label2.textContent = 'Menü 2';
+                const text2 = document.createElement('div');
+                text2.className = 'menu-item-text';
+                text2.textContent = data.menu.menu2_name || 'Nicht gesetzt';
+                item2.appendChild(label2);
+                item2.appendChild(text2);
+                
+                dual.appendChild(item1);
+                dual.appendChild(item2);
+                menuDisplay.appendChild(dual);
             } else if (data.menu.description) {
-                menuDisplay.innerHTML = `<strong>${data.menu.description}</strong>`;
+                menuDisplay.textContent = '';
+                const strong = document.createElement('strong');
+                strong.textContent = data.menu.description;
+                menuDisplay.appendChild(strong);
             } else {
-                menuDisplay.innerHTML = '<span style="color: #64748b;">Kein Menü eingetragen</span>';
+                menuDisplay.textContent = 'Kein Menü eingetragen';
             }
         })
         .catch(error => {
