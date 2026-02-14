@@ -154,7 +154,7 @@ def register_with_menu():
     user_id = request.form.get('user_id')
     menu_choice = request.form.get('menu_choice', 1, type=int)
     
-    user = User.query.get(user_id)
+    user = db.session.get(User, int(user_id))
     if user:
         # Erstelle neue Registration mit Menüwahl
         existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
@@ -181,14 +181,12 @@ def register_with_menu():
     return redirect(url_for('main.index'))
 
 # Küche: Anzeige und Menü-Eingabe
-from .models import Guest
-
 @bp.route('/kitchen', methods=['GET', 'POST'])
 def kitchen():
-    from .models import PresetMenu
-    
     today_menu = Menu.query.filter_by(date=date.today()).first()
-    registrations = Registration.query.filter_by(date=date.today()).all()
+    registrations = Registration.query.options(
+        joinedload(Registration.user)
+    ).filter_by(date=date.today()).all()
     users = sorted([r.user for r in registrations], key=lambda u: u.name.lower())
     guest_entry = Guest.query.filter_by(date=date.today()).first()
     guest_count = guest_entry.count if guest_entry else 0
@@ -234,7 +232,9 @@ def kitchen():
 def kitchen_data():
     """API-Endpunkt für AJAX-Updates der Küchenseite"""
     today_menu = Menu.query.filter_by(date=date.today()).first()
-    registrations = Registration.query.filter_by(date=date.today()).all()
+    registrations = Registration.query.options(
+        joinedload(Registration.user)
+    ).filter_by(date=date.today()).all()
     users = sorted([r.user for r in registrations], key=lambda u: u.name.lower())
     guest_entry = Guest.query.filter_by(date=date.today()).first()
     guest_count = guest_entry.count if guest_entry else 0
@@ -260,10 +260,10 @@ def kitchen_data():
 @bp.route('/kitchen/print')
 def kitchen_print():
     """Druckansicht für die Küche - gruppiert nach Menü"""
-    from .models import Guest
-    
     today_menu = Menu.query.filter_by(date=date.today()).first()
-    registrations = Registration.query.filter_by(date=date.today()).all()
+    registrations = Registration.query.options(
+        joinedload(Registration.user)
+    ).filter_by(date=date.today()).all()
     guest_entry = Guest.query.filter_by(date=date.today()).first()
     guest_count = guest_entry.count if guest_entry else 0
     
@@ -296,13 +296,12 @@ def menu_data():
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-    from .models import PresetMenu
-    
     today_menu = Menu.query.filter_by(date=date.today()).first()
     guest_entry = Guest.query.filter_by(date=date.today()).first()
     guest_count = guest_entry.count if guest_entry else 0
     preset_menus = PresetMenu.get_all_ordered()
     message = None
+
     
     if request.method == 'POST':
         # Menü speichern (neue Logik für ein oder zwei Menüs)
@@ -330,7 +329,7 @@ def admin():
         # Vordefiniertes Menü löschen
         elif 'delete_preset_menu' in request.form:
             preset_id = request.form.get('delete_preset_id')
-            preset = PresetMenu.query.get(preset_id)
+            preset = db.session.get(PresetMenu, int(preset_id))
             if preset:
                 menu_name = preset.name
                 db.session.delete(preset)
@@ -341,9 +340,8 @@ def admin():
         # Tagesan-/abmeldung
         elif 'user_id' in request.form and 'edit_user' not in request.form:
             user_id = request.form.get('user_id')
-            user = User.query.get(user_id)
+            user = db.session.get(User, int(user_id))
             if user:
-                from .utils import register_user_for_today
                 registered = register_user_for_today(user)
                 if registered:
                     message = f"{user.name} wurde für heute angemeldet."
@@ -368,7 +366,7 @@ def admin():
         # User bearbeiten
         elif 'edit_user' in request.form:
             user_id = request.form.get('edit_user')
-            user = User.query.get(user_id)
+            user = db.session.get(User, int(user_id))
             if user:
                 edit_name = request.form.get('edit_name', '')
                 edit_pn = request.form.get('edit_personal_number', '')
@@ -394,7 +392,7 @@ def admin():
         # User löschen
         elif 'delete_user' in request.form:
             user_id = request.form.get('delete_user')
-            user = User.query.get(user_id)
+            user = db.session.get(User, int(user_id))
             if user:
                 db.session.delete(user)
                 db.session.commit()
@@ -459,9 +457,6 @@ def admin():
 @bp.route('/admin/weekly', methods=['GET', 'POST'])
 @login_required
 def admin_weekly():
-    from datetime import timedelta
-    from .models import PresetMenu
-    
     message = None
     
     if request.method == 'POST':
@@ -571,7 +566,9 @@ def on_load(state):
 @bp.route('/qr/<int:user_id>')
 def qr_code(user_id):
     """Generiere QR-Code für User - Mobile Registrierung"""
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id)
+    if not user:
+        return {'error': 'User nicht gefunden'}, 404
     
     # Sicherstellen, dass User einen Token hat
     if not user.mobile_token:
@@ -579,8 +576,6 @@ def qr_code(user_id):
         db.session.commit()
     
     # QR-Code mit Mobile-URL generieren
-    # Verwendet BASE_URL aus .env falls gesetzt, sonst automatische Erkennung
-    import os
     base_url = os.getenv('BASE_URL', request.host_url.rstrip('/'))
     mobile_url = f"{base_url}/m/{user.mobile_token}"
     qr_image = generate_qr_code(mobile_url)
