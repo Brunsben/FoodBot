@@ -4,49 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="google" content="notranslate">
-    <title>Küche - FoodBot</title>
+    <meta name="color-scheme" content="dark">
+    <title>Küche – FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/kitchen.css') }}">
 </head>
 <body>
-    <div class="header">
-        <h1>🍳 Küche</h1>
-        <div class="header-actions">
-            <a href="/kitchen/print" target="_blank" class="btn btn-primary">🖨️ Drucken</a>
-            <a href="/admin" class="btn btn-secondary">👤 Admin</a>
-            <a href="/" class="btn btn-secondary">📡 Touch</a>
-        </div>
-    </div>
-    
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-value" id="total-count">0</div>
-                <div class="stat-label">Gesamt</div>
+    <header class="topbar">
+        <h1 class="topbar__title">🍳 Küche</h1>
+        <nav class="topbar__nav">
+            <a href="/kitchen/print" target="_blank">🖨️ Drucken</a>
+            <a href="/admin">⚙️ Admin</a>
+            <a href="/">📡 Touch</a>
+        </nav>
+    </header>
+
+    <main class="content">
+        <!-- Statistik -->
+        <div class="stats">
+            <div class="stat stat--total">
+                <span class="stat__num" id="total-count">0</span>
+                <span class="stat__label">Gesamt</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">🍽️</div>
-                <div class="stat-value" id="menu1-count">0</div>
-                <div class="stat-label">Menü 1</div>
+            <div class="stat stat--m1">
+                <span class="stat__num" id="menu1-count">0</span>
+                <span class="stat__label">Menü 1</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">🍝</div>
-                <div class="stat-value" id="menu2-count">0</div>
-                <div class="stat-label">Menü 2</div>
+            <div class="stat stat--m2">
+                <span class="stat__num" id="menu2-count">0</span>
+                <span class="stat__label">Menü 2</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">👨‍👩‍👧</div>
-                <div class="stat-value" id="guest-count">{{ guest_count }}</div>
-                <div class="stat-label">Gäste</div>
+            <div class="stat stat--guest">
+                <span class="stat__num" id="guest-count">{{ guest_count }}</span>
+                <span class="stat__label">Gäste</span>
             </div>
         </div>
-        
-        <div class="menu-section">
-            <h2>📋 Heutiges Menü</h2>
+
+        <!-- Heutiges Menü -->
+        <section class="panel">
+            <h2 class="panel__heading">📋 Heutiges Menü</h2>
             <div class="menu-display">
                 {% if menu %}
                     {% if menu.zwei_menues_aktiv %}
@@ -61,51 +57,54 @@
                             </div>
                         </div>
                     {% else %}
-                        <strong>{{ menu.description }}</strong>
+                        <p class="menu-single">{{ menu.description }}</p>
                     {% endif %}
                 {% else %}
-                    <span style="color: #64748b;">Kein Menü eingetragen</span>
+                    <p class="menu-empty">Kein Menü eingetragen</p>
                 {% endif %}
             </div>
-            
-            <!-- Menü bearbeiten -->
-            <div class="menu-edit-section">
-                <h3>Menü eingeben/ändern</h3>
-                <form method="post" class="menu-form">
+
+            <details class="menu-edit">
+                <summary class="menu-edit__toggle">✏️ Menü bearbeiten</summary>
+                <form method="post" class="menu-edit__form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <label>
-                        <input type="checkbox" name="zwei_menues_aktiv" value="1" 
+                    <label class="check-row">
+                        <input type="checkbox" name="zwei_menues_aktiv" value="1"
                                {% if menu and menu.zwei_menues_aktiv %}checked{% endif %}>
-                        Zwei Menüs
+                        <span>Zwei Menüs anbieten</span>
                     </label>
-                    
+
                     <div id="single-menu-input" style="{% if menu and menu.zwei_menues_aktiv %}display:none{% endif %}">
-                        <input type="text" name="menu" placeholder="Menü eingeben" 
+                        <input type="text" name="menu" placeholder="Menü eingeben"
                                value="{{ menu.description if menu and not menu.zwei_menues_aktiv else '' }}">
                     </div>
-                    
+
                     <div id="dual-menu-inputs" style="{% if not menu or not menu.zwei_menues_aktiv %}display:none{% endif %}">
-                        <input type="text" name="menu1" placeholder="Menü 1" class="dual-menu-input"
+                        <input type="text" name="menu1" placeholder="Menü 1"
                                value="{{ menu.menu1_name if menu and menu.zwei_menues_aktiv else '' }}">
-                        <input type="text" name="menu2" placeholder="Menü 2" 
+                        <input type="text" name="menu2" placeholder="Menü 2"
                                value="{{ menu.menu2_name if menu and menu.zwei_menues_aktiv else '' }}">
                     </div>
-                    
-                    <button type="submit" class="btn btn-primary form-button">💾 Speichern</button>
+
+                    <button type="submit" class="btn-save">💾 Speichern</button>
                 </form>
-            </div>
-        </div>
-        
-        <div class="users-section">
-            <h2>👥 Angemeldete Personen (<span id="user-count">{{ users|length }}</span>)</h2>
+            </details>
+        </section>
+
+        <!-- Angemeldete Personen -->
+        <section class="panel">
+            <h2 class="panel__heading">
+                👥 Angemeldet
+                <span class="count-badge" id="user-count">{{ users|length }}</span>
+            </h2>
             <div class="users-grid" id="users-list">
                 {% for user in users %}
                 <div class="user-badge">{{ user.name }}</div>
                 {% endfor %}
             </div>
-        </div>
-    </div>
-    
+        </section>
+    </main>
+
     <script src="{{ url_for('static', filename='js/pages/kitchen.js') }}" defer></script>
 </body>
 </html>

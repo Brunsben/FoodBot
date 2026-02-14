@@ -4,318 +4,283 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="google" content="notranslate">
-    <title>Admin - FoodBot</title>
+    <meta name="color-scheme" content="dark">
+    <title>Admin – FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/admin.css') }}">
 </head>
 <body>
-    <div class="header">
-        <h1>🔧 Admin</h1>
-        <div class="header-actions">
-            <a href="/admin/weekly">📅 Wochenplanung</a>
+    <header class="topbar">
+        <h1 class="topbar__title">⚙️ Admin</h1>
+        <nav class="topbar__nav">
+            <a href="/admin/weekly">📅 Wochenplan</a>
             <a href="/stats">📊 Statistiken</a>
             <a href="/history">📜 Historie</a>
             <a href="/kitchen">🍳 Küche</a>
             <a href="/">📡 Touch</a>
-            <a href="/logout">🚪 Logout</a>
-        </div>
-    </div>
-    
-    <div class="container">
+            <a href="/logout" class="topbar__logout">🚪 Logout</a>
+        </nav>
+    </header>
+
+    <main class="content">
         {% if message %}
-        <div class="message">{{ message }}</div>
+        <div class="flash">{{ message }}</div>
         {% endif %}
-        
-        <div class="grid grid-2">
-            <!-- Menü Card -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-icon">🍽️</span>
-                    <h2>Menü für heute</h2>
-                </div>
-                
-                <form method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <div class="checkbox-label">
-                        <input type="checkbox" id="zwei_menues" name="zwei_menues_aktiv" value="1" 
-                               {% if menu and menu.zwei_menues_aktiv %}checked{% endif %}
-                               onchange="toggleMenuInputs(this.checked)">
-                        <label for="zwei_menues" style="margin: 0;">Zwei Menüs anbieten</label>
-                    </div>
-                    
-                    <div class="info-box">
-                        <strong>⏰ Anmeldefrist</strong>
-                        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
-                            <div class="checkbox-label" style="margin: 0;">
-                                <input type="checkbox" name="deadline_enabled" value="1" 
-                                       {% if not menu or menu.deadline_enabled %}checked{% endif %}>
-                                <span>Frist aktiv</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span>Bis:</span>
-                                <input type="time" name="registration_deadline" 
-                                       value="{{ menu.registration_deadline if menu else '19:45' }}" 
-                                       style="width: 120px; padding: 8px;">
-                                <span>Uhr</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="single-menu" class="menu-inputs {% if not menu or not menu.zwei_menues_aktiv %}active{% endif %}">
-                        <div class="form-group">
-                            <label>Menü</label>
-                            <input type="text" list="menu-options" name="menu_text" 
-                                   value="{{ menu.description if menu and not menu.zwei_menues_aktiv else '' }}" 
-                                   placeholder="z.B. Schnitzel mit Pommes">
-                        </div>
-                    </div>
-                    
-                    <div id="dual-menu" class="menu-inputs {% if menu and menu.zwei_menues_aktiv %}active{% endif %}">
-                        <div class="form-group">
-                            <label>Menü 1</label>
-                            <input type="text" list="menu-options" name="menu1_text" 
-                                   value="{{ menu.menu1_name if menu else '' }}" 
-                                   placeholder="Erstes Menü">
-                        </div>
-                        <div class="form-group">
-                            <label>Menü 2</label>
-                            <input type="text" list="menu-options" name="menu2_text" 
-                                   value="{{ menu.menu2_name if menu else '' }}" 
-                                   placeholder="Zweites Menü">
-                        </div>
-                    </div>
-                    
-                    <datalist id="menu-options">
-                        {% for preset in preset_menus %}
-                        <option value="{{ preset.name }}">
-                        {% endfor %}
-                    </datalist>
-                    
-                    <button type="submit" name="save_menu" value="1" class="btn btn-primary" style="width: 100%;">
-                        ✅ Menü speichern
-                    </button>
-                </form>
-            </div>
-            
-            <!-- Gäste Card -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-icon">👥</span>
-                    <h2>Gäste</h2>
-                </div>
-                
-                <form method="post">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <div class="form-group">
-                        <label>Anzahl Gäste</label>
-                        <input type="number" name="guest_count" value="{{ guest_count }}" min="0" max="50">
-                    </div>
-                    <button type="submit" name="guest_action" value="set" class="btn btn-primary" style="width: 100%;">
-                        Speichern
-                    </button>
-                </form>
-            </div>
-        </div>
-        
-        <!-- Angemeldete Personen -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-icon">📋</span>
-                <h2>Angemeldete Personen ({{ users|length }})</h2>
-            </div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Aktion</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in users %}
-                    <tr>
-                        <td data-label="Name">{{ user.name }}</td>
-                        <td data-label="Status">
-                            {% if user.id in registered_ids %}
-                            <span class="badge badge-success">✓ Angemeldet</span>
-                            {% endif %}
-                        </td>
-                        <td data-label="Aktion">
-                            <form method="post" style="display: inline;">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                <input type="hidden" name="user_id" value="{{ user.id }}">
-                                <button type="submit" class="btn {% if user.id in registered_ids %}btn-secondary{% else %}btn-primary{% endif %}" 
-                                        style="padding: 6px 15px; font-size: 0.9em;">
-                                    {{ 'Abmelden' if user.id in registered_ids else 'Anmelden' }}
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Neuen User anlegen -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-icon">➕</span>
-                <h2>User-Verwaltung</h2>
-            </div>
-            
-            <h3 style="margin-bottom: 15px; font-size: 1.3em;">Neuen User anlegen</h3>
-            <form method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="grid grid-3">
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input type="text" name="new_name" placeholder="Max Mustermann" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Personalnummer</label>
-                        <input type="text" name="new_personal_number" placeholder="12345" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Karten-ID (optional)</label>
-                        <input type="text" name="new_card_id" placeholder="RFID Karte">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">User anlegen</button>
-            </form>
-            
-            <h3 style="margin: 30px 0 15px; font-size: 1.3em;">CSV-Import</h3>
-            <form method="post" enctype="multipart/form-data">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div class="form-group">
-                    <label>CSV-Datei hochladen</label>
-                    <input type="file" name="csv_file" accept=".csv" required 
-                           style="padding: 10px; background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2);">
-                </div>
-                <button type="submit" class="btn btn-primary">CSV importieren</button>
-            </form>
-        </div>
-        
-        <!-- Preset-Menüs -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-icon">📝</span>
-                <h2>Vordefinierte Menüs</h2>
-            </div>
-            
-            <form method="post" style="margin-bottom: 20px;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div style="display: flex; gap: 15px;">
-                    <input type="text" name="new_preset_menu" placeholder="Neues Menü hinzufügen" 
-                           style="flex: 1;" required>
-                    <button type="submit" name="add_preset_menu" value="1" class="btn btn-primary">
-                        Hinzufügen
-                    </button>
-                </div>
-            </form>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                {% for preset in preset_menus %}
-                <div class="preset-tag">
-                    <span>{{ preset.name }}</span>
-                    <form method="post" style="display: inline;">
+
+        <!-- Tab-Navigation -->
+        <nav class="tabs" role="tablist">
+            <button class="tab active" data-tab="day" role="tab">📋 Tagesplanung</button>
+            <button class="tab" data-tab="users" role="tab">👥 User-Verwaltung</button>
+        </nav>
+
+        <!-- =================== TAB 1: Tagesplanung =================== -->
+        <div class="tab-panel active" id="tab-day" role="tabpanel">
+
+            <div class="row-2">
+                <!-- Menü -->
+                <section class="card">
+                    <h2 class="card__heading">🍽️ Menü für heute</h2>
+
+                    <form method="post">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <input type="hidden" name="delete_preset_id" value="{{ preset.id }}">
-                        <button type="submit" name="delete_preset_menu" value="1" class="preset-delete-btn">
-                            ✕
+
+                        <label class="check-row">
+                            <input type="checkbox" id="zwei_menues" name="zwei_menues_aktiv" value="1"
+                                   {% if menu and menu.zwei_menues_aktiv %}checked{% endif %}
+                                   onchange="toggleMenuInputs(this.checked)">
+                            <span>Zwei Menüs anbieten</span>
+                        </label>
+
+                        <div class="info-box">
+                            <div class="info-box__row">
+                                <label class="check-row">
+                                    <input type="checkbox" name="deadline_enabled" value="1"
+                                           {% if not menu or menu.deadline_enabled %}checked{% endif %}>
+                                    <span>⏰ Anmeldefrist</span>
+                                </label>
+                                <div class="time-input">
+                                    <span>Bis</span>
+                                    <input type="time" name="registration_deadline"
+                                           value="{{ menu.registration_deadline if menu else '19:45' }}">
+                                    <span>Uhr</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="single-menu" class="menu-inputs {% if not menu or not menu.zwei_menues_aktiv %}active{% endif %}">
+                            <div class="field">
+                                <label>Menü</label>
+                                <input type="text" list="menu-options" name="menu_text"
+                                       value="{{ menu.description if menu and not menu.zwei_menues_aktiv else '' }}"
+                                       placeholder="z.B. Schnitzel mit Pommes">
+                            </div>
+                        </div>
+
+                        <div id="dual-menu" class="menu-inputs {% if menu and menu.zwei_menues_aktiv %}active{% endif %}">
+                            <div class="field">
+                                <label>Menü 1</label>
+                                <input type="text" list="menu-options" name="menu1_text"
+                                       value="{{ menu.menu1_name if menu else '' }}"
+                                       placeholder="Erstes Menü">
+                            </div>
+                            <div class="field">
+                                <label>Menü 2</label>
+                                <input type="text" list="menu-options" name="menu2_text"
+                                       value="{{ menu.menu2_name if menu else '' }}"
+                                       placeholder="Zweites Menü">
+                            </div>
+                        </div>
+
+                        <datalist id="menu-options">
+                            {% for preset in preset_menus %}
+                            <option value="{{ preset.name }}">
+                            {% endfor %}
+                        </datalist>
+
+                        <button type="submit" name="save_menu" value="1" class="btn-action">
+                            ✅ Menü speichern
                         </button>
                     </form>
-                </div>
-                {% endfor %}
+                </section>
+
+                <!-- Gäste -->
+                <section class="card">
+                    <h2 class="card__heading">👨‍👩‍👧 Gäste</h2>
+
+                    <form method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="field">
+                            <label>Anzahl Gäste</label>
+                            <input type="number" name="guest_count" value="{{ guest_count }}" min="0" max="50">
+                        </div>
+                        <button type="submit" name="guest_action" value="set" class="btn-action">
+                            💾 Speichern
+                        </button>
+                    </form>
+                </section>
             </div>
-        </div>
-        
-        <!-- User bearbeiten & löschen -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-icon">✏️</span>
-                <h2>Alle User</h2>
-            </div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Personalnummer</th>
-                        <th>Karten-ID</th>
-                        <th>QR-Code</th>
-                        <th>Aktionen</th>
-                    </tr>
-                </thead>
-                <tbody>
+
+            <!-- Angemeldete Personen -->
+            <section class="card">
+                <h2 class="card__heading">
+                    📋 Angemeldete Personen
+                    <span class="count-badge">{{ users|length }}</span>
+                </h2>
+
+                {% if users %}
+                <div class="reg-list">
                     {% for user in users %}
-                    <tr>
-                        <td data-label="Name">{{ user.name }}</td>
-                        <td data-label="Personalnr.">{{ user.personal_number }}</td>
-                        <td data-label="Karten-ID">{{ user.card_id or '-' }}</td>
-                        <td data-label="QR-Code">
-                            <a href="/qr/{{ user.id }}" target="_blank" class="btn btn-secondary" 
-                               style="padding: 6px 12px; font-size: 0.85em;">
-                                📱 QR
-                            </a>
-                        </td>
-                        <td data-label="Aktionen">
-                            <button class="btn btn-secondary edit-user-btn"
+                    <div class="reg-item {% if user.id in registered_ids %}reg-item--on{% endif %}">
+                        <span class="reg-item__name">{{ user.name }}</span>
+                        <form method="post" class="reg-item__form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <button type="submit"
+                                    class="btn-toggle {% if user.id in registered_ids %}btn-toggle--off{% else %}btn-toggle--on{% endif %}">
+                                {{ 'Abmelden' if user.id in registered_ids else 'Anmelden' }}
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="empty-hint">Keine User vorhanden</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <!-- =================== TAB 2: User-Verwaltung =================== -->
+        <div class="tab-panel" id="tab-users" role="tabpanel">
+
+            <!-- Neuen User anlegen -->
+            <section class="card">
+                <h2 class="card__heading">➕ Neuen User anlegen</h2>
+
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="row-3">
+                        <div class="field">
+                            <label>Name</label>
+                            <input type="text" name="new_name" placeholder="Max Mustermann" required>
+                        </div>
+                        <div class="field">
+                            <label>Personalnummer</label>
+                            <input type="text" name="new_personal_number" placeholder="12345" required>
+                        </div>
+                        <div class="field">
+                            <label>Karten-ID (optional)</label>
+                            <input type="text" name="new_card_id" placeholder="RFID Karte">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-action">👤 User anlegen</button>
+                </form>
+
+                <hr class="divider">
+
+                <h3 class="sub-heading">📂 CSV-Import</h3>
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="field">
+                        <label>CSV-Datei hochladen</label>
+                        <input type="file" name="csv_file" accept=".csv" required class="file-input">
+                    </div>
+                    <button type="submit" class="btn-action">📤 CSV importieren</button>
+                </form>
+            </section>
+
+            <!-- Vordefinierte Menüs -->
+            <section class="card">
+                <h2 class="card__heading">📝 Vordefinierte Menüs</h2>
+
+                <form method="post" class="preset-add">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="text" name="new_preset_menu" placeholder="Neues Menü hinzufügen" required>
+                    <button type="submit" name="add_preset_menu" value="1" class="btn-action btn-action--compact">
+                        ➕ Hinzufügen
+                    </button>
+                </form>
+
+                <div class="preset-tags">
+                    {% for preset in preset_menus %}
+                    <div class="preset-tag">
+                        <span>{{ preset.name }}</span>
+                        <form method="post" class="preset-tag__form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" name="delete_preset_id" value="{{ preset.id }}">
+                            <button type="submit" name="delete_preset_menu" value="1"
+                                    class="preset-tag__x" title="Löschen">✕</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Alle User -->
+            <section class="card">
+                <h2 class="card__heading">
+                    ✏️ Alle User
+                    <span class="count-badge">{{ users|length }}</span>
+                </h2>
+
+                {% if users %}
+                <div class="user-list">
+                    {% for user in users %}
+                    <div class="user-row">
+                        <div class="user-row__info">
+                            <span class="user-row__name">{{ user.name }}</span>
+                            <span class="user-row__meta">Nr. {{ user.personal_number }}{% if user.card_id %} · Karte: {{ user.card_id }}{% endif %}</span>
+                        </div>
+                        <div class="user-row__actions">
+                            <a href="/qr/{{ user.id }}" target="_blank" class="btn-icon" title="QR-Code">📱</a>
+                            <button class="btn-icon edit-user-btn" title="Bearbeiten"
                                     data-id="{{ user.id }}"
                                     data-name="{{ user.name }}"
                                     data-pnr="{{ user.personal_number }}"
-                                    data-card="{{ user.card_id or '' }}"
-                                    style="padding: 6px 12px; font-size: 0.85em; margin-right: 5px;">
-                                ✏️
-                            </button>
-                            <form method="post" style="display: inline;">
+                                    data-card="{{ user.card_id or '' }}">✏️</button>
+                            <form method="post" class="inline-form">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <input type="hidden" name="delete_user" value="{{ user.id }}">
-                                <button type="submit" class="btn btn-secondary delete-user-btn"
-                                        data-name="{{ user.name }}"
-                                        style="padding: 6px 12px; font-size: 0.85em; background: rgba(239,68,68,0.2);">
-                                    🗑️
-                                </button>
+                                <button type="submit" class="btn-icon btn-icon--danger delete-user-btn"
+                                        data-name="{{ user.name }}" title="Löschen">🗑️</button>
                             </form>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
                     {% endfor %}
-                </tbody>
-            </table>
+                </div>
+                {% else %}
+                <p class="empty-hint">Keine User vorhanden</p>
+                {% endif %}
+            </section>
         </div>
-    </div>
-    
+    </main>
+
     <!-- Edit User Modal -->
     <div id="editModal" class="modal">
-        <div class="modal-content">
-            <h2>User bearbeiten</h2>
+        <div class="modal__box">
+            <h2 class="modal__title">User bearbeiten</h2>
             <form method="post">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" id="edit_user_id" name="edit_user">
-                <div class="form-group">
+                <div class="field">
                     <label>Name</label>
                     <input type="text" id="edit_name" name="edit_name" required>
                 </div>
-                <div class="form-group">
+                <div class="field">
                     <label>Personalnummer</label>
                     <input type="text" id="edit_personal_number" name="edit_personal_number" required>
                 </div>
-                <div class="form-group">
+                <div class="field">
                     <label>Karten-ID</label>
                     <input type="text" id="edit_card_id" name="edit_card_id">
                 </div>
-                <div class="modal-actions">
-                    <button type="submit" class="btn btn-primary" style="flex: 1;">Speichern</button>
-                    <button type="button" onclick="closeEditModal()" class="btn btn-secondary" style="flex: 1;">
-                        Abbrechen
-                    </button>
+                <div class="modal__actions">
+                    <button type="submit" class="btn-action">💾 Speichern</button>
+                    <button type="button" onclick="closeEditModal()" class="btn-cancel">Abbrechen</button>
                 </div>
             </form>
         </div>
     </div>
-    
+
     <script src="{{ url_for('static', filename='js/pages/admin.js') }}" defer></script>
 </body>
 </html>

@@ -66,6 +66,28 @@ function closeEditModal() {
  * Initialize event listeners when DOM is loaded
  */
 document.addEventListener('DOMContentLoaded', function() {
+    // === Tab Navigation ===
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    function switchTab(name) {
+        tabs.forEach(function(t) { t.classList.toggle('active', t.dataset.tab === name); });
+        panels.forEach(function(p) { p.classList.toggle('active', p.id === 'tab-' + name); });
+        try { localStorage.setItem('adminTab', name); } catch(e) { /* ignore */ }
+    }
+
+    tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() { switchTab(tab.dataset.tab); });
+    });
+
+    // Restore last active tab from localStorage
+    try {
+        var savedTab = localStorage.getItem('adminTab');
+        if (savedTab && document.getElementById('tab-' + savedTab)) {
+            switchTab(savedTab);
+        }
+    } catch(e) { /* ignore */ }
+
     // Edit user buttons - read data from data-attributes (XSS-safe)
     document.querySelectorAll('.edit-user-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
