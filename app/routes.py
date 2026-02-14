@@ -195,15 +195,16 @@ def kitchen():
     registrations = Registration.query.options(
         joinedload(Registration.user)
     ).filter_by(date=date.today()).all()
-    users = sorted([r.user for r in registrations], key=lambda u: u.name.lower())
+    # Sortiere nach Username
+    registrations = sorted(registrations, key=lambda r: r.user.name.lower())
     guest_entry = Guest.query.filter_by(date=date.today()).first()
     guest_count = guest_entry.count if guest_entry else 0
     preset_menus = PresetMenu.get_all_ordered()
-    
+
     # Menüstatistiken berechnen
     menu1_count = sum(1 for r in registrations if r.menu_choice == 1)
     menu2_count = sum(1 for r in registrations if r.menu_choice == 2)
-    
+
     if request.method == 'POST':
         # Menü speichern
         if 'menu' in request.form or 'menu1' in request.form:
@@ -212,7 +213,7 @@ def kitchen():
                 flash('Menü aktualisiert!')
             except Exception:
                 flash('Fehler beim Speichern des Menüs.')
-            
+
         # Gäste hinzufügen/entfernen
         elif 'guest_action' in request.form:
             action = request.form.get('guest_action')
@@ -225,12 +226,12 @@ def kitchen():
                 guest_entry.count -= 1
             db.session.commit()
         return redirect(url_for('main.kitchen'))
-    
-    total = len(users) + guest_count
-    return render_template('kitchen.html', 
-                         menu=today_menu, 
-                         users=users, 
-                         guest_count=guest_count, 
+
+    total = len(registrations) + guest_count
+    return render_template('kitchen.html',
+                         menu=today_menu,
+                         registrations=registrations,
+                         guest_count=guest_count,
                          total=total,
                          menu1_count=menu1_count,
                          menu2_count=menu2_count,

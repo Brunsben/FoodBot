@@ -107,11 +107,18 @@
         <section class="panel">
             <h2 class="panel__heading">
                 👥 Angemeldet
-                <span class="count-badge" id="user-count">{{ users|length }}</span>
+                <span class="count-badge" id="user-count">{{ registrations|length }}</span>
             </h2>
             <div class="users-grid" id="users-list">
-                {% for user in users %}
-                <div class="user-badge">{{ user.name }}</div>
+                {% for reg in registrations %}
+                <div class="user-badge">
+                    {{ reg.user.name }}
+                    {% if menu and menu.zwei_menues_aktiv %}
+                        <span style="color:#94a3b8; font-size:0.92em;">· {{ 'Menü 1' if reg.menu_choice==1 else 'Menü 2' }}{% if reg.menu_choice==1 and menu.menu1_name %}: {{ menu.menu1_name }}{% elif reg.menu_choice==2 and menu.menu2_name %}: {{ menu.menu2_name }}{% endif %}</span>
+                    {% elif menu and menu.description %}
+                        <span style="color:#94a3b8; font-size:0.92em;">· {{ menu.description }}</span>
+                    {% endif %}
+                </div>
                 {% endfor %}
             </div>
         </section>
