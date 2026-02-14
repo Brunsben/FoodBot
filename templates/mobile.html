@@ -2,8 +2,10 @@
 <html lang="de" translate="no">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="google" content="notranslate">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#0f172a">
     <title>Anmelden - FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/mobile.css') }}">
@@ -60,7 +62,7 @@
             </div>
         </div>
         
-        <div class="action-buttons" style="margin-top: 20px;">
+        <div class="action-buttons">
             <form method="post" action="/m/{{ token }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="action" value="unregister">
@@ -76,7 +78,7 @@
         </div>
         
         {% if not registration_closed and menu %}
-        <div class="action-buttons" style="margin-top: 20px;">
+        <div class="action-buttons">
             {% if menu.zwei_menues_aktiv %}
             <form method="post" action="/m/{{ token }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>

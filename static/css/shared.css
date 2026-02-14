@@ -376,3 +376,24 @@ input[type="checkbox"] {
         grid-template-columns: 1fr;
     }
 }
+
+/* Landscape mode for phones */
+@media (orientation: landscape) and (max-height: 500px) {
+    .header {
+        flex-direction: row;
+        text-align: left;
+        padding: var(--space-xs) var(--space-lg);
+    }
+    
+    .header h1 {
+        font-size: clamp(1rem, 3vw, 1.5rem);
+    }
+    
+    .header-actions {
+        width: auto;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}

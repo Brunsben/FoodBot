@@ -1,72 +1,93 @@
 /* ===================================
    Mobile Page Styles
-   Styles für die mobile Anmeldeansicht
+   Optimiert für Smartphone-Nutzung via QR-Code
+   
+   Supports:
+   - Portrait + Landscape orientation
+   - Notch / Dynamic Island (safe-area-insets)
+   - 320px–428px+ screen widths
+   - iOS Safari + Android Chrome
+   - Dynamic viewport height (dvh)
    =================================== */
 
-/* Mobile-spezifisches Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Body & Layout */
+/* ---- Layout ---- */
 body {
-    font-family: var(--font-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif);
-    background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
-    color: var(--text-primary, #fff);
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
+    background: linear-gradient(135deg, var(--bg-base, #0f172a) 0%, var(--bg-elevated, #1e293b) 100%);
+    background-attachment: fixed;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
 }
 
-/* Header */
+/* ---- Header (sticky, compact) ---- */
 .header {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 25px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: var(--space-md, 1rem) var(--space-lg, 1.5rem);
+    padding-top: max(var(--space-md, 1rem), env(safe-area-inset-top));
     text-align: center;
-    border-bottom: 3px solid var(--accent, #dc2626);
+    border-bottom: 2px solid var(--accent, #dc2626);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .header h1 {
-    font-size: 2em;
+    font-size: clamp(1.2rem, 4.5vw, 1.75rem);
     font-weight: 700;
-    margin-bottom: 5px;
+    margin: 0 0 0.125rem 0;
+    line-height: 1.2;
 }
 
 .header .name {
-    font-size: 1.3em;
+    font-size: clamp(0.9rem, 3vw, 1.15rem);
     color: var(--text-secondary, #94a3b8);
+    margin: 0;
 }
 
-/* Container */
+/* ---- Scrollable Content Area ---- */
 .container {
     flex: 1;
-    padding: 30px 20px;
+    padding: var(--space-lg, 1.5rem) var(--space-md, 1rem);
+    padding-left: max(var(--space-md, 1rem), env(safe-area-inset-left));
+    padding-right: max(var(--space-md, 1rem), env(safe-area-inset-right));
+    padding-bottom: max(var(--space-xl, 2rem), env(safe-area-inset-bottom));
     max-width: 600px;
     margin: 0 auto;
     width: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-top: var(--space-md, 1rem);
 }
 
-/* Menu Box */
+/* ---- Menu Box ---- */
 .menu-box {
     background: var(--bg-glass, rgba(255, 255, 255, 0.05));
     border: 2px solid rgba(220, 38, 38, 0.3);
-    border-radius: var(--radius-xl, 16px);
-    padding: 30px;
-    margin-bottom: 30px;
+    border-radius: var(--radius-lg, 12px);
+    padding: var(--space-lg, 1.5rem);
+    margin-bottom: var(--space-lg, 1.5rem);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .menu-title {
-    font-size: 1.3em;
-    color: var(--text-secondary, #94a3b8);
-    margin-bottom: 20px;
+    font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+    color: var(--text-muted, #94a3b8);
+    margin-bottom: var(--space-sm, 0.75rem);
     text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
 }
 
 .menu-display {
-    font-size: 1.8em;
+    font-size: clamp(1.1rem, 4vw, 1.5rem);
     font-weight: 600;
     text-align: center;
     line-height: 1.4;
@@ -75,92 +96,54 @@ body {
 /* Dual Menu Layout */
 .menu-dual {
     display: grid;
-    gap: 20px;
+    gap: var(--space-md, 1rem);
 }
 
 .menu-item {
-    background: rgba(220, 38, 38, 0.15);
-    border: 2px solid var(--accent, #dc2626);
-    border-radius: var(--radius-md, 12px);
-    padding: 20px;
+    background: rgba(220, 38, 38, 0.12);
+    border: 1.5px solid var(--accent, #dc2626);
+    border-radius: var(--radius-md, 8px);
+    padding: var(--space-md, 1rem);
     text-align: center;
 }
 
 .menu-item-label {
-    font-size: 0.9em;
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
     color: var(--text-secondary, #94a3b8);
-    margin-bottom: 8px;
+    margin-bottom: 0.25rem;
 }
 
 .menu-item-text {
-    font-size: 1.5em;
+    font-size: clamp(1rem, 3.5vw, 1.25rem);
     font-weight: 700;
 }
 
-/* Warning Box */
+/* ---- Warning Box ---- */
 .warning-box {
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(245, 158, 11, 0.12);
     border: 2px solid var(--warning, #f59e0b);
-    border-radius: var(--radius-md, 12px);
-    padding: 20px;
-    margin-bottom: 25px;
+    border-radius: var(--radius-md, 8px);
+    padding: var(--space-md, 1rem);
+    margin-bottom: var(--space-lg, 1.5rem);
     text-align: center;
 }
 
 .warning-icon {
-    font-size: 2.5em;
-    margin-bottom: 10px;
+    font-size: 1.75rem;
+    margin-bottom: 0.25rem;
 }
 
 .warning-text {
-    font-size: 1.2em;
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
     color: #fbbf24;
 }
 
-/* Action Buttons */
-.action-buttons {
-    display: grid;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-/* Buttons */
-.btn {
-    padding: 20px;
-    border-radius: var(--radius-md, 12px);
-    border: none;
-    font-size: 1.3em;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition-base, all 0.2s);
-    text-align: center;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--success, #10b981) 0%, #059669 100%);
-    color: #fff;
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, var(--error, #dc2626) 0%, #991b1b 100%);
-    color: #fff;
-}
-
-.btn:active {
-    transform: translateY(2px);
-}
-
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Status Box */
+/* ---- Status Box ---- */
 .status-box {
     background: var(--bg-glass, rgba(255, 255, 255, 0.05));
     border: 2px solid rgba(220, 38, 38, 0.3);
-    border-radius: var(--radius-md, 12px);
-    padding: 20px;
+    border-radius: var(--radius-md, 8px);
+    padding: var(--space-md, 1rem) var(--space-lg, 1.5rem);
     text-align: center;
 }
 
@@ -170,117 +153,204 @@ body {
 }
 
 .status-icon {
-    font-size: 3em;
-    margin-bottom: 10px;
+    font-size: 2rem;
+    margin-bottom: 0.25rem;
 }
 
 .status-text {
-    font-size: 1.2em;
+    font-size: clamp(0.9rem, 2.5vw, 1.05rem);
     color: var(--text-secondary, #94a3b8);
 }
 
-/* Responsive Design */
-@media (max-width: 480px) {
-    .header {
-        padding: 15px;
-    }
-    
-    .header h1 {
-        font-size: 1.5em;
-    }
-    
-    .header .name {
-        font-size: 1.1em;
-    }
-    
-    .container {
-        padding: 20px 15px;
-    }
-    
-    .menu-box {
-        padding: 20px;
-    }
-    
-    .menu-display {
-        font-size: 1.5em;
-    }
-    
-    .menu-item-text {
-        font-size: 1.2em;
-    }
-    
-    .btn {
-        padding: 18px;
-        font-size: 1.2em;
-    }
-    
-    .status-icon {
-        font-size: 2.5em;
-    }
+/* ---- Action Buttons ---- */
+.action-buttons {
+    display: grid;
+    gap: var(--space-md, 1rem);
+    margin-top: var(--space-lg, 1.5rem);
 }
 
-/* Sehr kleine Screens (z.B. 320px Breite) */
-@media (max-width: 360px) {
+/* Buttons - Touch-friendly (48px min tap target per WCAG 2.5.8) */
+.btn {
+    padding: var(--space-md, 1rem) var(--space-lg, 1.5rem);
+    border-radius: var(--radius-md, 8px);
+    border: none;
+    font-size: clamp(1rem, 3vw, 1.15rem);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--success, #10b981), #059669);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--error, #dc2626), #991b1b);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.btn:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==========================
+   Landscape Orientation
+   Querformat auf Smartphones
+   ========================== */
+@media (orientation: landscape) and (max-height: 500px) {
     .header {
-        padding: 12px;
+        padding: var(--space-xs, 0.5rem) var(--space-lg, 1.5rem);
+        padding-top: max(var(--space-xs, 0.5rem), env(safe-area-inset-top));
+        padding-left: max(var(--space-lg, 1.5rem), env(safe-area-inset-left));
+        padding-right: max(var(--space-lg, 1.5rem), env(safe-area-inset-right));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-lg, 1.5rem);
+        text-align: left;
     }
     
     .header h1 {
-        font-size: 1.3em;
+        font-size: 1.1rem;
+        margin: 0;
     }
     
     .header .name {
-        font-size: 1em;
+        font-size: 0.9rem;
     }
     
     .container {
-        padding: 15px 10px;
+        padding: var(--space-sm, 0.75rem) var(--space-xl, 2rem);
+        padding-left: max(var(--space-xl, 2rem), env(safe-area-inset-left));
+        padding-right: max(var(--space-xl, 2rem), env(safe-area-inset-right));
+        padding-bottom: max(var(--space-md, 1rem), env(safe-area-inset-bottom));
+        max-width: 900px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: var(--space-sm, 0.75rem) var(--space-lg, 1.5rem);
+        align-content: start;
     }
     
-    .menu-box {
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .menu-title {
-        font-size: 1.1em;
-        margin-bottom: 12px;
-    }
-    
-    .menu-display {
-        font-size: 1.3em;
-    }
-    
-    .menu-item {
-        padding: 12px;
-    }
-    
-    .menu-item-text {
-        font-size: 1.1em;
-    }
-    
-    .btn {
-        padding: 14px;
-        font-size: 1.1em;
-    }
-    
+    /* Warning spans full width */
     .warning-box {
-        padding: 15px;
+        grid-column: 1 / -1;
+        padding: var(--space-xs, 0.5rem) var(--space-md, 1rem);
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-sm, 0.75rem);
     }
     
     .warning-icon {
-        font-size: 2em;
+        font-size: 1.25rem;
+        margin-bottom: 0;
     }
     
     .warning-text {
-        font-size: 1em;
+        font-size: 0.85rem;
+    }
+    
+    /* Left column: Menu */
+    .menu-box {
+        grid-column: 1;
+        margin-bottom: 0;
+        padding: var(--space-md, 1rem);
+    }
+    
+    .menu-title {
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .menu-display {
+        font-size: 1rem;
+    }
+    
+    .menu-item {
+        padding: var(--space-sm, 0.75rem);
+    }
+    
+    .menu-item-text {
+        font-size: 0.95rem;
+    }
+    
+    /* Right column: Status */
+    .status-box {
+        grid-column: 2;
+        padding: var(--space-sm, 0.75rem) var(--space-md, 1rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     
     .status-icon {
-        font-size: 2em;
+        font-size: 1.5rem;
+        margin-bottom: 0.125rem;
     }
     
     .status-text {
-        font-size: 1em;
+        font-size: 0.85rem;
+    }
+    
+    /* Buttons span full width in row */
+    .action-buttons {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: var(--space-sm, 0.75rem);
+        margin-top: 0;
+    }
+    
+    .btn {
+        padding: var(--space-sm, 0.75rem) var(--space-md, 1rem);
+        font-size: 0.95rem;
+        min-height: 44px;
+    }
+}
+
+/* ==========================
+   Very small screens (≤360px)
+   iPhone SE 1st gen, older Androids
+   ========================== */
+@media (max-width: 360px) and (orientation: portrait) {
+    .header {
+        padding: var(--space-sm, 0.75rem);
+    }
+    
+    .container {
+        padding: var(--space-md, 1rem) var(--space-sm, 0.75rem);
+    }
+    
+    .menu-box {
+        padding: var(--space-md, 1rem);
+        margin-bottom: var(--space-md, 1rem);
+    }
+    
+    .menu-display {
+        font-size: 1rem;
+    }
+    
+    .btn {
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
     }
 }

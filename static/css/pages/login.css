@@ -4,10 +4,11 @@
 
 body {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: var(--space-lg);
+    padding: max(var(--space-lg), var(--safe-top)) max(var(--space-lg), var(--safe-right)) max(var(--space-lg), var(--safe-bottom)) max(var(--space-lg), var(--safe-left));
 }
 
 .login-container {

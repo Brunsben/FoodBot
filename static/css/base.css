@@ -3,10 +3,17 @@
    =================================== */
 
 /* CSS Reset */
-* {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+/* Dark color scheme for native UI elements */
+:root {
+    color-scheme: dark;
 }
 
 /* CSS Variables */
@@ -43,6 +50,12 @@
     --space-xl: 2rem;
     --space-2xl: 3rem;
     --space-3xl: 4rem;
+    
+    /* Safe Area Insets (for notch/Dynamic Island phones) */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
     
     /* Border Radius */
     --radius-sm: 0.5rem;
@@ -90,9 +103,13 @@ body {
     background: linear-gradient(135deg, var(--bg-base) 0%, var(--bg-elevated) 100%);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Performance: Optimize rendering */
+    /* Performance */
     text-rendering: optimizeSpeed;
-    font-display: swap;
+    /* Modern mobile support */
+    min-height: 100vh;
+    min-height: 100dvh;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -147,6 +164,18 @@ h4 { font-size: var(--font-size-xl); }
 .animate-fadeIn { animation: fadeIn 0.5s var(--transition-base); }
 .animate-pulse { animation: pulse 2s ease-in-out infinite; }
 
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 /* Google Translate Blocker */
 body > .skiptranslate, body > .VIpgJd-ZVi9od-aZ2wEe-wOHMyf, body > .goog-te-banner-frame,
 .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, div#google_translate_element,
@@ -159,5 +188,8 @@ iframe[src*="translate"] {
     height: 0 !important;
     overflow: hidden !important;
 }
-body.translated-ltr, body.translated-rtl { margin-top: 0 !important; }
-body, html { top: 0 !important; }
+body.translated-ltr, body.translated-rtl {
+    margin-top: 0 !important;
+    top: 0 !important;
+    position: static !important;
+}

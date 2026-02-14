@@ -398,3 +398,34 @@ tr:hover {
         padding: var(--space-md);
     }
 }
+
+/* Landscape on phones */
+@media (orientation: landscape) and (max-height: 500px) {
+    .header {
+        flex-direction: row;
+        padding: var(--space-xs) var(--space-lg);
+    }
+    
+    .header h1 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .header-actions {
+        width: auto;
+        display: flex;
+        gap: var(--space-xs);
+    }
+    
+    .header-actions a {
+        padding: var(--space-xs) var(--space-sm);
+        font-size: var(--font-size-xs);
+    }
+    
+    .container {
+        padding: var(--space-sm) var(--space-md);
+    }
+    
+    .card {
+        padding: var(--space-md);
+    }
+}

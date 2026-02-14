@@ -368,3 +368,42 @@
         font-size: var(--font-size-sm);
     }
 }
+
+/* Landscape on tablets/phones */
+@media (orientation: landscape) and (max-height: 500px) {
+    .header {
+        padding: var(--space-xs) var(--space-lg);
+        flex-direction: row;
+        text-align: left;
+    }
+    
+    .header h1 {
+        font-size: var(--font-size-lg);
+    }
+    
+    .container {
+        padding: var(--space-sm) var(--space-md);
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-sm);
+    }
+    
+    .stat-card {
+        padding: var(--space-sm);
+    }
+    
+    .stat-value {
+        font-size: var(--font-size-xl);
+    }
+    
+    .stat-label {
+        font-size: var(--font-size-xs);
+    }
+    
+    .menu-section,
+    .users-section {
+        padding: var(--space-md);
+    }
+}
