@@ -44,13 +44,18 @@ body {
 }
 
 .page-title {
-    font-size: clamp(1.5rem, 5vw, 2.5rem);
-    font-weight: 800;
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    font-weight: 900;
     margin: 0;
-    background: linear-gradient(135deg, #818cf8, #fb7185);
+    background: linear-gradient(90deg, #a5b4fc 0%, #6366f1 40%, #f43f5e 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    /* Moderner, kräftiger Textschatten für bessere Lesbarkeit */
+    text-shadow: 0 4px 24px rgba(80,40,120,0.45), 0 1px 0 #fff3;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    text-align: center;
 }
 
 /* ---------- Main Content ---------- */
