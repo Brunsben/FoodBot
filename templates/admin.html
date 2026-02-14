@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="google" content="notranslate">
     <title>Admin - FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
@@ -136,13 +137,13 @@
                 <tbody>
                     {% for user in users %}
                     <tr>
-                        <td>{{ user.name }}</td>
-                        <td>
+                        <td data-label="Name">{{ user.name }}</td>
+                        <td data-label="Status">
                             {% if user.id in registered_ids %}
                             <span class="badge badge-success">✓ Angemeldet</span>
                             {% endif %}
                         </td>
-                        <td>
+                        <td data-label="Aktion">
                             <form method="post" style="display: inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <input type="hidden" name="user_id" value="{{ user.id }}">
@@ -251,16 +252,16 @@
                 <tbody>
                     {% for user in users %}
                     <tr>
-                        <td>{{ user.name }}</td>
-                        <td>{{ user.personal_number }}</td>
-                        <td>{{ user.card_id or '-' }}</td>
-                        <td>
+                        <td data-label="Name">{{ user.name }}</td>
+                        <td data-label="Personalnr.">{{ user.personal_number }}</td>
+                        <td data-label="Karten-ID">{{ user.card_id or '-' }}</td>
+                        <td data-label="QR-Code">
                             <a href="/qr/{{ user.id }}" target="_blank" class="btn btn-secondary" 
                                style="padding: 6px 12px; font-size: 0.85em;">
                                 📱 QR
                             </a>
                         </td>
-                        <td>
+                        <td data-label="Aktionen">
                             <button class="btn btn-secondary edit-user-btn"
                                     data-id="{{ user.id }}"
                                     data-name="{{ user.name }}"

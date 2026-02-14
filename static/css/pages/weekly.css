@@ -324,4 +324,17 @@ input[type="checkbox"] {
     .day-name {
         font-size: var(--font-size-lg);
     }
+    
+    .header h1 {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .add-day-card h2 {
+        font-size: var(--font-size-lg);
+    }
+    
+    .btn {
+        padding: 10px 16px;
+        font-size: var(--font-size-sm);
+    }
 }

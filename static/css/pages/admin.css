@@ -55,11 +55,11 @@
 }
 
 .grid-2 {
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(500px, 100%), 1fr));
 }
 
 .grid-3 {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
 }
 
 /* Cards */
@@ -302,6 +302,15 @@ tr:hover {
 
     .header-actions {
         width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-xs);
+    }
+    
+    .header-actions a {
+        text-align: center;
+        padding: var(--space-sm) var(--space-xs);
+        font-size: var(--font-size-sm);
     }
 
     .container {
@@ -315,23 +324,77 @@ tr:hover {
     .modal-content {
         padding: var(--space-lg);
     }
+    
+    /* Tabelle auf Mobile stacken */
+    table thead {
+        display: none;
+    }
+    
+    table, table tbody, table tr, table td {
+        display: block;
+        width: 100%;
+    }
+    
+    table tr {
+        margin-bottom: var(--space-md);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: var(--space-md);
+        background: rgba(255, 255, 255, 0.02);
+    }
+    
+    table td {
+        text-align: left;
+        padding: var(--space-xs) 0;
+        border-bottom: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--space-sm);
+    }
+    
+    table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+        flex-shrink: 0;
+    }
 }
 
 @media (max-width: 480px) {
     .header {
-        padding: var(--space-md);
+        padding: var(--space-sm) var(--space-md);
     }
 
     .header h1 {
-        font-size: var(--font-size-2xl);
+        font-size: var(--font-size-xl);
+    }
+    
+    .header-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .header-actions a {
+        font-size: var(--font-size-xs);
+        padding: var(--space-xs);
     }
 
     .card-header {
         flex-direction: column;
         align-items: flex-start;
     }
+    
+    .card h2 {
+        font-size: var(--font-size-lg);
+    }
 
     .grid-3 {
         grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: var(--space-md);
     }
 }
