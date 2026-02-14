@@ -252,8 +252,26 @@ def kitchen_data():
     menu1_count = sum(1 for r in registrations if r.menu_choice == 1)
     menu2_count = sum(1 for r in registrations if r.menu_choice == 2)
     
+    # Liefere für jeden User auch menu_choice und Menüname
+    user_entries = []
+    for r in registrations:
+        entry = {
+            'name': r.user.name,
+            'menu_choice': r.menu_choice,
+        }
+        if today_menu:
+            if today_menu.zwei_menues_aktiv:
+                if r.menu_choice == 1:
+                    entry['menu_name'] = today_menu.menu1_name or 'Menü 1'
+                elif r.menu_choice == 2:
+                    entry['menu_name'] = today_menu.menu2_name or 'Menü 2'
+            else:
+                entry['menu_name'] = today_menu.description or ''
+        else:
+            entry['menu_name'] = ''
+        user_entries.append(entry)
     return jsonify({
-        'users': [{'name': u.name} for u in users],
+        'users': user_entries,
         'guest_count': guest_count,
         'total': len(users) + guest_count,
         'menu1_count': menu1_count,

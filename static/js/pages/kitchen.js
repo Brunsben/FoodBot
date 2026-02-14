@@ -16,16 +16,30 @@ function updateKitchen() {
             document.getElementById('guest-count').textContent = data.guest_count;
             document.getElementById('user-count').textContent = data.users.length;
             
-            // Update users list (escape names to prevent XSS)
+            // Update users list (zeige Menüwahl mit an)
             const usersList = document.getElementById('users-list');
             usersList.innerHTML = data.users
                 .map(user => {
                     const safe = document.createElement('div');
                     safe.className = 'user-badge';
-                    safe.textContent = user.name;
+                    // Name
+                    let html = '';
+                    html += `<span>${escapeHtml(user.name)}</span>`;
+                    // Menüwahl
+                    if (user.menu_name) {
+                        html += ` <span style="color:#94a3b8; font-size:0.92em;">· ${escapeHtml(user.menu_name)}</span>`;
+                    }
+                    safe.innerHTML = html;
                     return safe.outerHTML;
                 })
                 .join('');
+
+            // Hilfsfunktion für XSS-Schutz
+            function escapeHtml(text) {
+                return text.replace(/[&<>"']/g, function(m) {
+                    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]);
+                });
+            }
             
             // Update menu display (safe DOM manipulation)
             const menuDisplay = document.querySelector('.menu-display');
