@@ -8,6 +8,8 @@
     <title>Admin – FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/admin.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/glass.css') }}">
 </head>
 <body>
     <header class="topbar">
@@ -38,7 +40,7 @@
 
             <div class="row-2">
                 <!-- Menü -->
-                <section class="card">
+                <section class="card glass">
                     <h2 class="card__heading">🍽️ Menü für heute</h2>
 
                     <form method="post">
@@ -61,7 +63,7 @@
                                 <div class="time-input">
                                     <span>Bis</span>
                                     <input type="time" name="registration_deadline"
-                                           value="{{ menu.registration_deadline if menu else '19:45' }}">
+                                           value="{{ menu.registration_deadline if menu else '19:45' }}" inputmode="numeric" aria-label="Anmeldefrist Uhrzeit">
                                     <span>Uhr</span>
                                 </div>
                             </div>
@@ -72,7 +74,7 @@
                                 <label>Menü</label>
                                 <input type="text" list="menu-options" name="menu_text"
                                        value="{{ menu.description if menu and not menu.zwei_menues_aktiv else '' }}"
-                                       placeholder="z.B. Schnitzel mit Pommes">
+                                       placeholder="z.B. Schnitzel mit Pommes" inputmode="text" aria-label="Menübeschreibung">
                             </div>
                         </div>
 
@@ -81,13 +83,13 @@
                                 <label>Menü 1</label>
                                 <input type="text" list="menu-options" name="menu1_text"
                                        value="{{ menu.menu1_name if menu else '' }}"
-                                       placeholder="Erstes Menü">
+                                       placeholder="Erstes Menü" inputmode="text" aria-label="Menü 1">
                             </div>
                             <div class="field">
                                 <label>Menü 2</label>
                                 <input type="text" list="menu-options" name="menu2_text"
                                        value="{{ menu.menu2_name if menu else '' }}"
-                                       placeholder="Zweites Menü">
+                                       placeholder="Zweites Menü" inputmode="text" aria-label="Menü 2">
                             </div>
                         </div>
 
@@ -112,6 +114,7 @@
                         <div class="field">
                             <label>Anzahl Gäste</label>
                             <input type="number" name="guest_count" value="{{ guest_count }}" min="0" max="50">
+                                                    <input type="number" name="guest_count" value="{{ guest_count }}" min="0" max="50" inputmode="numeric" aria-label="Anzahl Gäste">
                         </div>
                         <button type="submit" name="guest_action" value="set" class="btn-action">
                             💾 Speichern
@@ -121,7 +124,7 @@
             </div>
 
             <!-- Angemeldete Personen -->
-            <section class="card">
+            <section class="card glass">
                 <h2 class="card__heading">
                     📋 Angemeldete Personen
                     <span class="count-badge">{{ users|length }}</span>
@@ -153,7 +156,7 @@
         <div class="tab-panel" id="tab-users" role="tabpanel">
 
             <!-- Neuen User anlegen -->
-            <section class="card">
+            <section class="card glass">
                 <h2 class="card__heading">➕ Neuen User anlegen</h2>
 
                 <form method="post">
@@ -161,15 +164,15 @@
                     <div class="row-3">
                         <div class="field">
                             <label>Name</label>
-                            <input type="text" name="new_name" placeholder="Max Mustermann" required>
+                            <input type="text" name="new_name" placeholder="Max Mustermann" required inputmode="text" aria-label="Name">
                         </div>
                         <div class="field">
                             <label>Personalnummer</label>
-                            <input type="text" name="new_personal_number" placeholder="12345" required>
+                            <input type="text" name="new_personal_number" placeholder="12345" required inputmode="numeric" aria-label="Personalnummer">
                         </div>
                         <div class="field">
                             <label>Karten-ID (optional)</label>
-                            <input type="text" name="new_card_id" placeholder="RFID Karte">
+                            <input type="text" name="new_card_id" placeholder="RFID Karte" inputmode="text" aria-label="Karten-ID">
                         </div>
                     </div>
                     <button type="submit" class="btn-action">👤 User anlegen</button>
@@ -182,19 +185,19 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="field">
                         <label>CSV-Datei hochladen</label>
-                        <input type="file" name="csv_file" accept=".csv" required class="file-input">
+                        <input type="file" name="csv_file" accept=".csv" required class="file-input" aria-label="CSV-Datei">
                     </div>
                     <button type="submit" class="btn-action">📤 CSV importieren</button>
                 </form>
             </section>
 
             <!-- Vordefinierte Menüs -->
-            <section class="card">
+            <section class="card glass">
                 <h2 class="card__heading">📝 Vordefinierte Menüs</h2>
 
                 <form method="post" class="preset-add">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <input type="text" name="new_preset_menu" placeholder="Neues Menü hinzufügen" required>
+                    <input type="text" name="new_preset_menu" placeholder="Neues Menü hinzufügen" required inputmode="text" aria-label="Neues Menü">
                     <button type="submit" name="add_preset_menu" value="1" class="btn-action btn-action--compact">
                         ➕ Hinzufügen
                     </button>
@@ -216,7 +219,7 @@
             </section>
 
             <!-- Alle User -->
-            <section class="card">
+            <section class="card glass">
                 <h2 class="card__heading">
                     ✏️ Alle User
                     <span class="count-badge">{{ users|length }}</span>
@@ -263,15 +266,15 @@
                 <input type="hidden" id="edit_user_id" name="edit_user">
                 <div class="field">
                     <label>Name</label>
-                    <input type="text" id="edit_name" name="edit_name" required>
+                    <input type="text" id="edit_name" name="edit_name" required inputmode="text" aria-label="Name">
                 </div>
                 <div class="field">
                     <label>Personalnummer</label>
-                    <input type="text" id="edit_personal_number" name="edit_personal_number" required>
+                    <input type="text" id="edit_personal_number" name="edit_personal_number" required inputmode="numeric" aria-label="Personalnummer">
                 </div>
                 <div class="field">
                     <label>Karten-ID</label>
-                    <input type="text" id="edit_card_id" name="edit_card_id">
+                    <input type="text" id="edit_card_id" name="edit_card_id" inputmode="text" aria-label="Karten-ID">
                 </div>
                 <div class="modal__actions">
                     <button type="submit" class="btn-action">💾 Speichern</button>

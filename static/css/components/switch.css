@@ -1,0 +1,50 @@
+/* Custom Switch Styles for FoodBot */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  vertical-align: middle;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(90deg, #a5b4fc 0%, #6366f1 100%);
+  border-radius: 24px;
+  transition: background 0.3s;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.15);
+}
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 1px 4px rgba(99,102,241,0.15);
+}
+.switch input:checked + .switch-slider {
+  background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+}
+.switch input:checked + .switch-slider:before {
+  transform: translateX(20px);
+}
+.switch-slider:active:before {
+  width: 24px;
+}
+.switch-label {
+  margin-left: 0.75em;
+  font-size: 1em;
+  color: var(--text-primary, #22223b);
+  cursor: pointer;
+  user-select: none;
+}

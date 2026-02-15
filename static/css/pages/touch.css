@@ -170,6 +170,60 @@ body {
     border-radius: var(--radius-lg);
     color: var(--text-primary);
     margin-bottom: var(--space-md);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+/* Floating Label Group */
+.floating-label-group {
+    position: relative;
+    width: 100%;
+    margin-bottom: var(--space-md);
+}
+
+.floating-label-input {
+    background: var(--bg-glass);
+    border: 2px solid rgba(99, 102, 241, 0.3);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    width: 100%;
+    padding: clamp(0.75rem, 2vw, 1rem) clamp(0.75rem, 2vw, 1rem) clamp(0.75rem, 2vw, 1rem) clamp(0.75rem, 2vw, 1rem);
+    font-size: clamp(1.25rem, 3vw, 1.5rem);
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.floating-label {
+    position: absolute;
+    left: 0.9em;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1em;
+    pointer-events: none;
+    background: transparent;
+    transition: all 0.2s cubic-bezier(.4,0,.2,1);
+    padding: 0 0.25em;
+    z-index: 2;
+}
+
+.floating-label-input:focus + .floating-label,
+.floating-label-input:not(:placeholder-shown) + .floating-label {
+    top: 0.1em;
+    left: 0.7em;
+    font-size: 0.75em;
+    color: var(--primary);
+    background: var(--bg-glass);
+    padding: 0 0.3em;
+    z-index: 3;
+}
+
+.floating-label-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-light);
 }
 
 .numpad {

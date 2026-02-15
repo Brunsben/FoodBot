@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="/static/css/base.css">
     <link rel="stylesheet" href="/static/css/components.css">
     <link rel="stylesheet" href="/static/css/layouts.css">
-    <link rel="stylesheet" href="/static/css/pages/touch.css">
+        <link rel="stylesheet" href="/static/css/pages/touch.css">
+        <link rel="stylesheet" href="/static/css/components/button.css">
 </head>
 <body>
     <div class="page">
@@ -62,7 +63,10 @@
             
             <div id="numpadWrapper" class="numpad-wrapper" style="display: none;">
                 <form onsubmit="handleSubmit(event)">
-                    <input type="text" id="numpadDisplay" class="numpad-display" placeholder="Personalnummer" readonly>
+                    <div class="floating-label-group">
+                        <input type="text" id="numpadDisplay" class="numpad-display floating-label-input" placeholder=" " readonly required autocomplete="off" aria-label="Personalnummer" inputmode="numeric">
+                        <label for="numpadDisplay" class="floating-label">Personalnummer</label>
+                    </div>
                     
                     <div class="numpad">
                         <button type="button" class="numpad-btn" onclick="addDigit('1')">1</button>

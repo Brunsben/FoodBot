@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/weekly.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/weekly.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/switch.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
 </head>
 <body>
@@ -67,13 +69,16 @@
                     
                     <!-- Zwei Menüs Checkbox -->
                     <div class="checkbox-group">
-                        <input type="checkbox" 
-                               id="zwei_menues_{{ loop.index0 }}" 
-                               name="zwei_menues_aktiv" 
-                               value="1" 
-                               {% if day_info.menu and day_info.menu.zwei_menues_aktiv %}checked{% endif %}
-                               onchange="toggleDualMenu({{ loop.index0 }}, this.checked)">
-                        <label for="zwei_menues_{{ loop.index0 }}" style="cursor: pointer; margin: 0;">Zwei Menüs</label>
+                        <label class="switch">
+                            <input type="checkbox"
+                                   id="zwei_menues_{{ loop.index0 }}"
+                                   name="zwei_menues_aktiv"
+                                   value="1"
+                                   {% if day_info.menu and day_info.menu.zwei_menues_aktiv %}checked{% endif %}
+                                   onchange="toggleDualMenu({{ loop.index0 }}, this.checked)">
+                            <span class="switch-slider"></span>
+                        </label>
+                        <span class="switch-label" onclick="document.getElementById('zwei_menues_{{ loop.index0 }}').click()">Zwei Menüs</span>
                     </div>
                     
                     <!-- Anmeldefrist -->
