@@ -128,6 +128,56 @@
         
         console.log('Touch-Interface geladen, hiddenScanInput vorhanden:', !!hiddenInput);
         
+        // Keyboard-Events auf Document-Ebene abfangen
+        let scanBuffer = '';
+        let scanTimeout = null;
+        
+        document.addEventListener('keydown', function(e) {
+            const numpadWrapper = document.getElementById('numpadWrapper');
+            // Nur abfangen wenn Numpad NICHT offen ist
+            if (numpadWrapper && numpadWrapper.style.display === 'block') {
+                return; // Numpad ist offen, normale Tastatur-Events erlauben
+            }
+            
+            // Verhindere Browser-Shortcuts (F1-F12, etc.)
+            if (e.key.startsWith('F') || e.keyCode >= 112 && e.keyCode <= 123) {
+                e.preventDefault();
+                console.log('F-Taste blockiert:', e.key);
+                return;
+            }
+            
+            // Sammle alphanumerische Zeichen
+            if (e.key.length === 1 || e.key === 'Enter') {
+                e.preventDefault(); // Verhindere Browser-Aktion
+                
+                if (e.key === 'Enter') {
+                    // Enter = Scan ist komplett
+                    console.log('Enter erkannt, Scan-Buffer:', scanBuffer);
+                    if (scanBuffer.length > 3 && hiddenInput) {
+                        hiddenInput.value = scanBuffer;
+                        hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
+                    }
+                    scanBuffer = '';
+                    clearTimeout(scanTimeout);
+                } else {
+                    // Zeichen zum Buffer hinzufügen
+                    scanBuffer += e.key;
+                    console.log('Zeichen gesammelt:', e.key, 'Buffer:', scanBuffer);
+                    
+                    // Auto-Reset nach 100ms Pause (falls kein Enter kommt)
+                    clearTimeout(scanTimeout);
+                    scanTimeout = setTimeout(() => {
+                        if (scanBuffer.length > 3) {
+                            console.log('Timeout - sende Buffer:', scanBuffer);
+                            hiddenInput.value = scanBuffer;
+                            hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
+                        }
+                        scanBuffer = '';
+                    }, 100);
+                }
+            }
+        });
+        
         // Einfach konstant fokussieren, inputmode="none" verhindert Tastatur
         focusHiddenInput();
         document.body.addEventListener('click', focusHiddenInput, {passive: true});
