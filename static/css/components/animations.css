@@ -208,14 +208,15 @@
 
 /* Icon Animation */
 .fancy-nav-item .icon {
-    opacity: 0;
-    transform: translateX(-10px) scale(0);
+    opacity: 1;
+    transform: scale(1);
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: inline-block;
 }
 
 .fancy-nav-item:hover .icon {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: scale(1.2) rotate(5deg);
 }
 
 /* Hintergrund-Animation */

@@ -24,7 +24,7 @@
             <!-- Unsichtbares Input für Kartenleser-Scans auf Tablets (außerhalb des Viewports) -->
             <input type="text" id="hiddenScanInput" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;z-index:-1;" autocomplete="off" inputmode="none" aria-hidden="true" tabindex="-1">
         <div class="menu-card elastic-card glass-ultra">
-            <div class="menu-label neon-glow">Heutiges Menü</div>
+            <div class="menu-label">Heutiges Menü</div>
             <div id="menuDisplay" class="menu-text">
                 {% if menu %}
                     {% if menu.zwei_menues_aktiv %}
@@ -163,8 +163,12 @@
         const fullscreenBtn = document.createElement('button');
         fullscreenBtn.textContent = '⛶ Vollbild';
         fullscreenBtn.className = 'btn btn-secondary ripple-btn';
-        fullscreenBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 0.6rem 1.2rem; font-size: 0.9rem;';
-        fullscreenBtn.onclick = enterFullscreen;
+        fullscreenBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 0.8rem 1.5rem; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
+        fullscreenBtn.onclick = (e) => {
+            e.stopPropagation();
+            enterFullscreen();
+        };
+        fullscreenBtn.setAttribute('type', 'button');
         
         // Zeige Button nur wenn nicht im Fullscreen
         function updateFullscreenBtn() {
