@@ -20,8 +20,8 @@
     </header>
     
     <main class="main-content">
-            <!-- Unsichtbares Input für Kartenleser-Scans auf Tablets -->
-            <input type="text" id="hiddenScanInput" style="position:absolute;opacity:0;width:1px;height:1px;z-index:-1;" autocomplete="off" inputmode="numeric" aria-label="RFID Scan" tabindex="0">
+            <!-- Unsichtbares Input für Kartenleser-Scans auf Tablets (readonly, außerhalb des Viewports) -->
+            <input type="text" id="hiddenScanInput" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;z-index:-1;" autocomplete="off" inputmode="none" aria-label="RFID Scan" tabindex="0" readonly>
         <div class="menu-card">
             <div class="menu-label">Heutiges Menü</div>
             <div id="menuDisplay" class="menu-text">
@@ -115,7 +115,10 @@
     // Immer das unsichtbare Feld fokussieren, außer wenn das Numpad offen ist
     function focusHiddenInput() {
         if (document.getElementById('numpadWrapper').style.display !== 'block') {
-            document.getElementById('hiddenScanInput').focus();
+            const input = document.getElementById('hiddenScanInput');
+            input.readOnly = false; // kurzzeitig entsperren
+            input.focus();
+            setTimeout(() => { input.readOnly = true; }, 100);
         }
     }
     document.addEventListener('DOMContentLoaded', () => {
