@@ -110,22 +110,16 @@
         </div>
     </div>
     
-    <!-- Fullscreen Button -->
-    <button id="fullscreenBtn" class="btn btn-secondary ripple-btn" onclick="enterFullscreen()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 0.8rem 1.5rem; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-        ⛶ Vollbild
-    </button>
-    </div>
-    
-    <script src="/static/js/animations.js" defer></script>
-    <script src="/static/js/pages/touch.js" defer></script>
+    <!-- Fullscreen Funktion muss VOR dem Button definiert werden -->
     <script>
     // ==================== FULLSCREEN FUNKTION (GLOBAL) ====================
     function enterFullscreen() {
+        console.log('enterFullscreen() aufgerufen');
         const elem = document.documentElement;
         if (elem.requestFullscreen) {
             elem.requestFullscreen().catch(err => {
                 console.log('Fullscreen Fehler:', err);
-                alert('Vollbild konnte nicht aktiviert werden. Bitte Browser-Einstellungen prüfen.');
+                alert('Vollbild konnte nicht aktiviert werden: ' + err.message);
             });
         } else if (elem.webkitRequestFullscreen) { // Safari
             elem.webkitRequestFullscreen();
@@ -135,7 +129,18 @@
             alert('Vollbild wird von diesem Browser nicht unterstützt.');
         }
     }
+    console.log('enterFullscreen Funktion definiert:', typeof enterFullscreen);
+    </script>
     
+    <!-- Fullscreen Button -->
+    <button id="fullscreenBtn" class="btn btn-secondary ripple-btn" onclick="enterFullscreen()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 0.8rem 1.5rem; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+        ⛶ Vollbild
+    </button>
+    </div>
+    
+    <script src="/static/js/animations.js" defer></script>
+    <script src="/static/js/pages/touch.js" defer></script>
+    <script>
     // Immer das unsichtbare Feld fokussieren, außer wenn das Numpad offen ist
     function focusHiddenInput() {
         const numpadWrapper = document.getElementById('numpadWrapper');
