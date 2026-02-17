@@ -20,8 +20,8 @@
     </header>
     
     <main class="main-content">
-            <!-- Unsichtbares Input für Kartenleser-Scans auf Tablets (readonly, außerhalb des Viewports) -->
-            <input type="text" id="hiddenScanInput" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;z-index:-1;pointer-events:none;" autocomplete="off" inputmode="none" aria-hidden="true" tabindex="-1" readonly>
+            <!-- Unsichtbares Input für Kartenleser-Scans auf Tablets (außerhalb des Viewports) -->
+            <input type="text" id="hiddenScanInput" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;z-index:-1;" autocomplete="off" inputmode="none" aria-hidden="true" tabindex="-1">
         <div class="menu-card">
             <div class="menu-label">Heutiges Menü</div>
             <div id="menuDisplay" class="menu-text">
@@ -117,37 +117,53 @@
         const numpadWrapper = document.getElementById('numpadWrapper');
         if (numpadWrapper && numpadWrapper.style.display !== 'block') {
             const input = document.getElementById('hiddenScanInput');
-            if (input) {
-                input.removeAttribute('readonly'); // kurzzeitig entsperren
+            if (input && document.activeElement !== input) {
                 input.focus();
-                setTimeout(() => { input.setAttribute('readonly', 'readonly'); }, 50);
             }
         }
     }
     document.addEventListener('DOMContentLoaded', () => {
+        const hiddenInput = document.getElementById('hiddenScanInput');
+        
+        // Fokus-Event: Verhindere virtuelle Tastatur durch sofortigen Blur und Re-Focus
+        if (hiddenInput) {
+            hiddenInput.addEventListener('focus', function() {
+                // Blur sofort, damit keine Tastatur erscheint, dann re-focus
+                this.blur();
+                setTimeout(() => this.focus(), 10);
+            }, {once: false});
+        }
+        
         focusHiddenInput();
         document.body.addEventListener('click', focusHiddenInput, {passive: true});
-        // Fokus nur bei Bedarf wiederherstellen, nicht jede Sekunde
+        // Fokus nur bei Bedarf wiederherstellen
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) focusHiddenInput();
         });
     });
     // Wenn Scan erkannt, Ausweisnummer verarbeiten und anmelden
-    const hiddenInput = document.getElementById('hiddenScanInput');
-    if (hiddenInput) {
-        hiddenInput.addEventListener('input', function(e) {
+    const scanInput = document.getElementById('hiddenScanInput');
+    if (scanInput) {
+        scanInput.addEventListener('input', function(e) {
             const val = e.target.value.trim();
+            console.log('Scan input erkannt:', val, 'Länge:', val.length);
+            
             if(val.length > 3) { // Mindestlänge für Kartennummer
                 const cardIdInput = document.getElementById('cardIdInput');
                 const numpadWrapper = document.getElementById('numpadWrapper');
                 const form = document.querySelector('.numpad-wrapper form');
                 
+                console.log('Verarbeite Scan:', val);
+                
                 if (cardIdInput && form && numpadWrapper && numpadWrapper.style.display !== 'block') {
                     // Schreibe Ausweisnummer in das versteckte Feld
                     cardIdInput.value = val;
                     e.target.value = '';
+                    console.log('Sende Formular mit card_id:', val);
                     // Formular absenden
                     form.dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));
+                } else {
+                    console.log('Formular kann nicht abgesendet werden - Elemente fehlen oder Numpad offen');
                 }
             }
         });
