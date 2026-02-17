@@ -129,30 +129,20 @@
         console.log('Touch-Interface geladen, hiddenScanInput vorhanden:', !!hiddenInput);
         console.log('User Agent:', navigator.userAgent);
         
-        // Keyboard-Events auf Document-Ebene abfangen
+        // Scan-Buffer für Kartenleser
         let scanBuffer = '';
         let scanTimeout = null;
         
-        // Global Event Logger - loggt ALLES
-        window.addEventListener('keydown', function(e) {
-            console.log('WINDOW keydown:', e.key, 'keyCode:', e.keyCode, 'code:', e.code);
-        }, true);
-        
-        function handleKeyEvent(e) {
-            console.log('handleKeyEvent aufgerufen:', e.type, e.key, e.keyCode);
-            
+        // BLOCKIERE ALLE KEYBOARD-EVENTS GLOBAL (außer Tab/Escape)
+        // Dies verhindert Browser-Shortcuts inkl. Samsung F-Leiste
+        function blockAllKeys(e) {
             const numpadWrapper = document.getElementById('numpadWrapper');
-            // Nur abfangen wenn Numpad NICHT offen ist
             if (numpadWrapper && numpadWrapper.style.display === 'block') {
-                console.log('Numpad offen - ignoriere Event');
-                return; // Numpad ist offen, normale Tastatur-Events erlauben
+                return; // Numpad offen - erlaube normale Eingabe
             }
             
-            // Blockiere ALLE F-Tasten (F1-F12) und andere Shortcuts
-            const isFunctionKey = (e.key && e.key.match(/^F\d+$/i)) || (e.keyCode >= 112 && e.keyCode <= 123);
-            
-            if (isFunctionKey) {
-                console.log('!!! F-Taste BLOCKIERT !!!:', e.key, 'keyCode:', e.keyCode);
+            // Blockiere alles außer Navigation-Tasten
+            if (e.key !== 'Tab' && e.key !== 'Escape') {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
@@ -160,24 +150,51 @@
             }
         }
         
-        // Blockiere F-Tasten auf allen Event-Typen auf Window UND Document
+        // Auf ALLEN Event-Phasen und Event-Typen blockieren
         ['keydown', 'keyup', 'keypress'].forEach(eventType => {
-            window.addEventListener(eventType, handleKeyEvent, true);
-            document.addEventListener(eventType, handleKeyEvent, true);
+            window.addEventListener(eventType, blockAllKeys, {capture: true, passive: false});
+            document.addEventListener(eventType, blockAllKeys, {capture: true, passive: false});
         });
         
+        // Sammle Scan-Daten
         document.addEventListener('keydown', function(e) {
             const numpadWrapper = document.getElementById('numpadWrapper');
             if (numpadWrapper && numpadWrapper.style.display === 'block') {
                 return;
             }
             
+            console.log('Key:', e.key, 'Code:', e.code, 'KeyCode:', e.keyCode);
+            
             // Sammle alphanumerische Zeichen
-            if (e.key && e.key.length === 1 || e.key === 'Enter') {
+            if (e.key && (e.key.length === 1 || e.key === 'Enter')) {
                 
                 if (e.key === 'Enter') {
                     // Enter = Scan ist komplett
-                    console.log('Enter erkannt, Scan-Buffer:', scanBuffer);
+                    console.log('✓ Scan komplett:', scanBuffer);
+                    if (scanBuffer.length > 3 && hiddenInput) {
+                        hiddenInput.value = scanBuffer;
+                        hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
+                    }
+                    scanBuffer = '';
+                    clearTimeout(scanTimeout);
+                } else {
+                    // Zeichen sammeln
+                    scanBuffer += e.key;
+                    console.log('  → Buffer:', scanBuffer);
+                    
+                    // Auto-Submit nach 150ms Pause
+                    clearTimeout(scanTimeout);
+                    scanTimeout = setTimeout(() => {
+                        if (scanBuffer.length > 3 && hiddenInput) {
+                            console.log('✓ Timeout-Submit:', scanBuffer);
+                            hiddenInput.value = scanBuffer;
+                            hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
+                        }
+                        scanBuffer = '';
+                    }, 150);
+                }
+            }
+        });
                     if (scanBuffer.length > 3 && hiddenInput) {
                         hiddenInput.value = scanBuffer;
                         hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
