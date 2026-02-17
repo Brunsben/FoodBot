@@ -111,7 +111,7 @@
     </div>
     
     <!-- Fullscreen Button -->
-    <button id="fullscreenBtn" class="btn btn-secondary ripple-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 0.8rem 1.5rem; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+    <button id="fullscreenBtn" class="btn btn-secondary ripple-btn" onclick="enterFullscreen()" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 0.8rem 1.5rem; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
         ⛶ Vollbild
     </button>
     </div>
@@ -119,6 +119,23 @@
     <script src="/static/js/animations.js" defer></script>
     <script src="/static/js/pages/touch.js" defer></script>
     <script>
+    // ==================== FULLSCREEN FUNKTION (GLOBAL) ====================
+    function enterFullscreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(err => {
+                console.log('Fullscreen Fehler:', err);
+                alert('Vollbild konnte nicht aktiviert werden. Bitte Browser-Einstellungen prüfen.');
+            });
+        } else if (elem.webkitRequestFullscreen) { // Safari
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { // IE11
+            elem.msRequestFullscreen();
+        } else {
+            alert('Vollbild wird von diesem Browser nicht unterstützt.');
+        }
+    }
+    
     // Immer das unsichtbare Feld fokussieren, außer wenn das Numpad offen ist
     function focusHiddenInput() {
         const numpadWrapper = document.getElementById('numpadWrapper');
@@ -137,20 +154,6 @@
         console.log('User Agent:', navigator.userAgent);
         
         // ==================== FULLSCREEN MODUS FÜR TABLETS ====================
-        // Verhindert Samsung F-Tasten-Leiste durch Fullscreen
-        function enterFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => {
-                    console.log('Fullscreen Fehler:', err);
-                });
-            } else if (elem.webkitRequestFullscreen) { // Safari
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { // IE11
-                elem.msRequestFullscreen();
-            }
-        }
-        
         // Versuche Fullscreen beim ersten User-Interaktion (Auto-Play-Policy)
         let fullscreenAttempted = false;
         function tryFullscreen() {
