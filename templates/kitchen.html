@@ -88,13 +88,13 @@
                         <span>Zwei Menüs anbieten</span>
                     </label>
 
-                    <div id="single-menu-input" style="{% if menu and menu.zwei_menues_aktiv %}display:none{% endif %}">
+                    <div id="single-menu-input" {% if menu and menu.zwei_menues_aktiv %}style="display:none"{% endif %}>
                         <input type="text" name="menu" placeholder="Menü eingeben"
                                value="{{ menu.description if menu and not menu.zwei_menues_aktiv else '' }}"
                                inputmode="text" aria-label="Menübeschreibung">
                     </div>
 
-                    <div id="dual-menu-inputs" style="{% if not menu or not menu.zwei_menues_aktiv %}display:none{% endif %}">
+                    <div id="dual-menu-inputs" {% if not menu or not menu.zwei_menues_aktiv %}style="display:none"{% endif %}>
                         <input type="text" name="menu1" placeholder="Menü 1"
                                value="{{ menu.menu1_name if menu and menu.zwei_menues_aktiv else '' }}"
                                inputmode="text" aria-label="Menü 1">
