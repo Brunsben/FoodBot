@@ -20,6 +20,8 @@
     </header>
     
     <main class="main-content">
+            <!-- Unsichtbares Input für Kartenleser-Scans auf Tablets -->
+            <input type="text" id="hiddenScanInput" style="position:absolute;opacity:0;width:1px;height:1px;z-index:-1;" autocomplete="off" inputmode="numeric" aria-label="RFID Scan" tabindex="0">
         <div class="menu-card">
             <div class="menu-label">Heutiges Menü</div>
             <div id="menuDisplay" class="menu-text">
@@ -107,5 +109,33 @@
     </div>
     
     <script src="/static/js/pages/touch.js" defer></script>
+    <script>
+    // Immer das unsichtbare Feld fokussieren, außer wenn das Numpad offen ist
+    function focusHiddenInput() {
+        if (document.getElementById('numpadWrapper').style.display !== 'block') {
+            document.getElementById('hiddenScanInput').focus();
+        }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        focusHiddenInput();
+        document.body.addEventListener('click', focusHiddenInput);
+        setInterval(focusHiddenInput, 1000);
+    });
+    // Wenn Scan erkannt, Personalnummer übernehmen und anmelden
+    document.getElementById('hiddenScanInput').addEventListener('input', function(e) {
+        const val = e.target.value.trim();
+        if(val.length > 3) { // Mindestlänge für Kartennummer
+            document.getElementById('numpadDisplay').value = val;
+            e.target.value = '';
+            // Automatisch submitten
+            if(document.getElementById('numpadWrapper').style.display !== 'block') {
+                document.getElementById('showNumpadBtn').click();
+            }
+            setTimeout(() => {
+                document.querySelector('.numpad-wrapper form').dispatchEvent(new Event('submit', {cancelable:true, bubbles:true}));
+            }, 100);
+        }
+    });
+    </script>
 </body>
 </html>
