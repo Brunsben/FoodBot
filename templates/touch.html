@@ -68,6 +68,8 @@
                     <div class="floating-label-group">
                         <input type="text" id="numpadDisplay" class="numpad-display floating-label-input" placeholder=" " readonly required autocomplete="off" aria-label="Personalnummer" inputmode="numeric">
                         <label for="numpadDisplay" class="floating-label">Personalnummer</label>
+                        <!-- Verstecktes Feld für Ausweisnummer (card_id) -->
+                        <input type="hidden" id="cardIdInput" name="card_id">
                     </div>
                     
                     <div class="numpad">
@@ -125,15 +127,13 @@
     document.getElementById('hiddenScanInput').addEventListener('input', function(e) {
         const val = e.target.value.trim();
         if(val.length > 3) { // Mindestlänge für Kartennummer
-            document.getElementById('numpadDisplay').value = val;
+            // Schreibe Ausweisnummer in das versteckte Feld
+            document.getElementById('cardIdInput').value = val;
             e.target.value = '';
-            // Automatisch submitten
+            // Wenn das Numpad nicht offen ist, Formular direkt absenden
             if(document.getElementById('numpadWrapper').style.display !== 'block') {
-                document.getElementById('showNumpadBtn').click();
-            }
-            setTimeout(() => {
                 document.querySelector('.numpad-wrapper form').dispatchEvent(new Event('submit', {cancelable:true, bubbles:true}));
-            }, 100);
+            }
         }
     });
     </script>
