@@ -21,7 +21,7 @@
     
     <main class="main-content">
             <!-- Unsichtbares Input für Kartenleser-Scans auf Tablets (readonly, außerhalb des Viewports) -->
-            <input type="text" id="hiddenScanInput" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;z-index:-1;" autocomplete="off" inputmode="none" aria-label="RFID Scan" tabindex="0" readonly>
+            <input type="text" id="hiddenScanInput" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;z-index:-1;pointer-events:none;" autocomplete="off" inputmode="none" aria-hidden="true" tabindex="-1" readonly>
         <div class="menu-card">
             <div class="menu-label">Heutiges Menü</div>
             <div id="menuDisplay" class="menu-text">
@@ -66,7 +66,7 @@
             <div id="numpadWrapper" class="numpad-wrapper" style="display: none;">
                 <form onsubmit="handleSubmit(event)">
                     <div class="floating-label-group">
-                        <input type="text" id="numpadDisplay" class="numpad-display floating-label-input" placeholder=" " readonly required autocomplete="off" aria-label="Personalnummer" inputmode="numeric">
+                        <input type="text" id="numpadDisplay" name="personal_number" class="numpad-display floating-label-input" placeholder=" " readonly required autocomplete="off" aria-label="Personalnummer" inputmode="numeric">
                         <label for="numpadDisplay" class="floating-label">Personalnummer</label>
                         <!-- Verstecktes Feld für Ausweisnummer (card_id) -->
                         <input type="hidden" id="cardIdInput" name="card_id">
@@ -114,31 +114,44 @@
     <script>
     // Immer das unsichtbare Feld fokussieren, außer wenn das Numpad offen ist
     function focusHiddenInput() {
-        if (document.getElementById('numpadWrapper').style.display !== 'block') {
+        const numpadWrapper = document.getElementById('numpadWrapper');
+        if (numpadWrapper && numpadWrapper.style.display !== 'block') {
             const input = document.getElementById('hiddenScanInput');
-            input.readOnly = false; // kurzzeitig entsperren
-            input.focus();
-            setTimeout(() => { input.readOnly = true; }, 100);
+            if (input) {
+                input.removeAttribute('readonly'); // kurzzeitig entsperren
+                input.focus();
+                setTimeout(() => { input.setAttribute('readonly', 'readonly'); }, 50);
+            }
         }
     }
     document.addEventListener('DOMContentLoaded', () => {
         focusHiddenInput();
-        document.body.addEventListener('click', focusHiddenInput);
-        setInterval(focusHiddenInput, 1000);
+        document.body.addEventListener('click', focusHiddenInput, {passive: true});
+        // Fokus nur bei Bedarf wiederherstellen, nicht jede Sekunde
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) focusHiddenInput();
+        });
     });
-    // Wenn Scan erkannt, Personalnummer übernehmen und anmelden
-    document.getElementById('hiddenScanInput').addEventListener('input', function(e) {
-        const val = e.target.value.trim();
-        if(val.length > 3) { // Mindestlänge für Kartennummer
-            // Schreibe Ausweisnummer in das versteckte Feld
-            document.getElementById('cardIdInput').value = val;
-            e.target.value = '';
-            // Wenn das Numpad nicht offen ist, Formular direkt absenden
-            if(document.getElementById('numpadWrapper').style.display !== 'block') {
-                document.querySelector('.numpad-wrapper form').dispatchEvent(new Event('submit', {cancelable:true, bubbles:true}));
+    // Wenn Scan erkannt, Ausweisnummer verarbeiten und anmelden
+    const hiddenInput = document.getElementById('hiddenScanInput');
+    if (hiddenInput) {
+        hiddenInput.addEventListener('input', function(e) {
+            const val = e.target.value.trim();
+            if(val.length > 3) { // Mindestlänge für Kartennummer
+                const cardIdInput = document.getElementById('cardIdInput');
+                const numpadWrapper = document.getElementById('numpadWrapper');
+                const form = document.querySelector('.numpad-wrapper form');
+                
+                if (cardIdInput && form && numpadWrapper && numpadWrapper.style.display !== 'block') {
+                    // Schreibe Ausweisnummer in das versteckte Feld
+                    cardIdInput.value = val;
+                    e.target.value = '';
+                    // Formular absenden
+                    form.dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));
+                }
             }
-        }
-    });
+        });
+    }
     </script>
 </body>
 </html>

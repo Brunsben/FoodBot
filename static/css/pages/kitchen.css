@@ -290,6 +290,11 @@ body {
     white-space: nowrap;
 }
 
+.user-badge__detail {
+    color: #94a3b8;
+    font-size: 0.92em;
+}
+
 /* --- Print --- */
 @media print {
     body { background: white !important; color: black !important; }
