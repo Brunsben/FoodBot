@@ -127,15 +127,24 @@
         const hiddenInput = document.getElementById('hiddenScanInput');
         
         console.log('Touch-Interface geladen, hiddenScanInput vorhanden:', !!hiddenInput);
+        console.log('User Agent:', navigator.userAgent);
         
         // Keyboard-Events auf Document-Ebene abfangen
         let scanBuffer = '';
         let scanTimeout = null;
         
+        // Global Event Logger - loggt ALLES
+        window.addEventListener('keydown', function(e) {
+            console.log('WINDOW keydown:', e.key, 'keyCode:', e.keyCode, 'code:', e.code);
+        }, true);
+        
         function handleKeyEvent(e) {
+            console.log('handleKeyEvent aufgerufen:', e.type, e.key, e.keyCode);
+            
             const numpadWrapper = document.getElementById('numpadWrapper');
             // Nur abfangen wenn Numpad NICHT offen ist
             if (numpadWrapper && numpadWrapper.style.display === 'block') {
+                console.log('Numpad offen - ignoriere Event');
                 return; // Numpad ist offen, normale Tastatur-Events erlauben
             }
             
@@ -143,18 +152,19 @@
             const isFunctionKey = (e.key && e.key.match(/^F\d+$/i)) || (e.keyCode >= 112 && e.keyCode <= 123);
             
             if (isFunctionKey) {
+                console.log('!!! F-Taste BLOCKIERT !!!:', e.key, 'keyCode:', e.keyCode);
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                console.log('F-Taste blockiert:', e.key, 'keyCode:', e.keyCode);
                 return false;
             }
         }
         
-        // Blockiere F-Tasten auf allen Event-Typen
-        document.addEventListener('keydown', handleKeyEvent, true);
-        document.addEventListener('keyup', handleKeyEvent, true);
-        document.addEventListener('keypress', handleKeyEvent, true);
+        // Blockiere F-Tasten auf allen Event-Typen auf Window UND Document
+        ['keydown', 'keyup', 'keypress'].forEach(eventType => {
+            window.addEventListener(eventType, handleKeyEvent, true);
+            document.addEventListener(eventType, handleKeyEvent, true);
+        });
         
         document.addEventListener('keydown', function(e) {
             const numpadWrapper = document.getElementById('numpadWrapper');
