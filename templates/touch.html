@@ -109,6 +109,11 @@
             </div>
         </div>
     </div>
+    
+    <!-- Fullscreen Button -->
+    <button id="fullscreenBtn" class="btn btn-secondary ripple-btn" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 0.8rem 1.5rem; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+        ⛶ Vollbild
+    </button>
     </div>
     
     <script src="/static/js/animations.js" defer></script>
@@ -159,30 +164,29 @@
         document.body.addEventListener('click', tryFullscreen, { once: true });
         document.body.addEventListener('touchstart', tryFullscreen, { once: true });
         
-        // Fullscreen Button für manuelle Aktivierung
-        const fullscreenBtn = document.createElement('button');
-        fullscreenBtn.textContent = '⛶ Vollbild';
-        fullscreenBtn.className = 'btn btn-secondary ripple-btn';
-        fullscreenBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 0.8rem 1.5rem; font-size: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
-        fullscreenBtn.onclick = (e) => {
-            e.stopPropagation();
-            enterFullscreen();
-        };
-        fullscreenBtn.setAttribute('type', 'button');
-        
-        // Zeige Button nur wenn nicht im Fullscreen
-        function updateFullscreenBtn() {
-            if (document.fullscreenElement) {
-                fullscreenBtn.style.display = 'none';
-            } else {
-                fullscreenBtn.style.display = 'block';
+        // Nutze existierenden Fullscreen Button
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        if (fullscreenBtn) {
+            fullscreenBtn.onclick = (e) => {
+                e.stopPropagation();
+                enterFullscreen();
+            };
+            
+            // Zeige Button nur wenn nicht im Fullscreen
+            function updateFullscreenBtn() {
+                if (document.fullscreenElement || document.webkitFullscreenElement) {
+                    fullscreenBtn.style.display = 'none';
+                } else {
+                    fullscreenBtn.style.display = 'block';
+                }
             }
+            
+            document.addEventListener('fullscreenchange', updateFullscreenBtn);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenBtn);
+            updateFullscreenBtn();
+            
+            console.log('Fullscreen-Button initialisiert');
         }
-        
-        document.addEventListener('fullscreenchange', updateFullscreenBtn);
-        document.addEventListener('webkitfullscreenchange', updateFullscreenBtn);
-        document.body.appendChild(fullscreenBtn);
-        updateFullscreenBtn();
         
         // Scan-Buffer für Kartenleser
         let scanBuffer = '';
