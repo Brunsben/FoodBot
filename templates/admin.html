@@ -7,20 +7,21 @@
     <meta name="color-scheme" content="dark">
     <title>Admin – FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/admin.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/components/glass.css') }}">
 </head>
 <body>
     <header class="topbar">
-        <h1 class="topbar__title">⚙️ Admin</h1>
-        <nav class="topbar__nav">
-            <a href="/admin/weekly">📅 Wochenplan</a>
-            <a href="/stats">📊 Statistiken</a>
-            <a href="/history">📜 Historie</a>
-            <a href="/kitchen">🍳 Küche</a>
-            <a href="/">📡 Touch</a>
-            <a href="/logout" class="topbar__logout">🚪 Logout</a>
+        <h1 class="topbar__title neon-glow">⚙️ Admin</h1>
+        <nav class="topbar__nav fancy-nav">
+            <a href="/admin/weekly" class="fancy-nav-item"><span class="icon">📅</span>Wochenplan</a>
+            <a href="/stats" class="fancy-nav-item"><span class="icon">📊</span>Statistiken</a>
+            <a href="/history" class="fancy-nav-item"><span class="icon">📜</span>Historie</a>
+            <a href="/kitchen" class="fancy-nav-item"><span class="icon">🍳</span>Küche</a>
+            <a href="/" class="fancy-nav-item"><span class="icon">📡</span>Touch</a>
+            <a href="/logout" class="topbar__logout fancy-nav-item"><span class="icon">🚺</span>Logout</a>
         </nav>
     </header>
 
@@ -113,8 +114,7 @@
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="field">
                             <label>Anzahl Gäste</label>
-                            <input type="number" name="guest_count" value="{{ guest_count }}" min="0" max="50">
-                                                    <input type="number" name="guest_count" value="{{ guest_count }}" min="0" max="50" inputmode="numeric" aria-label="Anzahl Gäste">
+                            <input type="number" name="guest_count" value="{{ guest_count }}" min="0" max="50" inputmode="numeric" aria-label="Anzahl Gäste">
                         </div>
                         <button type="submit" name="guest_action" value="set" class="btn-action">
                             💾 Speichern
@@ -126,8 +126,9 @@
             <!-- Angemeldete Personen -->
             <section class="card glass">
                 <h2 class="card__heading">
-                    📋 Angemeldete Personen
+                    📋 Alle User
                     <span class="count-badge">{{ users|length }}</span>
+                    <span style="font-size: 0.8em; font-weight: normal; color: var(--text-muted);"> · {{ registered_ids|length }} angemeldet</span>
                 </h2>
 
                 {% if users %}
@@ -284,6 +285,7 @@
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/animations.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/pages/admin.js') }}" defer></script>
 </body>
 </html>

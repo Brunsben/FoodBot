@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/static/css/base.css">
     <link rel="stylesheet" href="/static/css/components.css">
     <link rel="stylesheet" href="/static/css/layouts.css">
+    <link rel="stylesheet" href="/static/css/components/animations.css">
         <link rel="stylesheet" href="/static/css/pages/touch.css">
         <link rel="stylesheet" href="/static/css/components/button.css">
 </head>
@@ -22,8 +23,8 @@
     <main class="main-content">
             <!-- Unsichtbares Input für Kartenleser-Scans auf Tablets (außerhalb des Viewports) -->
             <input type="text" id="hiddenScanInput" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;z-index:-1;" autocomplete="off" inputmode="none" aria-hidden="true" tabindex="-1">
-        <div class="menu-card">
-            <div class="menu-label">Heutiges Menü</div>
+        <div class="menu-card elastic-card glass-ultra">
+            <div class="menu-label neon-glow">Heutiges Menü</div>
             <div id="menuDisplay" class="menu-text">
                 {% if menu %}
                     {% if menu.zwei_menues_aktiv %}
@@ -46,8 +47,8 @@
             </div>
         </div>
         
-        <div class="scanner-area">
-            <div class="scanner-icon" id="scannerIcon">
+        <div class="scanner-area elastic-hover">
+            <div class="scanner-icon scan-pulse" id="scannerIcon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em">
                     <path d="M2 10a8 8 0 0 1 8-8"/>
                     <path d="M2 14a12 12 0 0 1 12-12"/>
@@ -59,7 +60,7 @@
             </div>
             <div class="scanner-text" id="scannerText">Karte auflegen</div>
             
-            <button class="btn btn-primary" id="showNumpadBtn" onclick="showNumpad()">
+            <button class="btn btn-primary ripple-btn" id="showNumpadBtn" onclick="showNumpad()">
                 oder mit Personalnummer
             </button>
             
@@ -110,6 +111,7 @@
     </div>
     </div>
     
+    <script src="/static/js/animations.js" defer></script>
     <script src="/static/js/pages/touch.js" defer></script>
     <script>
     // Immer das unsichtbare Feld fokussieren, außer wenn das Numpad offen ist
@@ -128,6 +130,55 @@
         
         console.log('Touch-Interface geladen, hiddenScanInput vorhanden:', !!hiddenInput);
         console.log('User Agent:', navigator.userAgent);
+        
+        // ==================== FULLSCREEN MODUS FÜR TABLETS ====================
+        // Verhindert Samsung F-Tasten-Leiste durch Fullscreen
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => {
+                    console.log('Fullscreen Fehler:', err);
+                });
+            } else if (elem.webkitRequestFullscreen) { // Safari
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { // IE11
+                elem.msRequestFullscreen();
+            }
+        }
+        
+        // Versuche Fullscreen beim ersten User-Interaktion (Auto-Play-Policy)
+        let fullscreenAttempted = false;
+        function tryFullscreen() {
+            if (!fullscreenAttempted && !document.fullscreenElement) {
+                enterFullscreen();
+                fullscreenAttempted = true;
+            }
+        }
+        
+        // Bei erstem Click/Touch in Fullscreen gehen
+        document.body.addEventListener('click', tryFullscreen, { once: true });
+        document.body.addEventListener('touchstart', tryFullscreen, { once: true });
+        
+        // Fullscreen Button für manuelle Aktivierung
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.textContent = '⛶ Vollbild';
+        fullscreenBtn.className = 'btn btn-secondary ripple-btn';
+        fullscreenBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 0.6rem 1.2rem; font-size: 0.9rem;';
+        fullscreenBtn.onclick = enterFullscreen;
+        
+        // Zeige Button nur wenn nicht im Fullscreen
+        function updateFullscreenBtn() {
+            if (document.fullscreenElement) {
+                fullscreenBtn.style.display = 'none';
+            } else {
+                fullscreenBtn.style.display = 'block';
+            }
+        }
+        
+        document.addEventListener('fullscreenchange', updateFullscreenBtn);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenBtn);
+        document.body.appendChild(fullscreenBtn);
+        updateFullscreenBtn();
         
         // Scan-Buffer für Kartenleser
         let scanBuffer = '';
@@ -259,5 +310,6 @@
         });
     }
     </script>
+    <script src="/static/js/animations.js" defer></script>
 </body>
 </html>

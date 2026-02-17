@@ -7,6 +7,7 @@
     <meta name="color-scheme" content="dark">
     <title>Küche – FoodBot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/animations.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/kitchen.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/components/glass.css') }}">
@@ -14,10 +15,10 @@
 <body>
     <header class="topbar">
         <h1 class="topbar__title">🍳 Küche</h1>
-        <nav class="topbar__nav">
-            <a href="/kitchen/print" target="_blank">🖨️ Drucken</a>
-            <a href="/admin">⚙️ Admin</a>
-            <a href="/">📡 Touch</a>
+        <nav class="topbar__nav fancy-nav">
+            <a href="/kitchen/print" target="_blank" class="fancy-nav-item"><span class="icon">🖨️</span>Drucken</a>
+            <a href="/admin" class="fancy-nav-item"><span class="icon">⚙️</span>Admin</a>
+            <a href="/" class="fancy-nav-item"><span class="icon">📡</span>Touch</a>
         </nav>
     </header>
 
@@ -55,8 +56,8 @@
         </div>
 
         <!-- Heutiges Menü -->
-        <section class="panel glass">
-            <h2 class="panel__heading">📋 Heutiges Menü</h2>
+        <section class="panel glass glass-ultra elastic-card">
+            <h2 class="panel__heading neon-glow">📋 Heutiges Menü</h2>
             <div class="menu-display">
                 {% if menu %}
                     {% if menu.zwei_menues_aktiv %}
@@ -103,13 +104,13 @@
                                inputmode="text" aria-label="Menü 2">
                     </div>
 
-                    <button type="submit" class="btn-save">💾 Speichern</button>
+                    <button type="submit" class="btn-save ripple-btn">💾 Speichern</button>
                 </form>
             </details>
         </section>
 
         <!-- Angemeldete Personen -->
-        <section class="panel glass">
+        <section class="panel glass glass-ultra">
             <h2 class="panel__heading">
                 👥 Angemeldet
                 <span class="count-badge" id="user-count">{{ registrations|length }}</span>
@@ -127,8 +128,21 @@
                 {% endfor %}
             </div>
         </section>
+
+        <!-- Gäste-Verwaltung -->
+        <section class="panel glass glass-ultra">
+            <h2 class="panel__heading">👥 Gäste verwalten</h2>
+            <form method="post" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="submit" name="guest_action" value="remove" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➖</button>
+                <span style="font-size: 1.5rem; font-weight: bold; min-width: 3rem; text-align: center;">{{ guest_count }}</span>
+                <button type="submit" name="guest_action" value="add" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➕</button>
+                <span style="color: var(--text-muted); margin-left: 0.5rem;">Gäste</span>
+            </form>
+        </section>
     </main>
 
+    <script src="{{ url_for('static', filename='js/animations.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/pages/kitchen.js') }}" defer></script>
 </body>
 </html>

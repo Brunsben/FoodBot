@@ -1,0 +1,481 @@
+/* =====================================================================
+   FoodBot – Advanced Animations & Effects
+   ===================================================================== */
+
+/* ==================== GUMMI/ELASTIC EFFEKT ==================== */
+/* Elastischer Rand-Effekt basierend auf Mausposition */
+.elastic-card {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.elastic-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    filter: blur(8px);
+}
+
+.elastic-card:hover::before {
+    opacity: 0.6;
+    animation: elasticPulse 2s ease-in-out infinite;
+}
+
+@keyframes elasticPulse {
+    0%, 100% { 
+        transform: scale(1);
+        filter: blur(8px);
+    }
+    50% { 
+        transform: scale(1.03);
+        filter: blur(12px);
+    }
+}
+
+/* Gummi-Effekt bei Mausbewegung (benötigt JavaScript für CSS-Variablen) */
+.elastic-hover {
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+    position: relative;
+    overflow: hidden;
+}
+
+.elastic-hover::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    left: var(--mouse-x);
+    top: var(--mouse-y);
+    transform: translate(-50%, -50%);
+    transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0;
+}
+
+.elastic-hover:hover::after {
+    opacity: 1;
+}
+
+/* ==================== NEON GLOW EFFEKTE ==================== */
+.neon-glow {
+    position: relative;
+    text-shadow: 
+        0 0 10px rgba(99,102,241,0.8),
+        0 0 20px rgba(99,102,241,0.6),
+        0 0 30px rgba(99,102,241,0.4),
+        0 0 40px rgba(99,102,241,0.2);
+    animation: neonFlicker 3s ease-in-out infinite;
+}
+
+@keyframes neonFlicker {
+    0%, 100% { 
+        text-shadow: 
+            0 0 10px rgba(99,102,241,0.8),
+            0 0 20px rgba(99,102,241,0.6),
+            0 0 30px rgba(99,102,241,0.4);
+    }
+    50% { 
+        text-shadow: 
+            0 0 15px rgba(99,102,241,1),
+            0 0 25px rgba(99,102,241,0.8),
+            0 0 35px rgba(99,102,241,0.6),
+            0 0 45px rgba(99,102,241,0.4);
+    }
+}
+
+.neon-border {
+    box-shadow: 
+        0 0 5px rgba(99,102,241,0.5),
+        0 0 10px rgba(99,102,241,0.4),
+        0 0 15px rgba(99,102,241,0.3),
+        inset 0 0 5px rgba(99,102,241,0.2);
+    border: 1px solid rgba(99,102,241,0.6);
+}
+
+.neon-border:hover {
+    box-shadow: 
+        0 0 10px rgba(99,102,241,0.8),
+        0 0 20px rgba(99,102,241,0.6),
+        0 0 30px rgba(99,102,241,0.4),
+        inset 0 0 10px rgba(99,102,241,0.3);
+    animation: neonBorderPulse 2s ease-in-out infinite;
+}
+
+@keyframes neonBorderPulse {
+    0%, 100% { 
+        border-color: rgba(99,102,241,0.6);
+    }
+    50% { 
+        border-color: rgba(99,102,241,1);
+    }
+}
+
+/* ==================== ANIMIERTE FLOATING LABELS ==================== */
+.floating-label-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.floating-label-input {
+    width: 100%;
+    padding: 1.2rem 1rem 0.6rem;
+    font-size: 1rem;
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-label-input:focus {
+    border-color: var(--primary);
+    background: rgba(99,102,241,0.05);
+    box-shadow: 
+        0 0 0 3px rgba(99,102,241,0.1),
+        0 8px 16px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+}
+
+.floating-label {
+    position: absolute;
+    left: 1rem;
+    top: 1.2rem;
+    font-size: 1rem;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    padding: 0 0.25rem;
+}
+
+/* Label bewegt sich nach oben wenn Input fokussiert oder gefüllt ist */
+.floating-label-input:focus + .floating-label,
+.floating-label-input:not(:placeholder-shown) + .floating-label {
+    top: -0.6rem;
+    left: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--primary);
+    background: var(--bg-base);
+    font-weight: 600;
+}
+
+/* Animierte Unterlinie */
+.floating-label-group::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-50%);
+}
+
+.floating-label-input:focus ~ .floating-label-group::after {
+    width: 100%;
+}
+
+/* ==================== FANCY HOVER MENÜ ==================== */
+.fancy-nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.fancy-nav-item {
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Icon Animation */
+.fancy-nav-item .icon {
+    opacity: 0;
+    transform: translateX(-10px) scale(0);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fancy-nav-item:hover .icon {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+/* Hintergrund-Animation */
+.fancy-nav-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.fancy-nav-item:hover::before {
+    opacity: 0.15;
+}
+
+.fancy-nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateX(-50%);
+}
+
+.fancy-nav-item:hover::after {
+    width: 80%;
+}
+
+.fancy-nav-item:hover {
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+/* ==================== CUSTOM CHECKBOX/SWITCH MIT ANIMATION ==================== */
+.animated-checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    padding: 0.5rem 0;
+}
+
+.animated-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.animated-checkbox-box {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.75rem;
+    background: var(--bg-glass);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-sm);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animated-checkbox input:checked ~ .animated-checkbox-box {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    border-color: var(--primary);
+    transform: rotate(10deg) scale(1.1);
+}
+
+.animated-checkbox input:checked ~ .animated-checkbox-box::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    animation: checkBounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes checkBounce {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    50% { transform: translate(-50%, -50%) scale(1.3); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.animated-checkbox:hover .animated-checkbox-box {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(99,102,241,0.3);
+}
+
+/* ==================== INTERAKTIVE BUTTON EFFEKTE ==================== */
+.ripple-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.ripple-btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Magnetischer Button-Effekt (benötigt JavaScript) */
+.magnetic-btn {
+    --btn-x: 0;
+    --btn-y: 0;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.magnetic-btn:hover {
+    transform: translate(calc(var(--btn-x) * 10px), calc(var(--btn-y) * 10px)) scale(1.05);
+}
+
+/* 3D Button Tilt Effekt */
+.tilt-btn {
+    --tilt-x: 0deg;
+    --tilt-y: 0deg;
+    transform: perspective(1000px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+    transition: transform 0.2s ease;
+}
+
+/* Glitch Effekt für Fehler-States */
+.glitch {
+    position: relative;
+    animation: glitch 1s infinite;
+}
+
+@keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+}
+
+/* ==================== SCAN ANIMATION ==================== */
+.scan-pulse {
+    animation: scanPulse 2s ease-in-out infinite;
+}
+
+@keyframes scanPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(99,102,241,0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+        box-shadow: 0 0 0 20px rgba(99,102,241,0);
+    }
+}
+
+/* Scan-Linie Effekt */
+.scan-line {
+    position: relative;
+    overflow: hidden;
+}
+
+.scan-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(99,102,241,0.3) 50%,
+        transparent 100%
+    );
+    animation: scanLine 2s ease-in-out infinite;
+}
+
+@keyframes scanLine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* ==================== GLASSMORPHISM ENHANCED ==================== */
+.glass-ultra {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 8px 32px 0 rgba(0, 0, 0, 0.37),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.glass-ultra:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(99,102,241,0.3);
+    box-shadow: 
+        0 8px 32px 0 rgba(99,102,241,0.2),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* ==================== GRADIENT BACKGROUND ANIMATION ==================== */
+.gradient-shift {
+    background: linear-gradient(
+        -45deg,
+        var(--bg-base),
+        var(--bg-elevated),
+        #1e1b4b,
+        var(--bg-base)
+    );
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ==================== LOADING SPINNER ==================== */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.spinner-glow {
+    filter: drop-shadow(0 0 10px var(--primary));
+}
+
+/* ==================== SHAKE ANIMATION FÜR FEHLER ==================== */
+.shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-6px); }
+    40%, 60% { transform: translateX(6px); }
+}
