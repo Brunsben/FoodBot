@@ -1,17 +1,16 @@
-<!DOCTYPE html>
-<html lang="de" translate="no">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="google" content="notranslate">
+{% extends "base.html" %}
+
+{% block title %}Küche – FoodBot{% endblock %}
+
+{% block styles %}
     <meta name="color-scheme" content="dark">
-    <title>Küche – FoodBot</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/animations.css') }}?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/kitchen.css') }}?v={{ asset_version }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}?v={{ asset_version }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/glass.css') }}?v={{ asset_version }}">
-</head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/glass.css') }}?v={{ asset_version }}">
+{% endblock %}
+
+{% block body %}
 <body>
     <header class="topbar">
         <h1 class="topbar__title">🍳 Küche</h1>
@@ -174,4 +173,4 @@
     <script src="{{ url_for('static', filename='js/animations.js') }}?v={{ asset_version }}" defer></script>
     <script src="{{ url_for('static', filename='js/pages/kitchen.js') }}?v={{ asset_version }}" defer></script>
 </body>
-</html>
+{% endblock %}

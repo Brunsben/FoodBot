@@ -56,28 +56,39 @@ def index():
 @history_bp.route('/user/<int:user_id>')
 @login_required
 def user_detail(user_id):
-    """Detail-Ansicht für einen User"""
+    """Detail-Ansicht für einen User mit Pagination"""
+    from flask import request
     user = db.session.get(User, user_id)
     if not user:
         from flask import abort
         abort(404)
     
-    # Alle Anmeldungen des Users (letzte 180 Tage)
+    # Pagination-Parameter
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 50, type=int)
+    per_page = min(per_page, 100)  # Max 100 Einträge pro Seite
+    
+    # Alle Anmeldungen des Users (letzte 180 Tage) mit Pagination
     start_date = date.today() - timedelta(days=180)
-    registrations = Registration.query.filter(
+    pagination = Registration.query.filter(
         Registration.user_id == user_id,
         Registration.date >= start_date
-    ).order_by(Registration.date.desc()).all()
+    ).order_by(Registration.date.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
     
-    # Gruppiere nach Monat
+    # Gruppiere nach Monat (nur angezeigte Registrierungen)
     from collections import defaultdict
     by_month = defaultdict(int)
-    for reg in registrations:
+    for reg in pagination.items:
         month_key = reg.date.strftime('%Y-%m')
         by_month[month_key] += 1
     
     return render_template('history_detail.html',
                          user=user,
+                         registrations=pagination.items,
+                         pagination=pagination,
+                         by_month=dict(sorted(by_month.items(), reverse=True)))
                          registrations=registrations,
                          by_month=sorted(by_month.items(), reverse=True),
                          total=len(registrations))

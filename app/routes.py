@@ -1,6 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, make_response
-from .models import db, User, Menu, Registration, Guest, PresetMenu
+from .models import db, User, Menu, Registration, Guest, PresetMenu, AdminLog
 from .utils import register_user_for_today, save_menu, get_guests_for_date, get_menu_for_date
+from .validation import (
+    validate_personal_number, validate_card_id, validate_name,
+    validate_integer, validate_menu_choice, validate_date, validate_time
+)
 from .rfid import find_user_by_card
 from .auth import login_required, check_auth
 from .api import limiter
@@ -51,6 +55,7 @@ _rfid_lock = threading.Lock()
 last_card_id = {'value': None}
 
 @bp.route('/', methods=['GET', 'POST'])
+@limiter.limit("60 per minute")  # Max 60 Scans pro Minute (1 pro Sekunde)
 def index():
     today_menu = get_menu_for_date()
     message = None
@@ -61,8 +66,8 @@ def index():
     pending_personal_number = None
     
     if request.method == 'POST':
-        personal_number = request.form.get('personal_number')
-        card_id = request.form.get('card_id')
+        personal_number = request.form.get('personal_number', '').strip()
+        card_id = request.form.get('card_id', '').strip()
         user = None
         
         # QR-Code-Format: FOODBOT:Personalnummer
@@ -73,11 +78,11 @@ def index():
             personal_number = card_id
             card_id = None
         
-        # Input-Validierung
+        # Input-Validierung mit Sicherheits-Funktionen
         if personal_number:
-            personal_number = personal_number[:20]  # Max 20 Zeichen
+            personal_number = validate_personal_number(personal_number)
         if card_id:
-            card_id = card_id[:50]  # Max 50 Zeichen
+            card_id = validate_card_id(card_id)
         
         if personal_number:
             user = User.query.filter_by(personal_number=personal_number).first()
@@ -164,10 +169,11 @@ def index():
                          pending_personal_number=pending_personal_number)
 
 @bp.route('/register_with_menu', methods=['POST'])
+@limiter.limit("60 per minute")  # Max 60 Menü-Auswahlen pro Minute
 def register_with_menu():
     """Route für Anmeldung mit Menüauswahl"""
-    user_id = request.form.get('user_id')
-    menu_choice = request.form.get('menu_choice', 1, type=int)
+    user_id = validate_integer(request.form.get('user_id'), min_value=1)
+    menu_choice = validate_menu_choice(request.form.get('menu_choice', 1), zwei_menues_aktiv=False)
     
     # Input-Validierung
     try:
@@ -253,7 +259,7 @@ def kitchen():
         # Gäste hinzufügen/entfernen
         elif 'guest_action' in request.form:
             action = request.form.get('guest_action')
-            menu_choice = int(request.form.get('menu_choice', 1))
+            menu_choice = validate_menu_choice(request.form.get('menu_choice', 1), zwei_menues_aktiv=menu.zwei_menues_aktiv if menu else False)
             
             guest_entry = Guest.query.filter_by(date=date.today(), menu_choice=menu_choice).first()
             if not guest_entry:
@@ -425,11 +431,11 @@ def admin():
                 message = "Unbekannter User."
         # User anlegen
         elif 'new_name' in request.form and 'new_personal_number' in request.form:
-            name = request.form.get('new_name').strip()
-            personal_number = request.form.get('new_personal_number').strip()
-            card_id = request.form.get('new_card_id').strip() or None
+            name = validate_name(request.form.get('new_name', ''))
+            personal_number = validate_personal_number(request.form.get('new_personal_number', ''))
+            card_id = validate_card_id(request.form.get('new_card_id', '')) or None
             if not name or not personal_number:
-                message = "Name und Personalnummer erforderlich."
+                message = "Name und Personalnummer sind erforderlich und m\u00fcssen g\u00fcltig sein."
             elif User.query.filter_by(personal_number=personal_number).first():
                 message = "Personalnummer existiert bereits."
             else:
@@ -439,16 +445,14 @@ def admin():
                 message = f"User {name} angelegt."
         # User bearbeiten
         elif 'edit_user' in request.form:
-            user_id = request.form.get('edit_user')
-            user = db.session.get(User, int(user_id))
+            user_id = validate_integer(request.form.get('edit_user'), min_value=1)
+            user = db.session.get(User, user_id) if user_id else None
             if user:
-                edit_name = request.form.get('edit_name', '')
-                edit_pn = request.form.get('edit_personal_number', '')
+                edit_name = validate_name(request.form.get('edit_name', ''))
+                edit_pn = validate_personal_number(request.form.get('edit_personal_number', ''))
                 if not edit_name or not edit_pn:
-                    message = "Name und Personalnummer dürfen nicht leer sein."
+                    message = "Name und Personalnummer d\u00fcrfen nicht leer sein und m\u00fcssen g\u00fcltig sein."
                 else:
-                    edit_name = edit_name.strip()
-                    edit_pn = edit_pn.strip()
                     # Duplikat-Prüfung (andere User mit gleicher Personalnummer)
                     duplicate = User.query.filter(User.personal_number == edit_pn, User.id != user.id).first()
                     if duplicate:
@@ -456,7 +460,7 @@ def admin():
                     else:
                         user.name = edit_name
                         user.personal_number = edit_pn
-                        user.card_id = (request.form.get('edit_card_id') or '').strip() or None
+                        user.card_id = validate_card_id(request.form.get('edit_card_id', '')) or None
                         try:
                             db.session.commit()
                             message = f"User {user.name} aktualisiert."

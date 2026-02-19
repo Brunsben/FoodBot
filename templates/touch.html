@@ -1,19 +1,16 @@
-<!DOCTYPE html>
-<html lang="de" translate="no">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="google" content="notranslate">
+{% extends "base.html" %}
+
+{% block title %}Essensanmeldung{% endblock %}
+
+{% block styles %}
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#0f172a">
-    <title>Essensanmeldung</title>
-    <link rel="stylesheet" href="/static/css/base.css?v={{ asset_version }}">
-    <link rel="stylesheet" href="/static/css/components.css?v={{ asset_version }}">
-    <link rel="stylesheet" href="/static/css/layouts.css?v={{ asset_version }}">
     <link rel="stylesheet" href="/static/css/components/animations.css?v={{ asset_version }}">
-        <link rel="stylesheet" href="/static/css/pages/touch.css?v={{ asset_version }}">
-        <link rel="stylesheet" href="/static/css/components/button.css?v={{ asset_version }}">
-</head>
+    <link rel="stylesheet" href="/static/css/pages/touch.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="/static/css/components/button.css?v={{ asset_version }}">
+{% endblock %}
+
+{% block body %}
 <body>
     <div class="page">
     <header class="page-header">
@@ -255,4 +252,4 @@
     });
     </script>
 </body>
-</html>
+{% endblock %}

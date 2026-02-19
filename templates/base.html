@@ -12,10 +12,10 @@
     <link rel="preconnect" href="{{ url_for('static', filename='css/base.css') | replace('css/base.css', '') }}" crossorigin>
     
     <!-- Base Styles -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}?v={{ asset_version }}">
     
     <!-- Page-specific Styles -->
     {% block styles %}{% endblock %}
@@ -33,7 +33,7 @@
     {% endblock %}
     
     <!-- Base Scripts -->
-    <script src="{{ url_for('static', filename='js/utils.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}?v={{ asset_version }}" defer></script>
     
     <!-- Page-specific Scripts -->
     {% block scripts %}{% endblock %}

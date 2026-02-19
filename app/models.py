@@ -69,13 +69,14 @@ class Guest(db.Model):
     
     __table_args__ = (
         db.UniqueConstraint('date', 'menu_choice', name='_guest_date_menu_uc'),
+        db.Index('idx_guest_date_menu', 'date', 'menu_choice'),  # Composite Index für häufige Abfragen
     )
 
 class AdminLog(db.Model):
     """Log für Admin-Aktionen"""
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, default=db.func.now(), index=True)
-    admin_user = db.Column(db.String(50), nullable=False)
+    admin_user = db.Column(db.String(50), nullable=False, index=True)  # Index für Filterung nach User
     action = db.Column(db.String(200), nullable=False)
     details = db.Column(db.Text, nullable=True)
     

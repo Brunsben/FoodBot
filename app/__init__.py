@@ -62,8 +62,21 @@ def create_app():
     csrf.exempt(routes.mobile_registration)    # POST /m/<token>
     
     # Rate Limiter initialisieren
-    from .api import limiter
-    limiter.init_app(app)
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["500 per day", "100 per hour"],
+        storage_uri="memory://",
+        # Wichtig: Erlaube Touchscreen-Zugriff, aber rate-limited
+        headers_enabled=True
+    )
+    
+    # API-spezifische Limits werden in api.py gesetzt
+    from .api import limiter as api_limiter
+    api_limiter.init_app(app)
     
     # Blueprints registrieren
     app.register_blueprint(routes.bp)
