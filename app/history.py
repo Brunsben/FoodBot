@@ -89,6 +89,3 @@ def user_detail(user_id):
                          registrations=pagination.items,
                          pagination=pagination,
                          by_month=dict(sorted(by_month.items(), reverse=True)))
-                         registrations=registrations,
-                         by_month=sorted(by_month.items(), reverse=True),
-                         total=len(registrations))
