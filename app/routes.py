@@ -142,7 +142,7 @@ def index():
             logger.warning(f"Fehlversuch Anmeldung von {get_remote_address()}")
     
     # Bei AJAX/Fetch-Requests JSON zurückgeben
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.accept_mimetypes.accept_json:
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({
             'status': status,
             'message': message,
