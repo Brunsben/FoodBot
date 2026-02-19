@@ -1,15 +1,52 @@
 from flask import Flask, request
 from .models import db
-from .config import load_config
 import os
 from datetime import timedelta
 
 def create_app():
     app = Flask(__name__, static_folder='../static', template_folder='../templates')
     
-    # Lade und validiere Konfiguration
-    config = load_config()
-    app.config.update(config.to_flask_config())
+    # Versuche neue Config zu laden, falle zurück auf alte Methode
+    try:
+        from .config import load_config
+        config = load_config()
+        app.config.update(config.to_flask_config())
+    except (ImportError, ValueError) as e:
+        # Fallback auf alte Konfiguration
+        import warnings
+        warnings.warn(f"Config-Validierung fehlgeschlagen, nutze Fallback: {e}")
+        
+        from dotenv import load_dotenv
+        load_dotenv()
+        
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///foodbot.db'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        
+        # Database Connection Pooling
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'pool_size': 10,
+            'pool_recycle': 3600,
+            'pool_pre_ping': True,
+            'max_overflow': 5,
+            'pool_timeout': 30
+        }
+        
+        # SECRET_KEY (alte Validierung)
+        secret_key = os.environ.get('SECRET_KEY')
+        if not secret_key or secret_key in ('dev-secret-key-change-in-production', 'change-me-in-production'):
+            raise ValueError("SECRET_KEY muss gesetzt werden! Generiere einen mit: python3 -c 'import secrets; print(secrets.token_hex(32))'")
+        app.config['SECRET_KEY'] = secret_key
+        app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
+        
+        # Session/CSRF Config
+        app.config['SESSION_COOKIE_SECURE'] = False
+        app.config['SESSION_COOKIE_HTTPONLY'] = True
+        app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+        app.config['WTF_CSRF_ENABLED'] = True
+        app.config['WTF_CSRF_TIME_LIMIT'] = 3600
+        app.config['WTF_CSRF_SSL_STRICT'] = False
+        app.config['WTF_CSRF_CHECK_DEFAULT'] = True
+        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
     
     db.init_app(app)
     

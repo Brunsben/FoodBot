@@ -56,10 +56,20 @@ class Config:
         
         # Kritische Validierung: SECRET_KEY
         if not secret:
-            raise ValueError(
-                "❌ SECRET_KEY fehlt in .env Datei!\n"
+            # Warnung statt Fehler - erlaubt Fallback
+            import warnings
+            warnings.warn(
+                "⚠️  SECRET_KEY fehlt in .env Datei! Verwende Umgebungsvariable oder setze in .env.\n"
                 "Generiere einen mit: python3 -c 'import secrets; print(secrets.token_hex(32))'"
             )
+            # Prüfe ob SECRET_KEY als Umgebungsvariable gesetzt ist (ohne .env)
+            secret = os.environ.get('SECRET_KEY')
+            if not secret:
+                raise ValueError(
+                    "❌ SECRET_KEY nicht gefunden!\n"
+                    "Setze SECRET_KEY als Umgebungsvariable oder in .env Datei.\n"
+                    "Generiere einen mit: python3 -c 'import secrets; print(secrets.token_hex(32))'"
+                )
         
         # Verbiete unsichere Default-Keys
         unsafe_keys = [
