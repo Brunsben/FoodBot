@@ -143,12 +143,17 @@ def index():
     
     # Bei AJAX/Fetch-Requests JSON zurückgeben (nur POST!)
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({
+        response_data = {
             'status': status,
             'message': message,
             'need_menu_choice': need_menu_choice,
             'user_id': pending_user_id if need_menu_choice else None
-        })
+        }
+        # Menünamen hinzufügen wenn Auswahl benötigt wird
+        if need_menu_choice and today_menu:
+            response_data['menu1'] = today_menu.menu1_name or 'Menü 1'
+            response_data['menu2'] = today_menu.menu2_name or 'Menü 2'
+        return jsonify(response_data)
     
     return render_template('touch.html', 
                          menu=today_menu, 

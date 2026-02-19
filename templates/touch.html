@@ -202,7 +202,7 @@
                 if (data.need_menu_choice) {
                     // Menüauswahl zeigen (touch.js Funktion)
                     if (typeof showMenuChoice === 'function') {
-                        showMenuChoice(data.user_id, cardId, null);
+                        showMenuChoice(data.user_id, cardId, null, data.menu1, data.menu2);
                     }
                 } else {
                     // Status-Popup anzeigen (touch.js Funktion)
