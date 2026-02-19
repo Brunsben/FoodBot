@@ -60,35 +60,23 @@
             </div>
             <div class="scanner-text" id="scannerText">Karte auflegen</div>
             
-            <button class="btn btn-primary ripple-btn" id="showNumpadBtn" onclick="showNumpad()">
+            <button class="btn btn-primary ripple-btn" id="showInputBtn" onclick="showInput()">
                 oder mit Personalnummer
             </button>
             
-            <div id="numpadWrapper" class="numpad-wrapper" style="display: none;">
+            <div id="inputWrapper" class="numpad-wrapper" style="display: none;">
                 <form onsubmit="handleSubmit(event)">
                     <div class="floating-label-group">
-                        <input type="text" id="numpadDisplay" name="personal_number" class="numpad-display floating-label-input" placeholder=" " readonly required autocomplete="off" aria-label="Personalnummer" inputmode="numeric">
-                        <label for="numpadDisplay" class="floating-label">Personalnummer</label>
+                        <input type="text" id="personalNumberInput" name="personal_number" class="numpad-display floating-label-input" placeholder=" " required autocomplete="off" aria-label="Personalnummer" inputmode="text" maxlength="20">
+                        <label for="personalNumberInput" class="floating-label">Personalnummer</label>
                         <!-- Verstecktes Feld für Ausweisnummer (card_id) -->
                         <input type="hidden" id="cardIdInput" name="card_id">
                     </div>
                     
-                    <div class="numpad">
-                        <button type="button" class="numpad-btn" onclick="addDigit('1')">1</button>
-                        <button type="button" class="numpad-btn" onclick="addDigit('2')">2</button>
-                        <button type="button" class="numpad-btn" onclick="addDigit('3')">3</button>
-                        <button type="button" class="numpad-btn" onclick="addDigit('4')">4</button>
-                        <button type="button" class="numpad-btn" onclick="addDigit('5')">5</button>
-                        <button type="button" class="numpad-btn" onclick="addDigit('6')">6</button>
-                        <button type="button" class="numpad-btn" onclick="addDigit('7')">7</button>
-                        <button type="button" class="numpad-btn" onclick="addDigit('8')">8</button>
-                        <button type="button" class="numpad-btn" onclick="addDigit('9')">9</button>
-                        <button type="button" class="numpad-btn delete" onclick="deleteDigit()">&#9003;</button>
-                        <button type="button" class="numpad-btn" onclick="addDigit('0')">0</button>
-                        <button type="submit" class="numpad-btn submit">&#10003;</button>
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                        <button type="submit" class="btn btn-primary ripple-btn" style="flex: 1;">✓ Anmelden</button>
+                        <button type="button" class="btn btn-secondary ripple-btn" onclick="hideInput()" style="flex: 1;">✕ Abbrechen</button>
                     </div>
-                    
-                    <button type="button" class="numpad-cancel" onclick="hideNumpad()">&#10005; Abbrechen</button>
                 </form>
             </div>
         </div>
@@ -141,10 +129,10 @@
     <script src="/static/js/animations.js" defer></script>
     <script src="/static/js/pages/touch.js" defer></script>
     <script>
-    // Immer das unsichtbare Feld fokussieren, außer wenn das Numpad offen ist
+    // Immer das unsichtbare Feld fokussieren, außer wenn das Input-Feld offen ist
     function focusHiddenInput() {
-        const numpadWrapper = document.getElementById('numpadWrapper');
-        if (numpadWrapper && numpadWrapper.style.display !== 'block') {
+        const inputWrapper = document.getElementById('inputWrapper');
+        if (inputWrapper && inputWrapper.style.display !== 'block') {
             const input = document.getElementById('hiddenScanInput');
             if (input && document.activeElement !== input) {
                 console.log('Fokussiere Hidden Input, aktueller Fokus:', document.activeElement.id);
@@ -203,8 +191,8 @@
         // BLOCKIERE ALLE KEYBOARD-EVENTS GLOBAL (außer Tab/Escape)
         // Dies verhindert Browser-Shortcuts inkl. Samsung F-Leiste
         function blockAllKeys(e) {
-            const numpadWrapper = document.getElementById('numpadWrapper');
-            if (numpadWrapper && numpadWrapper.style.display === 'block') {
+            const inputWrapper = document.getElementById('inputWrapper');
+            if (inputWrapper && inputWrapper.style.display === 'block') {
                 return; // Numpad offen - erlaube normale Eingabe
             }
             
@@ -225,8 +213,8 @@
         
         // Sammle Scan-Daten
         document.addEventListener('keydown', function(e) {
-            const numpadWrapper = document.getElementById('numpadWrapper');
-            if (numpadWrapper && numpadWrapper.style.display === 'block') {
+            const inputWrapper = document.getElementById('inputWrapper');
+            if (inputWrapper && inputWrapper.style.display === 'block') {
                 return;
             }
             
@@ -307,12 +295,12 @@
             
             if(val.length > 3) { // Mindestlänge für Kartennummer
                 const cardIdInput = document.getElementById('cardIdInput');
-                const numpadWrapper = document.getElementById('numpadWrapper');
+                const inputWrapper = document.getElementById('inputWrapper');
                 const form = document.querySelector('.numpad-wrapper form');
                 
                 console.log('Verarbeite Scan:', val);
                 
-                if (cardIdInput && form && numpadWrapper && numpadWrapper.style.display !== 'block') {
+                if (cardIdInput && form && inputWrapper && inputWrapper.style.display !== 'block') {
                     // Schreibe Ausweisnummer in das versteckte Feld
                     cardIdInput.value = val;
                     e.target.value = '';

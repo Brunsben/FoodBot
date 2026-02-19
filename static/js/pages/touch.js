@@ -147,50 +147,40 @@ async function updateMenu() {
 }
 
 /**
- * Show numpad for personal number input
+ * Show input for personal number input
  */
-function showNumpad() {
-    document.getElementById('numpadWrapper').style.display = 'block';
-    document.getElementById('showNumpadBtn').style.display = 'none';
+function showInput() {
+    document.getElementById('inputWrapper').style.display = 'block';
+    document.getElementById('showInputBtn').style.display = 'none';
     document.getElementById('scannerIcon').style.display = 'none';
     document.getElementById('scannerText').style.display = 'none';
     document.querySelector('.main-content').classList.add('numpad-active');
+    
+    // Fokussiere Input-Feld
+    setTimeout(() => {
+        document.getElementById('personalNumberInput').focus();
+    }, 100);
 }
 
 /**
- * Hide numpad
+ * Hide input
  */
-function hideNumpad() {
-    document.getElementById('numpadWrapper').style.display = 'none';
-    document.getElementById('showNumpadBtn').style.display = 'block';
+function hideInput() {
+    document.getElementById('inputWrapper').style.display = 'none';
+    document.getElementById('showInputBtn').style.display = 'block';
     document.getElementById('scannerIcon').style.display = 'block';
     document.getElementById('scannerText').style.display = 'block';
-    document.getElementById('numpadDisplay').value = '';
+    document.getElementById('personalNumberInput').value = '';
     document.querySelector('.main-content').classList.remove('numpad-active');
 }
 
 /**
- * Add digit to numpad display
- */
-function addDigit(digit) {
-    document.getElementById('numpadDisplay').value += digit;
-}
-
-/**
- * Delete last digit from numpad display
- */
-function deleteDigit() {
-    const input = document.getElementById('numpadDisplay');
-    input.value = input.value.slice(0, -1);
-}
-
-/**
- * Handle numpad form submission
+ * Handle form submission
  */
 async function handleSubmit(e) {
     e.preventDefault();
     
-    const personalNumber = document.getElementById('numpadDisplay').value;
+    const personalNumber = document.getElementById('personalNumberInput').value.trim();
     if (!personalNumber) return;
     
     try {
@@ -211,13 +201,13 @@ async function handleSubmit(e) {
                 document.getElementById('choice2').textContent = data.menu2;
                 document.getElementById('choiceOverlay').classList.add('show');
                 
-                hideNumpad();
+                hideInput();
             } else {
                 const message = data.registered ? 'Angemeldet!' : 'Abgemeldet';
                 const type = data.registered ? 'success' : 'warning';
                 
                 showStatus(type, message, data.user.name);
-                hideNumpad();
+                hideInput();
                 updateMenu();
             }
         } else {
