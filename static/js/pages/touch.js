@@ -218,7 +218,7 @@ async function handleSubmit(e) {
     }
 }
 
-// Initialize polling and updates
-setInterval(pollRFID, 500);
+// Initialize updates
+// RFID-Polling entfernt - Scanner wird jetzt über document keyboard events in touch.html erfasst
 setInterval(updateMenu, 5000);
 updateMenu();
