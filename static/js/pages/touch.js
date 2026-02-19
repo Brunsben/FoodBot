@@ -60,14 +60,17 @@ async function selectMenu(choice) {
         }
     } else {
         // Handle RFID selection
-        const res = await fetch('/register', {
+        const res = await fetch('/register_with_menu', {
             method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             body: `user_id=${currentUserId}&card_id=${currentCardId}&menu_choice=${choice}`
         });
         
         const data = await res.json();
-        showStatus(data.status, data.message, data.name);
+        showStatus(data.status, data.message.split('\n')[0], data.message.split('\n')[1] || '');
         updateMenu();
     }
 }

@@ -174,12 +174,16 @@ def register_with_menu():
     try:
         user_id_int = int(user_id)
     except (TypeError, ValueError):
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Ungültige Benutzer-ID'})
         return redirect(url_for('main.index'))
     if menu_choice not in (1, 2):
         menu_choice = 1
     
     user = db.session.get(User, user_id_int)
     if user:
+        today_menu = Menu.query.filter_by(date=date.today()).first()
+        
         # Erstelle neue Registration mit Menüwahl
         existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
         if not existing_reg:
@@ -189,13 +193,23 @@ def register_with_menu():
                 db.session.commit()
             except Exception:
                 db.session.rollback()
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'status': 'error', 'message': 'Datenbankfehler'})
                 return redirect(url_for('main.index'))
             
-            today_menu = Menu.query.filter_by(date=date.today()).first()
             menu_name = today_menu.menu1_name if menu_choice == 1 else today_menu.menu2_name
+            message = f"{user.name}, du bist angemeldet!\n{menu_name}"
             
             logger.info(f"Anmeldung mit Menü {menu_choice}: {user.name} ({user.personal_number})")
             notification_service.notify_new_registration(f"{user.name} - Menü {menu_choice}")
+            
+            # Bei AJAX JSON zurückgeben
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'status': 'success',
+                    'message': message,
+                    'name': user.name
+                })
             
             return render_template('touch.html', 
                                  menu=today_menu,
