@@ -25,12 +25,13 @@ function showStatus(type, title, subtitle) {
 /**
  * Show menu choice overlay
  */
-function showMenuChoice(userId, cardId, menu1, menu2) {
+function showMenuChoice(userId, cardId, personalNumber, menu1, menu2) {
     currentUserId = userId;
     currentCardId = cardId;
+    currentPersonalNumber = personalNumber;
     
-    document.getElementById('choice1').textContent = menu1;
-    document.getElementById('choice2').textContent = menu2;
+    document.getElementById('choice1').textContent = menu1 || 'Menü 1';
+    document.getElementById('choice2').textContent = menu2 || 'Menü 2';
     document.getElementById('choiceOverlay').classList.add('show');
 }
 
