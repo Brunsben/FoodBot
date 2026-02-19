@@ -21,8 +21,6 @@
     </header>
     
     <main class="main-content">
-            <!-- Unsichtbares Input für Kartenleser-Scans auf Tablets (außerhalb des Viewports) -->
-            <input type="text" id="hiddenScanInput" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;z-index:-1;" autocomplete="off" inputmode="none" aria-hidden="true" tabindex="-1">
         <div class="menu-card elastic-card glass-ultra">
             <div class="menu-label">Heutiges Menü</div>
             <div id="menuDisplay" class="menu-text">
@@ -129,25 +127,85 @@
     <script src="/static/js/animations.js" defer></script>
     <script src="/static/js/pages/touch.js" defer></script>
     <script>
-    // Immer das unsichtbare Feld fokussieren, außer wenn das Input-Feld offen ist
-    function focusHiddenInput() {
-        const inputWrapper = document.getElementById('inputWrapper');
-        if (inputWrapper && inputWrapper.style.display !== 'block') {
-            const input = document.getElementById('hiddenScanInput');
-            if (input && document.activeElement !== input) {
-                console.log('Fokussiere Hidden Input, aktueller Fokus:', document.activeElement.id);
-                input.focus();
+    // ==================== SCANNER-ERFASSUNG OHNE INPUT-FELD ====================
+    // Da Chrome bei Keyboard-Events die Shortcut-Leiste zeigt, arbeiten wir
+    // komplett ohne Input-Feld und erfassen direkt über Document-Events
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        let scanBuffer = '';
+        let scanTimeout = null;
+        const SCAN_TIMEOUT = 150; // ms zwischen Zeichen
+        
+        console.log('Scanner-Erfassung aktiv (kein Input-Feld)');
+        
+        // Erfasse alle Tastatur-Events auf Document-Level
+        document.addEventListener('keydown', function(e) {
+            const inputWrapper = document.getElementById('inputWrapper');
+            
+            // Ignoriere wenn manuelles Input-Feld offen ist
+            if (inputWrapper && inputWrapper.style.display === 'block') {
+                return;
+            }
+            
+            // Ignoriere Navigation-Tasten
+            if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'F5') {
+                return;
+            }
+            
+            // Verhindere Browser-Aktionen
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('Key:', e.key, 'Buffer:', scanBuffer);
+            
+            if (e.key === 'Enter') {
+                // Scan komplett - verarbeite Buffer
+                if (scanBuffer.length > 3) {
+                    console.log('✓ Scan komplett:', scanBuffer);
+                    processScan(scanBuffer);
+                }
+                scanBuffer = '';
+                clearTimeout(scanTimeout);
+            } else if (e.key.length === 1) {
+                // Sammle Zeichen (nur einzelne Zeichen, keine Modifier)
+                scanBuffer += e.key;
+                
+                // Auto-Reset nach Timeout (falls kein Enter kommt)
+                clearTimeout(scanTimeout);
+                scanTimeout = setTimeout(() => {
+                    if (scanBuffer.length > 3) {
+                        console.log('⏱ Timeout - sende Buffer:', scanBuffer);
+                        processScan(scanBuffer);
+                    }
+                    scanBuffer = '';
+                }, SCAN_TIMEOUT);
+            }
+        }, { capture: true, passive: false });
+        
+        // Verarbeite gescannte Karte
+        async function processScan(cardId) {
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `card_id=${encodeURIComponent(cardId)}`
+                });
+                
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    const text = await response.text();
+                    // Reload um Status zu sehen
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Scan-Verarbeitung fehlgeschlagen:', error);
             }
         }
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-        const hiddenInput = document.getElementById('hiddenScanInput');
-        
-        console.log('Touch-Interface geladen, hiddenScanInput vorhanden:', !!hiddenInput);
-        console.log('User Agent:', navigator.userAgent);
         
         // ==================== FULLSCREEN MODUS FÜR TABLETS ====================
-        // Versuche Fullscreen beim ersten User-Interaktion (Auto-Play-Policy)
         let fullscreenAttempted = false;
         function tryFullscreen() {
             if (!fullscreenAttempted && !document.fullscreenElement) {
@@ -183,137 +241,7 @@
             
             console.log('Fullscreen-Button initialisiert');
         }
-        
-        // Scan-Buffer für Kartenleser
-        let scanBuffer = '';
-        let scanTimeout = null;
-        
-        // BLOCKIERE ALLE KEYBOARD-EVENTS GLOBAL (außer Tab/Escape)
-        // Dies verhindert Browser-Shortcuts inkl. Samsung F-Leiste
-        function blockAllKeys(e) {
-            const inputWrapper = document.getElementById('inputWrapper');
-            if (inputWrapper && inputWrapper.style.display === 'block') {
-                return; // Numpad offen - erlaube normale Eingabe
-            }
-            
-            // Blockiere alles außer Navigation-Tasten
-            if (e.key !== 'Tab' && e.key !== 'Escape') {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                return false;
-            }
-        }
-        
-        // Auf ALLEN Event-Phasen und Event-Typen blockieren
-        ['keydown', 'keyup', 'keypress'].forEach(eventType => {
-            window.addEventListener(eventType, blockAllKeys, {capture: true, passive: false});
-            document.addEventListener(eventType, blockAllKeys, {capture: true, passive: false});
-        });
-        
-        // Sammle Scan-Daten
-        document.addEventListener('keydown', function(e) {
-            const inputWrapper = document.getElementById('inputWrapper');
-            if (inputWrapper && inputWrapper.style.display === 'block') {
-                return;
-            }
-            
-            console.log('Key:', e.key, 'Code:', e.code, 'KeyCode:', e.keyCode);
-            
-            // Sammle alphanumerische Zeichen
-            if (e.key && (e.key.length === 1 || e.key === 'Enter')) {
-                
-                if (e.key === 'Enter') {
-                    // Enter = Scan ist komplett
-                    console.log('✓ Scan komplett:', scanBuffer);
-                    if (scanBuffer.length > 3 && hiddenInput) {
-                        hiddenInput.value = scanBuffer;
-                        hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
-                    }
-                    scanBuffer = '';
-                    clearTimeout(scanTimeout);
-                } else {
-                    // Zeichen sammeln
-                    scanBuffer += e.key;
-                    console.log('  → Buffer:', scanBuffer);
-                    
-                    // Auto-Submit nach 150ms Pause
-                    clearTimeout(scanTimeout);
-                    scanTimeout = setTimeout(() => {
-                        if (scanBuffer.length > 3 && hiddenInput) {
-                            console.log('✓ Timeout-Submit:', scanBuffer);
-                            hiddenInput.value = scanBuffer;
-                            hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
-                        }
-                        scanBuffer = '';
-                    }, 150);
-                }
-            }
-        });
-                    if (scanBuffer.length > 3 && hiddenInput) {
-                        hiddenInput.value = scanBuffer;
-                        hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
-                    }
-                    scanBuffer = '';
-                    clearTimeout(scanTimeout);
-                } else {
-                    // Zeichen zum Buffer hinzufügen
-                    scanBuffer += e.key;
-                    console.log('Zeichen gesammelt:', e.key, 'Buffer:', scanBuffer);
-                    
-                    // Auto-Reset nach 100ms Pause (falls kein Enter kommt)
-                    clearTimeout(scanTimeout);
-                    scanTimeout = setTimeout(() => {
-                        if (scanBuffer.length > 3) {
-                            console.log('Timeout - sende Buffer:', scanBuffer);
-                            hiddenInput.value = scanBuffer;
-                            hiddenInput.dispatchEvent(new Event('input', {bubbles: true}));
-                        }
-                        scanBuffer = '';
-                    }, 100);
-                }
-            }
-        });
-        
-        // Einfach konstant fokussieren, inputmode="none" verhindert Tastatur
-        focusHiddenInput();
-        document.body.addEventListener('click', focusHiddenInput, {passive: true});
-        
-        // Alle 500ms sicherstellen dass Fokus da ist
-        setInterval(focusHiddenInput, 500);
-        
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) focusHiddenInput();
-        });
     });
-    // Wenn Scan erkannt, Ausweisnummer verarbeiten und anmelden
-    const scanInput = document.getElementById('hiddenScanInput');
-    if (scanInput) {
-        scanInput.addEventListener('input', function(e) {
-            const val = e.target.value.trim();
-            console.log('Scan input erkannt:', val, 'Länge:', val.length);
-            
-            if(val.length > 3) { // Mindestlänge für Kartennummer
-                const cardIdInput = document.getElementById('cardIdInput');
-                const inputWrapper = document.getElementById('inputWrapper');
-                const form = document.querySelector('.numpad-wrapper form');
-                
-                console.log('Verarbeite Scan:', val);
-                
-                if (cardIdInput && form && inputWrapper && inputWrapper.style.display !== 'block') {
-                    // Schreibe Ausweisnummer in das versteckte Feld
-                    cardIdInput.value = val;
-                    e.target.value = '';
-                    console.log('Sende Formular mit card_id:', val);
-                    // Formular absenden
-                    form.dispatchEvent(new Event('submit', {cancelable: true, bubbles: true}));
-                } else {
-                    console.log('Formular kann nicht abgesendet werden - Elemente fehlen oder Numpad offen');
-                }
-            }
-        });
-    }
     </script>
-    <script src="/static/js/animations.js" defer></script>
 </body>
 </html>
