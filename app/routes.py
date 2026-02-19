@@ -208,13 +208,18 @@ def kitchen():
     ).filter_by(date=date.today()).all()
     # Sortiere nach Username
     registrations = sorted(registrations, key=lambda r: r.user.name.lower())
-    guest_entry = Guest.query.filter_by(date=date.today()).first()
-    guest_count = guest_entry.count if guest_entry else 0
+    
+    # Gäste nach Menü
+    guests = Guest.query.filter_by(date=date.today()).all()
+    guest_menu1 = next((g for g in guests if g.menu_choice == 1), None)
+    guest_menu2 = next((g for g in guests if g.menu_choice == 2), None)
+    guest_count = sum(g.count for g in guests)
+    
     preset_menus = PresetMenu.get_all_ordered()
 
     # Menüstatistiken berechnen
-    menu1_count = sum(1 for r in registrations if r.menu_choice == 1)
-    menu2_count = sum(1 for r in registrations if r.menu_choice == 2)
+    menu1_count = sum(1 for r in registrations if r.menu_choice == 1) + (guest_menu1.count if guest_menu1 else 0)
+    menu2_count = sum(1 for r in registrations if r.menu_choice == 2) + (guest_menu2.count if guest_menu2 else 0)
 
     if request.method == 'POST':
         # Menü speichern
@@ -228,9 +233,13 @@ def kitchen():
         # Gäste hinzufügen/entfernen
         elif 'guest_action' in request.form:
             action = request.form.get('guest_action')
+            menu_choice = int(request.form.get('menu_choice', 1))
+            
+            guest_entry = Guest.query.filter_by(date=date.today(), menu_choice=menu_choice).first()
             if not guest_entry:
-                guest_entry = Guest(date=date.today(), count=0)
+                guest_entry = Guest(date=date.today(), menu_choice=menu_choice, count=0)
                 db.session.add(guest_entry)
+                
             if action == 'add' and guest_entry.count < 50:
                 guest_entry.count += 1
             elif action == 'remove' and guest_entry.count > 0:
@@ -243,6 +252,8 @@ def kitchen():
                          menu=today_menu,
                          registrations=registrations,
                          guest_count=guest_count,
+                         guest_menu1=guest_menu1,
+                         guest_menu2=guest_menu2,
                          total=total,
                          menu1_count=menu1_count,
                          menu2_count=menu2_count,
@@ -256,12 +267,16 @@ def kitchen_data():
         joinedload(Registration.user)
     ).filter_by(date=date.today()).all()
     users = sorted([r.user for r in registrations], key=lambda u: u.name.lower())
-    guest_entry = Guest.query.filter_by(date=date.today()).first()
-    guest_count = guest_entry.count if guest_entry else 0
+    
+    # Gäste nach Menü
+    guests = Guest.query.filter_by(date=date.today()).all()
+    guest_menu1 = next((g for g in guests if g.menu_choice == 1), None)
+    guest_menu2 = next((g for g in guests if g.menu_choice == 2), None)
+    guest_count = sum(g.count for g in guests)
     
     # Menüstatistiken
-    menu1_count = sum(1 for r in registrations if r.menu_choice == 1)
-    menu2_count = sum(1 for r in registrations if r.menu_choice == 2)
+    menu1_count = sum(1 for r in registrations if r.menu_choice == 1) + (guest_menu1.count if guest_menu1 else 0)
+    menu2_count = sum(1 for r in registrations if r.menu_choice == 2) + (guest_menu2.count if guest_menu2 else 0)
     
     # Liefere für jeden User auch menu_choice und Menüname
     user_entries = []
@@ -335,8 +350,9 @@ def menu_data():
 @login_required
 def admin():
     today_menu = Menu.query.filter_by(date=date.today()).first()
-    guest_entry = Guest.query.filter_by(date=date.today()).first()
-    guest_count = guest_entry.count if guest_entry else 0
+    guests = Guest.query.filter_by(date=date.today()).all()
+    guest_menu1 = next((g for g in guests if g.menu_choice == 1), None)
+    guest_count = sum(g.count for g in guests)  # Gesamt für Kompatibilität
     preset_menus = PresetMenu.get_all_ordered()
     message = None
 
@@ -461,11 +477,12 @@ def admin():
                     db.session.rollback()
                     message = "Fehler beim CSV-Import. Bitte Format prüfen."
                     logger.error(f"CSV-Import-Fehler: {e}")
-        # Gäste verwalten
+        # Gäste verwalten (nur Menü 1 in Admin, da einfaches Interface)
         elif 'guest_action' in request.form:
             action = request.form.get('guest_action')
+            guest_entry = Guest.query.filter_by(date=date.today(), menu_choice=1).first()
             if not guest_entry:
-                guest_entry = Guest(date=date.today(), count=0)
+                guest_entry = Guest(date=date.today(), menu_choice=1, count=0)
                 db.session.add(guest_entry)
             if action == 'add' and guest_entry.count < 50:
                 guest_entry.count += 1

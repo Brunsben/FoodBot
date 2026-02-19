@@ -132,13 +132,42 @@
         <!-- Gäste-Verwaltung -->
         <section class="panel glass glass-ultra">
             <h2 class="panel__heading">👥 Gäste verwalten</h2>
-            <form method="post" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button type="submit" name="guest_action" value="remove" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➖</button>
-                <span style="font-size: 1.5rem; font-weight: bold; min-width: 3rem; text-align: center;">{{ guest_count }}</span>
-                <button type="submit" name="guest_action" value="add" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➕</button>
-                <span style="color: var(--text-muted); margin-left: 0.5rem;">Gäste</span>
-            </form>
+            
+            {% if menu and menu.zwei_menues_aktiv %}
+                <!-- Zwei Menüs: Getrennte Gästeverwaltung -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">{{ menu.menu1_name or 'Menü 1' }}</h3>
+                        <form method="post" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" name="menu_choice" value="1"/>
+                            <button type="submit" name="guest_action" value="remove" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➖</button>
+                            <span style="font-size: 1.5rem; font-weight: bold; min-width: 3rem; text-align: center;">{{ guest_menu1.count if guest_menu1 else 0 }}</span>
+                            <button type="submit" name="guest_action" value="add" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➕</button>
+                        </form>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">{{ menu.menu2_name or 'Menü 2' }}</h3>
+                        <form method="post" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <input type="hidden" name="menu_choice" value="2"/>
+                            <button type="submit" name="guest_action" value="remove" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➖</button>
+                            <span style="font-size: 1.5rem; font-weight: bold; min-width: 3rem; text-align: center;">{{ guest_menu2.count if guest_menu2 else 0 }}</span>
+                            <button type="submit" name="guest_action" value="add" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➕</button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Ein Menü: Einfache Gästeverwaltung -->
+                <form method="post" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="menu_choice" value="1"/>
+                    <button type="submit" name="guest_action" value="remove" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➖</button>
+                    <span style="font-size: 1.5rem; font-weight: bold; min-width: 3rem; text-align: center;">{{ guest_menu1.count if guest_menu1 else 0 }}</span>
+                    <button type="submit" name="guest_action" value="add" class="btn-action ripple-btn" style="padding: 0.5rem 1rem;">➕</button>
+                    <span style="color: var(--text-muted); margin-left: 0.5rem;">Gäste</span>
+                </form>
+            {% endif %}
         </section>
     </main>
 

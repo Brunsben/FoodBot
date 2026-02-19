@@ -63,8 +63,13 @@ class Registration(db.Model):
 
 class Guest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date, default=date.today, unique=True, index=True)
+    date = db.Column(db.Date, default=date.today, index=True)
+    menu_choice = db.Column(db.Integer, default=1)  # 1 oder 2 für Menüauswahl
     count = db.Column(db.Integer, default=0)
+    
+    __table_args__ = (
+        db.UniqueConstraint('date', 'menu_choice', name='_guest_date_menu_uc'),
+    )
 
 class AdminLog(db.Model):
     """Log für Admin-Aktionen"""
