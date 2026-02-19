@@ -1,8 +1,34 @@
-from .models import db, User, Menu, Registration
+from .models import db, User, Menu, Registration, Guest
 from datetime import date
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def get_guests_for_date(target_date=None):
+    """Lade Gäste für ein Datum und gib strukturierte Daten zurück.
+    
+    Returns:
+        dict mit: {
+            'all': [Guest objects],
+            'menu1': Guest object oder None,
+            'menu2': Guest object oder None,
+            'total_count': int
+        }
+    """
+    if target_date is None:
+        target_date = date.today()
+    
+    guests = Guest.query.filter_by(date=target_date).all()
+    guest_menu1 = next((g for g in guests if g.menu_choice == 1), None)
+    guest_menu2 = next((g for g in guests if g.menu_choice == 2), None)
+    
+    return {
+        'all': guests,
+        'menu1': guest_menu1,
+        'menu2': guest_menu2,
+        'total_count': sum(g.count for g in guests)
+    }
 
 
 def save_menu(menu_date, form_data, field_prefix=''):

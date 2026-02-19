@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, make_response
 from .models import db, User, Menu, Registration, Guest, PresetMenu
-from .utils import register_user_for_today, save_menu
+from .utils import register_user_for_today, save_menu, get_guests_for_date
 from .rfid import find_user_by_card
 from .auth import login_required, check_auth
 from .api import limiter
@@ -64,8 +64,6 @@ def index():
         personal_number = request.form.get('personal_number')
         card_id = request.form.get('card_id')
         user = None
-        
-        logger.info(f"POST erhalten - card_id: {card_id}, personal_number: {personal_number}")
         
         # QR-Code-Format: FOODBOT:Personalnummer
         if personal_number and personal_number.startswith('FOODBOT:'):
@@ -228,11 +226,11 @@ def kitchen():
     # Sortiere nach Username
     registrations = sorted(registrations, key=lambda r: r.user.name.lower())
     
-    # Gäste nach Menü
-    guests = Guest.query.filter_by(date=date.today()).all()
-    guest_menu1 = next((g for g in guests if g.menu_choice == 1), None)
-    guest_menu2 = next((g for g in guests if g.menu_choice == 2), None)
-    guest_count = sum(g.count for g in guests)
+    # Gäste laden
+    guest_data = get_guests_for_date()
+    guest_menu1 = guest_data['menu1']
+    guest_menu2 = guest_data['menu2']
+    guest_count = guest_data['total_count']
     
     preset_menus = PresetMenu.get_all_ordered()
 
@@ -287,11 +285,11 @@ def kitchen_data():
     ).filter_by(date=date.today()).all()
     users = sorted([r.user for r in registrations], key=lambda u: u.name.lower())
     
-    # Gäste nach Menü
-    guests = Guest.query.filter_by(date=date.today()).all()
-    guest_menu1 = next((g for g in guests if g.menu_choice == 1), None)
-    guest_menu2 = next((g for g in guests if g.menu_choice == 2), None)
-    guest_count = sum(g.count for g in guests)
+    # Gäste laden
+    guest_data = get_guests_for_date()
+    guest_menu1 = guest_data['menu1']
+    guest_menu2 = guest_data['menu2']
+    guest_count = guest_data['total_count']
     
     # Menüstatistiken
     menu1_count = sum(1 for r in registrations if r.menu_choice == 1) + (guest_menu1.count if guest_menu1 else 0)
@@ -369,9 +367,9 @@ def menu_data():
 @login_required
 def admin():
     today_menu = Menu.query.filter_by(date=date.today()).first()
-    guests = Guest.query.filter_by(date=date.today()).all()
-    guest_menu1 = next((g for g in guests if g.menu_choice == 1), None)
-    guest_count = sum(g.count for g in guests)  # Gesamt für Kompatibilität
+    guest_data = get_guests_for_date()
+    guest_menu1 = guest_data['menu1']
+    guest_count = guest_data['total_count']  # Gesamt für Kompatibilität
     preset_menus = PresetMenu.get_all_ordered()
     message = None
 

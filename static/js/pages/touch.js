@@ -75,33 +75,7 @@ async function selectMenu(choice) {
     }
 }
 
-/**
- * Poll RFID scanner for card detection
- */
-async function pollRFID() {
-    try {
-        const res = await fetch('/rfid_scan');
-        const data = await res.json();
-        
-        if (data.card_id) {
-            const regRes = await fetch('/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: `card_id=${data.card_id}`
-            });
-            
-            const result = await regRes.json();
-            
-            if (result.need_menu_choice) {
-                showMenuChoice(result.user_id, data.card_id, result.menu1, result.menu2);
-            } else {
-                showStatus(result.status, result.message, result.name);
-            }
-        }
-    } catch(e) {
-        // Silent fail - RFID not available
-    }
-}
+// RFID polling removed - scanner uses keyboard events in touch.html
 
 /**
  * Update menu display with latest menu data
@@ -224,5 +198,5 @@ async function handleSubmit(e) {
 
 // Initialize updates
 // RFID-Polling entfernt - Scanner wird jetzt über document keyboard events in touch.html erfasst
-setInterval(updateMenu, 5000);
+setInterval(updateMenu, 10000); // Update every 10 seconds
 updateMenu();
