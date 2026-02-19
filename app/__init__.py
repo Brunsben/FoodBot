@@ -72,6 +72,14 @@ def create_app():
     app.register_blueprint(history_bp)
     app.register_blueprint(system_bp)
     
+    # Jinja2 filter for cache busting
+    import time
+    ASSET_VERSION = str(int(time.time()))  # Timestamp als Version
+    
+    @app.context_processor
+    def inject_asset_version():
+        return {'asset_version': ASSET_VERSION}
+    
     # Error Handler
     @app.errorhandler(404)
     def not_found_error(error):

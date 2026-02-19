@@ -7,12 +7,12 @@
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#0f172a">
     <title>Essensanmeldung</title>
-    <link rel="stylesheet" href="/static/css/base.css">
-    <link rel="stylesheet" href="/static/css/components.css">
-    <link rel="stylesheet" href="/static/css/layouts.css">
-    <link rel="stylesheet" href="/static/css/components/animations.css">
-        <link rel="stylesheet" href="/static/css/pages/touch.css">
-        <link rel="stylesheet" href="/static/css/components/button.css">
+    <link rel="stylesheet" href="/static/css/base.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="/static/css/components.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="/static/css/layouts.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="/static/css/components/animations.css?v={{ asset_version }}">
+        <link rel="stylesheet" href="/static/css/pages/touch.css?v={{ asset_version }}">
+        <link rel="stylesheet" href="/static/css/components/button.css?v={{ asset_version }}">
 </head>
 <body>
     <div class="page">
@@ -124,8 +124,8 @@
     </button>
     </div>
     
-    <script src="/static/js/animations.js" defer></script>
-    <script src="/static/js/pages/touch.js?v=2" defer></script>
+    <script src="/static/js/animations.js?v={{ asset_version }}" defer></script>
+    <script src="/static/js/pages/touch.js?v={{ asset_version }}" defer></script>
     <script>
     // ==================== SCANNER-ERFASSUNG OHNE INPUT-FELD ====================
     // Da Chrome bei Keyboard-Events die Shortcut-Leiste zeigt, arbeiten wir

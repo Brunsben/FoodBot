@@ -6,11 +6,11 @@
     <meta name="google" content="notranslate">
     <meta name="color-scheme" content="dark">
     <title>Küche – FoodBot</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/animations.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/kitchen.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/glass.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/animations.css') }}?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/kitchen.css') }}?v={{ asset_version }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}?v={{ asset_version }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/glass.css') }}?v={{ asset_version }}">
 </head>
 <body>
     <header class="topbar">
@@ -171,7 +171,7 @@
         </section>
     </main>
 
-    <script src="{{ url_for('static', filename='js/animations.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/pages/kitchen.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/animations.js') }}?v={{ asset_version }}" defer></script>
+    <script src="{{ url_for('static', filename='js/pages/kitchen.js') }}?v={{ asset_version }}" defer></script>
 </body>
 </html>

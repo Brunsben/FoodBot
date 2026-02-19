@@ -5,6 +5,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def get_menu_for_date(target_date=None):
+    """Lade Menü für ein Datum.
+    
+    Args:
+        target_date: date object, default ist heute
+        
+    Returns:
+        Menu object oder None
+    """
+    if target_date is None:
+        target_date = date.today()
+    return Menu.query.filter_by(date=target_date).first()
+
+
 def get_guests_for_date(target_date=None):
     """Lade Gäste für ein Datum und gib strukturierte Daten zurück.
     

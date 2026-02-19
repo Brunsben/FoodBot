@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, make_response
 from .models import db, User, Menu, Registration, Guest, PresetMenu
-from .utils import register_user_for_today, save_menu, get_guests_for_date
+from .utils import register_user_for_today, save_menu, get_guests_for_date, get_menu_for_date
 from .rfid import find_user_by_card
 from .auth import login_required, check_auth
 from .api import limiter
@@ -52,7 +52,7 @@ last_card_id = {'value': None}
 
 @bp.route('/', methods=['GET', 'POST'])
 def index():
-    today_menu = Menu.query.filter_by(date=date.today()).first()
+    today_menu = get_menu_for_date()
     message = None
     status = None
     need_menu_choice = False
@@ -104,8 +104,9 @@ def index():
                     try:
                         db.session.delete(existing_reg)
                         db.session.commit()
-                    except Exception:
+                    except Exception as e:
                         db.session.rollback()
+                        logger.error(f"Abmeldung fehlgeschlagen für {user.name}: {e}")
                         message = "Datenbankfehler bei Abmeldung"
                         status = 'error'
                         return render_template('touch.html', menu=today_menu, message=message, status=status)
@@ -180,7 +181,7 @@ def register_with_menu():
     
     user = db.session.get(User, user_id_int)
     if user:
-        today_menu = Menu.query.filter_by(date=date.today()).first()
+        today_menu = get_menu_for_date()
         
         # Erstelle neue Registration mit Menüwahl
         existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
@@ -189,8 +190,9 @@ def register_with_menu():
             try:
                 db.session.add(reg)
                 db.session.commit()
-            except Exception:
+            except Exception as e:
                 db.session.rollback()
+                logger.error(f"Registrierung mit Menü fehlgeschlagen für user_id {user_id}: {e}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({'status': 'error', 'message': 'Datenbankfehler'})
                 return redirect(url_for('main.index'))
@@ -219,7 +221,7 @@ def register_with_menu():
 # Küche: Anzeige und Menü-Eingabe
 @bp.route('/kitchen', methods=['GET', 'POST'])
 def kitchen():
-    today_menu = Menu.query.filter_by(date=date.today()).first()
+    today_menu = get_menu_for_date()
     registrations = Registration.query.options(
         joinedload(Registration.user)
     ).filter_by(date=date.today()).all()
@@ -244,7 +246,8 @@ def kitchen():
             try:
                 today_menu = save_menu(date.today(), request.form)
                 flash('Menü aktualisiert!')
-            except Exception:
+            except Exception as e:
+                logger.error(f"Menü-Speichern fehlgeschlagen: {e}")
                 flash('Fehler beim Speichern des Menüs.')
 
         # Gäste hinzufügen/entfernen
@@ -279,7 +282,7 @@ def kitchen():
 @bp.route('/kitchen/data', methods=['GET'])
 def kitchen_data():
     """API-Endpunkt für AJAX-Updates der Küchenseite"""
-    today_menu = Menu.query.filter_by(date=date.today()).first()
+    today_menu = get_menu_for_date()
     registrations = Registration.query.options(
         joinedload(Registration.user)
     ).filter_by(date=date.today()).all()
@@ -366,7 +369,7 @@ def menu_data():
 @bp.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-    today_menu = Menu.query.filter_by(date=date.today()).first()
+    today_menu = get_menu_for_date()
     guest_data = get_guests_for_date()
     guest_menu1 = guest_data['menu1']
     guest_count = guest_data['total_count']  # Gesamt für Kompatibilität
@@ -492,8 +495,8 @@ def admin():
                     logger.info(f"CSV-Import: {count} User importiert, {skipped} übersprungen")
                 except Exception as e:
                     db.session.rollback()
-                    message = "Fehler beim CSV-Import. Bitte Format prüfen."
                     logger.error(f"CSV-Import-Fehler: {e}")
+                    message = "Fehler beim CSV-Import. Bitte Format prüfen."
         # Gäste verwalten (nur Menü 1 in Admin, da einfaches Interface)
         elif 'guest_action' in request.form:
             action = request.form.get('guest_action')
