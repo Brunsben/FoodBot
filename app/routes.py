@@ -139,6 +139,15 @@ def index():
             status = 'error'
             logger.warning(f"Fehlversuch Anmeldung von {get_remote_address()}")
     
+    # Bei AJAX/Fetch-Requests JSON zurückgeben
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.accept_mimetypes.accept_json:
+        return jsonify({
+            'status': status,
+            'message': message,
+            'need_menu_choice': need_menu_choice,
+            'user_id': pending_user_id if need_menu_choice else None
+        })
+    
     return render_template('touch.html', 
                          menu=today_menu, 
                          message=message, 
