@@ -5,9 +5,10 @@ Sicherheits-Layer für alle Benutzereingaben
 
 import re
 from datetime import datetime, date as date_type
+from typing import Optional, Any
 
 
-def sanitize_string(value, max_length=None, allow_empty=False):
+def sanitize_string(value: Any, max_length: Optional[int] = None, allow_empty: bool = False) -> Optional[str]:
     """
     Bereinigt String-Eingaben
     
@@ -40,7 +41,7 @@ def sanitize_string(value, max_length=None, allow_empty=False):
     return cleaned
 
 
-def validate_personal_number(personal_number):
+def validate_personal_number(personal_number: str) -> Optional[str]:
     """
     Validiert Personalnummer (alphanumerisch, 1-20 Zeichen)
     
@@ -64,7 +65,7 @@ def validate_personal_number(personal_number):
     return cleaned
 
 
-def validate_card_id(card_id):
+def validate_card_id(card_id: str) -> Optional[str]:
     """
     Validiert RFID-Karten-ID (hexadezimal, 1-50 Zeichen)
     
@@ -88,7 +89,7 @@ def validate_card_id(card_id):
     return cleaned.upper()  # Normalisierung zu Großbuchstaben
 
 
-def validate_name(name):
+def validate_name(name: str) -> Optional[str]:
     """
     Validiert Benutzernamen (Unicode-Buchstaben, Leerzeichen, Bindestriche)
     
@@ -116,7 +117,7 @@ def validate_name(name):
     return cleaned
 
 
-def validate_integer(value, min_value=None, max_value=None, default=None):
+def validate_integer(value: Any, min_value: Optional[int] = None, max_value: Optional[int] = None, default: Optional[int] = None) -> Optional[int]:
     """
     Validiert Integer-Eingaben
     
@@ -143,7 +144,7 @@ def validate_integer(value, min_value=None, max_value=None, default=None):
         return default
 
 
-def validate_date(date_string):
+def validate_date(date_string: str) -> Optional[date_type]:
     """
     Validiert Datums-String im Format YYYY-MM-DD
     
@@ -164,7 +165,7 @@ def validate_date(date_string):
         return None
 
 
-def validate_time(time_string):
+def validate_time(time_string: str) -> Optional[str]:
     """
     Validiert Zeit-String im Format HH:MM
     
@@ -186,7 +187,7 @@ def validate_time(time_string):
     return cleaned
 
 
-def validate_menu_choice(choice, zwei_menues_aktiv=False):
+def validate_menu_choice(choice: Any, zwei_menues_aktiv: bool = False) -> int:
     """
     Validiert Menü-Auswahl (1 oder 2)
     
@@ -206,7 +207,7 @@ def validate_menu_choice(choice, zwei_menues_aktiv=False):
     return choice
 
 
-def validate_token(token):
+def validate_token(token: str) -> Optional[str]:
     """
     Validiert Mobile Token (URL-safe base64, 32-64 Zeichen)
     
@@ -232,7 +233,7 @@ def validate_token(token):
     return cleaned
 
 
-def sanitize_sql_like_pattern(pattern, max_length=50):
+def sanitize_sql_like_pattern(pattern: str, max_length: int = 50) -> str:
     """
     Bereinigt Suchpattern für SQL LIKE-Queries
     

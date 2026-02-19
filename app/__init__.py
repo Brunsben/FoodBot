@@ -1,38 +1,15 @@
 from flask import Flask, request
 from .models import db
+from .config import load_config
 import os
 from datetime import timedelta
-from dotenv import load_dotenv
 
 def create_app():
-    # Lade Umgebungsvariablen aus .env
-    load_dotenv()
-    
     app = Flask(__name__, static_folder='../static', template_folder='../templates')
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///foodbot.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    # SECRET_KEY ist zwingend erforderlich
-    secret_key = os.environ.get('SECRET_KEY')
-    if not secret_key or secret_key in ('dev-secret-key-change-in-production', 'change-me-in-production'):
-        raise ValueError("SECRET_KEY muss in .env gesetzt werden! Generiere einen mit: python3 -c 'import secrets; print(secrets.token_hex(32))'")
-    app.config['SECRET_KEY'] = secret_key
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
-    
-    # Sichere Session-Cookies
-    # SECURE nur bei HTTPS aktivieren (nicht bei HTTP!)
-    app.config['SESSION_COOKIE_SECURE'] = False  # Auf True setzen wenn HTTPS genutzt wird
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-    
-    # CSRF-Schutz
-    app.config['WTF_CSRF_ENABLED'] = True
-    app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # Token 1 Stunde gültig
-    app.config['WTF_CSRF_SSL_STRICT'] = False  # Erlaube HTTP in Dev
-    app.config['WTF_CSRF_CHECK_DEFAULT'] = True
-    
-    # Performance: Static file caching
-    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # 1 Jahr für statische Assets
+    # Lade und validiere Konfiguration
+    config = load_config()
+    app.config.update(config.to_flask_config())
     
     db.init_app(app)
     

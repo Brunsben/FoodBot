@@ -10,6 +10,41 @@ from .models import db, AdminLog
 logger = logging.getLogger(__name__)
 system_bp = Blueprint('system', __name__, url_prefix='/system')
 
+@system_bp.route('/health', methods=['GET'])
+def health_check():
+    """Health check für Monitoring und Uptime-Tools"""
+    try:
+        # Database connectivity check
+        db.session.execute(db.text('SELECT 1'))
+        db_status = 'connected'
+        
+        # Optional: Check table counts
+        from .models import User, Menu, Registration
+        user_count = User.query.count()
+        menu_count = Menu.query.count()
+        reg_count = Registration.query.count()
+        
+        health_data = {
+            'status': 'healthy',
+            'database': db_status,
+            'timestamp': datetime.utcnow().isoformat(),
+            'stats': {
+                'users': user_count,
+                'menus': menu_count,
+                'registrations': reg_count
+            }
+        }
+        return jsonify(health_data), 200
+        
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return jsonify({
+            'status': 'unhealthy',
+            'database': 'disconnected',
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
+        }), 503
+
 @system_bp.route('/update', methods=['POST'])
 @login_required
 def git_update():

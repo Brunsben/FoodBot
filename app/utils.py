@@ -1,12 +1,41 @@
 from .models import db, User, Menu, Registration, Guest
-from datetime import date
+from datetime import date as date_type
+from contextlib import contextmanager
+from typing import Optional, Dict, Any
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def get_menu_for_date(target_date=None):
-    """Lade Menü für ein Datum.
+@contextmanager
+def db_transaction():
+    """
+    Context Manager für sichere Datenbank-Transaktionen
+    
+    Automatisches Commit bei Erfolg, Rollback bei Fehler.
+    Verhindert vergessene Rollbacks und verbessert Code-Lesbarkeit.
+    
+    Usage:
+        with db_transaction():
+            user = User(name="Test", personal_number="123")
+            db.session.add(user)
+            # Commit erfolgt automatisch bei Success
+            
+    Raises:
+        Exception: Bei DB-Fehler (nach Rollback)
+    """
+    try:
+        yield
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Transaction failed, rolled back: {e}")
+        raise  # Re-raise für Error-Handling im Caller
+
+
+def get_menu_for_date(target_date: Optional[date_type] = None) -> Optional[Menu]:
+    """
+    Lade Menü für ein Datum.
     
     Args:
         target_date: date object, default ist heute
@@ -15,12 +44,16 @@ def get_menu_for_date(target_date=None):
         Menu object oder None
     """
     if target_date is None:
-        target_date = date.today()
+        target_date = date_type.today()
     return Menu.query.filter_by(date=target_date).first()
 
 
-def get_guests_for_date(target_date=None):
-    """Lade Gäste für ein Datum und gib strukturierte Daten zurück.
+def get_guests_for_date(target_date: Optional[date_type] = None) -> Dict[str, Any]:
+    """
+    Lade Gäste für ein Datum und gib strukturierte Daten zurück.
+    
+    Args:
+        target_date: date object, default ist heute
     
     Returns:
         dict mit: {
@@ -31,7 +64,7 @@ def get_guests_for_date(target_date=None):
         }
     """
     if target_date is None:
-        target_date = date.today()
+        target_date = date_type.today()
     
     guests = Guest.query.filter_by(date=target_date).all()
     guest_menu1 = next((g for g in guests if g.menu_choice == 1), None)
@@ -45,8 +78,9 @@ def get_guests_for_date(target_date=None):
     }
 
 
-def save_menu(menu_date, form_data, field_prefix=''):
-    """Menü speichern/aktualisieren. Einheitliche Logik für Admin, Kitchen und Weekly.
+def save_menu(menu_date: date_type, form_data: Dict[str, Any], field_prefix: str = '') -> Menu:
+    """
+    Menü speichern/aktualisieren. Einheitliche Logik für Admin, Kitchen und Weekly.
     
     Args:
         menu_date: date Objekt für welchen Tag
@@ -54,7 +88,7 @@ def save_menu(menu_date, form_data, field_prefix=''):
         field_prefix: Prefix für Formfeld-Namen (z.B. '' oder 'menu')
     
     Returns:
-        Menu Objekt
+        Menu Objekt (neu oder aktualisiert)
     """
     existing_menu = Menu.query.filter_by(date=menu_date).first()
     zwei_menues = form_data.get('zwei_menues_aktiv') == '1'
@@ -117,20 +151,32 @@ def save_menu(menu_date, form_data, field_prefix=''):
     
     return existing_menu
 
-def register_user_for_today(user: User, menu_choice: int = 1):
-    """An-/Abmeldung eines Users für heute. Gibt True zurück wenn angemeldet, False wenn abgemeldet."""
+
+def register_user_for_today(user: User, menu_choice: int = 1) -> bool:
+    """
+    An-/Abmeldung eines Users für heute (Toggle).
+    
+    Args:
+        user: User-Objekt
+        menu_choice: Menü-Auswahl (1 oder 2)
+    
+    Returns:
+        True wenn User angemeldet wurde, False wenn abgemeldet
+        
+    Raises:
+        Exception: Bei Datenbankfehlern
+    """
     try:
-        existing = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+        existing = Registration.query.filter_by(user_id=user.id, date=date_type.today()).first()
         if existing:
-            db.session.delete(existing)
-            db.session.commit()
+            with db_transaction():
+                db.session.delete(existing)
             return False  # Abgemeldet
         else:
-            reg = Registration(user_id=user.id, date=date.today(), menu_choice=menu_choice)
-            db.session.add(reg)
-            db.session.commit()
+            reg = Registration(user_id=user.id, date=date_type.today(), menu_choice=menu_choice)
+            with db_transaction():
+                db.session.add(reg)
             return True  # Angemeldet
     except Exception as e:
-        db.session.rollback()
         logger.error(f"Fehler bei Registrierung für User {user.id}: {e}")
         raise

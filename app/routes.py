@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, make_response
 from .models import db, User, Menu, Registration, Guest, PresetMenu, AdminLog
-from .utils import register_user_for_today, save_menu, get_guests_for_date, get_menu_for_date
+from .utils import register_user_for_today, save_menu, get_guests_for_date, get_menu_for_date, db_transaction
 from .validation import (
     validate_personal_number, validate_card_id, validate_name,
     validate_integer, validate_menu_choice, validate_date, validate_time
@@ -107,10 +107,9 @@ def index():
                     # Abmelden
                     menu_name = today_menu.menu1_name if existing_reg.menu_choice == 1 else today_menu.menu2_name
                     try:
-                        db.session.delete(existing_reg)
-                        db.session.commit()
+                        with db_transaction():
+                            db.session.delete(existing_reg)
                     except Exception as e:
-                        db.session.rollback()
                         logger.error(f"Abmeldung fehlgeschlagen für {user.name}: {e}")
                         message = "Datenbankfehler bei Abmeldung"
                         status = 'error'
@@ -194,10 +193,9 @@ def register_with_menu():
         if not existing_reg:
             reg = Registration(user_id=user.id, date=date.today(), menu_choice=menu_choice)
             try:
-                db.session.add(reg)
-                db.session.commit()
+                with db_transaction():
+                    db.session.add(reg)
             except Exception as e:
-                db.session.rollback()
                 logger.error(f"Registrierung mit Menü fehlgeschlagen für user_id {user_id}: {e}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({'status': 'error', 'message': 'Datenbankfehler'})
@@ -270,7 +268,9 @@ def kitchen():
                 guest_entry.count += 1
             elif action == 'remove' and guest_entry.count > 0:
                 guest_entry.count -= 1
-            db.session.commit()
+            
+            with db_transaction():
+                pass  # Changes werden automatisch committed
         return redirect(url_for('main.kitchen'))
 
     total = len(registrations) + guest_count
@@ -440,8 +440,8 @@ def admin():
                 message = "Personalnummer existiert bereits."
             else:
                 user = User(name=name, personal_number=personal_number, card_id=card_id)
-                db.session.add(user)
-                db.session.commit()
+                with db_transaction():
+                    db.session.add(user)
                 message = f"User {name} angelegt."
         # User bearbeiten
         elif 'edit_user' in request.form:
@@ -462,10 +462,10 @@ def admin():
                         user.personal_number = edit_pn
                         user.card_id = validate_card_id(request.form.get('edit_card_id', '')) or None
                         try:
-                            db.session.commit()
+                            with db_transaction():
+                                pass  # Änderungen werden automatisch committed
                             message = f"User {user.name} aktualisiert."
                         except Exception:
-                            db.session.rollback()
                             message = "Fehler beim Speichern."
         # User löschen
         elif 'delete_user' in request.form:
