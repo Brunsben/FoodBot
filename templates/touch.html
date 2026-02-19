@@ -184,6 +184,7 @@
         
         // Verarbeite gescannte Karte
         async function processScan(cardId) {
+            console.log('Sende Scan an Server:', cardId);
             try {
                 const response = await fetch('/', {
                     method: 'POST',
@@ -194,7 +195,9 @@
                     body: `card_id=${encodeURIComponent(cardId)}`
                 });
                 
+                console.log('Response Status:', response.status);
                 const data = await response.json();
+                console.log('Response Data:', data);
                 
                 if (data.need_menu_choice) {
                     // Menüauswahl zeigen (touch.js Funktion)

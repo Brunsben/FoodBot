@@ -65,6 +65,8 @@ def index():
         card_id = request.form.get('card_id')
         user = None
         
+        logger.info(f"POST erhalten - card_id: {card_id}, personal_number: {personal_number}")
+        
         # QR-Code-Format: FOODBOT:Personalnummer
         if personal_number and personal_number.startswith('FOODBOT:'):
             personal_number = personal_number.replace('FOODBOT:', '').strip()
