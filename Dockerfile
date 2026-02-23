@@ -42,7 +42,7 @@ ENV PYTHONUNBUFFERED=1
 COPY --chown=foodbot:foodbot app/ ./app/
 COPY --chown=foodbot:foodbot templates/ ./templates/
 COPY --chown=foodbot:foodbot static/ ./static/
-COPY --chown=foodbot:foodbot backup_db.py clear_registrations.py ./
+COPY --chown=foodbot:foodbot scripts/backup_db.py scripts/clear_registrations.py ./
 
 # Verzeichnisse für Daten erstellen
 RUN mkdir -p /app/backups /app/logs && \
