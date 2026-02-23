@@ -26,7 +26,7 @@
 
 .nav-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
 }
 
 .history-subtitle {

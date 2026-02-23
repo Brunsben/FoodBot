@@ -128,7 +128,7 @@ body {
 .no-print button {
     padding: 15px 30px;
     font-size: 14pt;
-    background: #6366f1;
+    background: #dc2626;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -138,7 +138,7 @@ body {
 }
 
 .no-print button:hover {
-    background: #4f46e5;
+    background: #b91c1c;
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }

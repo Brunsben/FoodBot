@@ -59,8 +59,8 @@ h1 {
 /* Add Day Card */
 .add-day-card {
     margin-bottom: var(--space-2xl);
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
-    border: 2px solid rgba(99, 102, 241, 0.3);
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.05), rgba(220, 38, 38, 0.05));
+    border: 2px solid rgba(220, 38, 38, 0.3);
 }
 
 .add-day-card h2 {
@@ -95,7 +95,7 @@ h1 {
 .date-input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
 }
 
 /* Empty State */
@@ -135,8 +135,8 @@ h1 {
 
 .day-card.today {
     border-color: var(--primary-color);
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.1));
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.3);
 }
 
 /* Day Header */
@@ -189,7 +189,7 @@ input[type="text"]:focus,
 input[type="time"]:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
     background: rgba(255, 255, 255, 0.08);
 }
 

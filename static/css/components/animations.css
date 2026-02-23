@@ -50,7 +50,7 @@
     position: absolute;
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(220, 38, 38,0.3) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
     left: var(--mouse-x);
@@ -68,53 +68,53 @@
 .neon-glow {
     position: relative;
     text-shadow: 
-        0 0 10px rgba(99,102,241,0.8),
-        0 0 20px rgba(99,102,241,0.6),
-        0 0 30px rgba(99,102,241,0.4),
-        0 0 40px rgba(99,102,241,0.2);
+        0 0 10px rgba(220, 38, 38,0.8),
+        0 0 20px rgba(220, 38, 38,0.6),
+        0 0 30px rgba(220, 38, 38,0.4),
+        0 0 40px rgba(220, 38, 38,0.2);
     animation: neonFlicker 3s ease-in-out infinite;
 }
 
 @keyframes neonFlicker {
     0%, 100% { 
         text-shadow: 
-            0 0 10px rgba(99,102,241,0.8),
-            0 0 20px rgba(99,102,241,0.6),
-            0 0 30px rgba(99,102,241,0.4);
+            0 0 10px rgba(220, 38, 38,0.8),
+            0 0 20px rgba(220, 38, 38,0.6),
+            0 0 30px rgba(220, 38, 38,0.4);
     }
     50% { 
         text-shadow: 
-            0 0 15px rgba(99,102,241,1),
-            0 0 25px rgba(99,102,241,0.8),
-            0 0 35px rgba(99,102,241,0.6),
-            0 0 45px rgba(99,102,241,0.4);
+            0 0 15px rgba(220, 38, 38,1),
+            0 0 25px rgba(220, 38, 38,0.8),
+            0 0 35px rgba(220, 38, 38,0.6),
+            0 0 45px rgba(220, 38, 38,0.4);
     }
 }
 
 .neon-border {
     box-shadow: 
-        0 0 5px rgba(99,102,241,0.5),
-        0 0 10px rgba(99,102,241,0.4),
-        0 0 15px rgba(99,102,241,0.3),
-        inset 0 0 5px rgba(99,102,241,0.2);
-    border: 1px solid rgba(99,102,241,0.6);
+        0 0 5px rgba(220, 38, 38,0.5),
+        0 0 10px rgba(220, 38, 38,0.4),
+        0 0 15px rgba(220, 38, 38,0.3),
+        inset 0 0 5px rgba(220, 38, 38,0.2);
+    border: 1px solid rgba(220, 38, 38,0.6);
 }
 
 .neon-border:hover {
     box-shadow: 
-        0 0 10px rgba(99,102,241,0.8),
-        0 0 20px rgba(99,102,241,0.6),
-        0 0 30px rgba(99,102,241,0.4),
-        inset 0 0 10px rgba(99,102,241,0.3);
+        0 0 10px rgba(220, 38, 38,0.8),
+        0 0 20px rgba(220, 38, 38,0.6),
+        0 0 30px rgba(220, 38, 38,0.4),
+        inset 0 0 10px rgba(220, 38, 38,0.3);
     animation: neonBorderPulse 2s ease-in-out infinite;
 }
 
 @keyframes neonBorderPulse {
     0%, 100% { 
-        border-color: rgba(99,102,241,0.6);
+        border-color: rgba(220, 38, 38,0.6);
     }
     50% { 
-        border-color: rgba(99,102,241,1);
+        border-color: rgba(220, 38, 38,1);
     }
 }
 
@@ -139,9 +139,9 @@
 
 .floating-label-input:focus {
     border-color: var(--primary);
-    background: rgba(99,102,241,0.05);
+    background: rgba(220, 38, 38,0.05);
     box-shadow: 
-        0 0 0 3px rgba(99,102,241,0.1),
+        0 0 0 3px rgba(220, 38, 38,0.1),
         0 8px 16px rgba(0,0,0,0.2);
     transform: translateY(-2px);
 }
@@ -308,7 +308,7 @@
 
 .animated-checkbox:hover .animated-checkbox-box {
     border-color: var(--primary);
-    box-shadow: 0 0 10px rgba(99,102,241,0.3);
+    box-shadow: 0 0 10px rgba(220, 38, 38,0.3);
 }
 
 /* ==================== INTERAKTIVE BUTTON EFFEKTE ==================== */
@@ -377,12 +377,12 @@
     0%, 100% {
         transform: scale(1);
         opacity: 1;
-        box-shadow: 0 0 0 0 rgba(99,102,241,0.7);
+        box-shadow: 0 0 0 0 rgba(220, 38, 38,0.7);
     }
     50% {
         transform: scale(1.05);
         opacity: 0.9;
-        box-shadow: 0 0 0 20px rgba(99,102,241,0);
+        box-shadow: 0 0 0 20px rgba(220, 38, 38,0);
     }
 }
 
@@ -402,7 +402,7 @@
     background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(99,102,241,0.3) 50%,
+        rgba(220, 38, 38,0.3) 50%,
         transparent 100%
     );
     animation: scanLine 2s ease-in-out infinite;
@@ -426,9 +426,9 @@
 
 .glass-ultra:hover {
     background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(99,102,241,0.3);
+    border-color: rgba(220, 38, 38,0.3);
     box-shadow: 
-        0 8px 32px 0 rgba(99,102,241,0.2),
+        0 8px 32px 0 rgba(220, 38, 38,0.2),
         inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 

@@ -15,9 +15,9 @@ input[type="submit"].btn,
   font-weight: 700;
   border: none;
   border-radius: 1.8em;
-  background: linear-gradient(90deg, #6366f1 0%, #f43f5e 100%);
+  background: linear-gradient(90deg, #dc2626 0%, #f43f5e 100%);
   color: #fff;
-  box-shadow: 0 4px 24px 0 rgba(99,102,241,0.18), 0 1.5px 0 #fff3;
+  box-shadow: 0 4px 24px 0 rgba(220, 38, 38,0.18), 0 1.5px 0 #fff3;
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
   overflow: hidden;
@@ -26,10 +26,10 @@ input[type="submit"].btn,
 }
 .btn-primary,
 .btn--primary {
-  background: linear-gradient(90deg, #6366f1 0%, #f43f5e 100%);
+  background: linear-gradient(90deg, #dc2626 0%, #f43f5e 100%);
 }
 .btn-secondary {
-  background: linear-gradient(90deg, #a5b4fc 0%, #6366f1 100%);
+  background: linear-gradient(90deg, #fca5a5 0%, #dc2626 100%);
   color: #fff;
 }
 .btn-save {
@@ -48,7 +48,7 @@ input[type="submit"].btn,
 .btn-delete:focus,
 .btn--primary:focus,
 .btn--danger:focus {
-  box-shadow: 0 0 0 4px #6366f155, 0 4px 24px 0 rgba(99,102,241,0.18);
+  box-shadow: 0 0 0 4px #dc262655, 0 4px 24px 0 rgba(220, 38, 38,0.18);
 }
 .btn:hover,
 .btn-primary:hover,
@@ -59,7 +59,7 @@ input[type="submit"].btn,
 .btn--danger:hover {
   filter: brightness(1.08) saturate(1.2);
   transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 8px 32px 0 rgba(99,102,241,0.22), 0 2px 0 #fff3;
+  box-shadow: 0 8px 32px 0 rgba(220, 38, 38,0.22), 0 2px 0 #fff3;
 }
 .btn:active,
 .btn-primary:active,
@@ -70,7 +70,7 @@ input[type="submit"].btn,
 .btn--danger:active {
   filter: brightness(0.98);
   transform: scale(0.97);
-  box-shadow: 0 2px 8px 0 rgba(99,102,241,0.10);
+  box-shadow: 0 2px 8px 0 rgba(220, 38, 38,0.10);
 }
 .btn[disabled],
 .btn:disabled {

@@ -47,7 +47,7 @@ body {
     font-size: clamp(2.2rem, 6vw, 3.5rem);
     font-weight: 900;
     margin: 0;
-    background: linear-gradient(90deg, #a5b4fc 0%, #6366f1 40%, #f43f5e 100%);
+    background: linear-gradient(90deg, #fca5a5 0%, #dc2626 40%, #f43f5e 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -73,7 +73,7 @@ body {
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(99, 102, 241, 0.3);
+    border: 1px solid rgba(220, 38, 38, 0.3);
     border-radius: var(--radius-xl);
     padding: var(--space-lg);
     box-shadow: var(--shadow-xl);
@@ -107,7 +107,7 @@ body {
     border-radius: var(--radius-lg);
     padding: var(--space-lg);
     text-align: center;
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
 }
 
 .menu-item-label {
@@ -166,7 +166,7 @@ body {
     font-weight: 600;
     text-align: center;
     background: var(--bg-glass);
-    border: 2px solid rgba(99, 102, 241, 0.3);
+    border: 2px solid rgba(220, 38, 38, 0.3);
     border-radius: var(--radius-lg);
     color: var(--text-primary);
     margin-bottom: var(--space-md);
@@ -183,7 +183,7 @@ body {
 
 .floating-label-input {
     background: var(--bg-glass);
-    border: 2px solid rgba(99, 102, 241, 0.3);
+    border: 2px solid rgba(220, 38, 38, 0.3);
     border-radius: var(--radius-lg);
     color: var(--text-primary);
     width: 100%;
@@ -238,7 +238,7 @@ body {
     font-size: clamp(1.25rem, 3vw, 1.5rem);
     font-weight: 700;
     background: var(--bg-glass);
-    border: 2px solid rgba(99, 102, 241, 0.2);
+    border: 2px solid rgba(220, 38, 38, 0.2);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     cursor: pointer;
@@ -250,7 +250,7 @@ body {
 
 .numpad-btn:active {
     transform: scale(0.95);
-    background: rgba(99, 102, 241, 0.3);
+    background: rgba(220, 38, 38, 0.3);
 }
 
 .numpad-btn.delete {
@@ -259,7 +259,7 @@ body {
 
 .numpad-btn.submit {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
     border: none;
 }
 
@@ -335,14 +335,14 @@ body {
     color: white;
     cursor: pointer;
     transition: all var(--transition-base);
-    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
     min-height: clamp(3rem, 8vw, 4rem);
     touch-action: manipulation;
 }
 
 .choice-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.6);
+    box-shadow: 0 12px 30px rgba(220, 38, 38, 0.6);
 }
 
 /* ---------- Keyboard Toggle ---------- */
@@ -352,7 +352,7 @@ body {
     font-size: clamp(0.875rem, 2vw, 1rem);
     font-weight: 600;
     background: var(--bg-glass);
-    border: 2px solid rgba(99, 102, 241, 0.2);
+    border: 2px solid rgba(220, 38, 38, 0.2);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     cursor: pointer;

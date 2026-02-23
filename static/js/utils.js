@@ -145,7 +145,7 @@ function confirmDialog(message) {
                 }
                 .confirm-dialog {
                     background: var(--bg-elevated, #1e293b);
-                    border: 2px solid var(--primary, #6366f1);
+                    border: 2px solid var(--primary, #dc2626);
                     border-radius: 16px;
                     padding: 2rem;
                     max-width: 500px;
@@ -285,7 +285,7 @@ function showLoadingSpinner(element) {
                 width: 40px;
                 height: 40px;
                 border: 4px solid rgba(255, 255, 255, 0.3);
-                border-top-color: var(--primary, #6366f1);
+                border-top-color: var(--primary, #dc2626);
                 border-radius: 50%;
                 animation: spin 0.8s linear infinite;
             }

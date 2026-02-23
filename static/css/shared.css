@@ -101,7 +101,7 @@ select:focus {
     outline: none;
     border-color: var(--primary);
     background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 input::placeholder,
@@ -125,7 +125,7 @@ input[type="checkbox"] {
 }
 
 .data-table thead tr {
-    background: rgba(99, 102, 241, 0.2);
+    background: rgba(220, 38, 38, 0.2);
 }
 
 .data-table th {
@@ -278,7 +278,7 @@ input[type="checkbox"] {
     padding: var(--space-lg);
     border-radius: var(--radius-lg);
     text-align: center;
-    border: 1px solid rgba(99, 102, 241, 0.3);
+    border: 1px solid rgba(220, 38, 38, 0.3);
 }
 
 .stat-value {

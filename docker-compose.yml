@@ -6,7 +6,7 @@ services:
     container_name: foodbot
     restart: unless-stopped
     ports:
-      - "5001:5001"
+      - "8183:5001"
     environment:
       - FLASK_ENV=production
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:?ADMIN_PASSWORD muss in .env gesetzt werden}
