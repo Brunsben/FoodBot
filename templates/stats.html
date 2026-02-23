@@ -1,24 +1,22 @@
-<!DOCTYPE html>
-<html lang="de" translate="no">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="google" content="notranslate">
-    <title>Statistiken - FoodBot</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+{% extends "admin_base.html" %}
+{% set active_page = 'stats' %}
+
+{% block title %}Statistiken – FoodBot{% endblock %}
+{% block mobile_title %}📊 Statistiken{% endblock %}
+
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/stats.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-</head>
-<body>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/stats.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}">
+{% endblock %}
+
+{% block content %}
     <div class="stats-container">
         <div class="page-header">
             <h1>📊 Statistiken</h1>
             <p class="page-subtitle">Übersicht aller Dienste und Teilnehmerzahlen</p>
         </div>
-        
+
         <div class="card summary-card">
             <h2>Zusammenfassung</h2>
             <div class="stats-summary">
@@ -29,49 +27,49 @@
             </div>
             <div class="button-group">
                 <a href="/stats/export/csv" class="btn btn-primary">📥 Als CSV exportieren (alle Dienste)</a>
-                <a href="/admin" class="btn btn-secondary">← Zurück zum Admin</a>
             </div>
         </div>
-        
+
         <div class="card table-card">
             <h2>Letzte 14 Dienste mit Menü</h2>
             <div class="table-responsive">
                 <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Datum</th>
-                    <th>Kameraden</th>
-                    <th>Gäste</th>
-                    <th>Gesamt</th>
-                    <th>Menü</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for day in days %}
-                <tr>
-                    <td>{{ day.date.strftime('%d.%m.%Y (%A)') }}</td>
-                    <td>{{ day.registrations }}</td>
-                    <td>{{ day.guests }}</td>
-                    <td>{{ day.total }}</td>
-                    <td>
-                        {% if day.zwei_menues %}
-                            <div style="margin-bottom: 8px;">Zwei Menüs angeboten:</div>
-                            <div class="menu-breakdown">
-                                <div><b>Menü 1:</b> {{ day.menu1_name }} <span style="color:#ef4444;font-weight:600;">({{ day.menu1_count }})</span></div>
-                                <div><b>Menü 2:</b> {{ day.menu2_name }} <span style="color:#ef4444;font-weight:600;">({{ day.menu2_count }})</span></div>
-                            </div>
-                        {% else %}
-                            {{ day.menu }}
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Kameraden</th>
+                            <th>Gäste</th>
+                            <th>Gesamt</th>
+                            <th>Menü</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in days %}
+                        <tr>
+                            <td>{{ day.date.strftime('%d.%m.%Y (%A)') }}</td>
+                            <td>{{ day.registrations }}</td>
+                            <td>{{ day.guests }}</td>
+                            <td>{{ day.total }}</td>
+                            <td>
+                                {% if day.zwei_menues %}
+                                    <div style="margin-bottom: 8px;">Zwei Menüs angeboten:</div>
+                                    <div class="menu-breakdown">
+                                        <div><b>Menü 1:</b> {{ day.menu1_name }} <span style="color:#ef4444;font-weight:600;">({{ day.menu1_count }})</span></div>
+                                        <div><b>Menü 2:</b> {{ day.menu2_name }} <span style="color:#ef4444;font-weight:600;">({{ day.menu2_count }})</span></div>
+                                    </div>
+                                {% else %}
+                                    {{ day.menu }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
-    
+{% endblock %}
+
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/pages/stats.js') }}" defer></script>
-</body>
-</html>
+{% endblock %}

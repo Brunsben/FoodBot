@@ -1,31 +1,28 @@
-<!DOCTYPE html>
-<html lang="de" translate="no">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="google" content="notranslate">
-    <title>Wochenplanung - FoodBot</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+{% extends "admin_base.html" %}
+{% set active_page = 'weekly' %}
+
+{% block title %}Wochenplanung – FoodBot{% endblock %}
+{% block mobile_title %}📅 Wochenplan{% endblock %}
+
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/weekly.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/weekly.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/switch.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <div class="container">
         <div class="header">
             <h1>📅 Wochenplanung</h1>
-            <a href="/admin" class="btn btn-secondary">← Zurück zum Admin</a>
         </div>
-        
+
         {% if message %}
         <div class="message message-success">
             {{ message }}
         </div>
         {% endif %}
-        
+
         <!-- Neuen Tag hinzufügen -->
         <div class="card add-day-card">
             <h2>➕ Neuen Tag anlegen</h2>
@@ -33,9 +30,9 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-group">
                     <label for="new_date">Datum wählen:</label>
-                    <input type="date" 
-                           id="new_date" 
-                           name="new_date" 
+                    <input type="date"
+                           id="new_date"
+                           name="new_date"
                            required
                            min="{{ today }}"
                            class="date-input">
@@ -45,14 +42,14 @@
                 </button>
             </form>
         </div>
-        
+
         {% if not days %}
         <div class="empty-state">
             <div class="empty-state-icon">📭</div>
             <p>Noch keine Tage geplant. Füge einen Tag hinzu, um zu starten.</p>
         </div>
         {% endif %}
-        
+
         <div class="week-grid">
             {% for day_info in days %}
             <div class="day-card {% if day_info.is_today %}today{% endif %}">
@@ -62,12 +59,11 @@
                         <div class="day-date">{{ day_info.date_str }}</div>
                     </div>
                 </div>
-                
+
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <input type="hidden" name="date" value="{{ day_info.date_iso }}">
-                    
-                    <!-- Zwei Menüs Checkbox -->
+
                     <div class="checkbox-group">
                         <label class="switch">
                             <input type="checkbox"
@@ -80,68 +76,64 @@
                         </label>
                         <span class="switch-label" onclick="document.getElementById('zwei_menues_{{ loop.index0 }}').click()">Zwei Menüs</span>
                     </div>
-                    
-                    <!-- Anmeldefrist -->
+
                     <div class="form-group">
                         <label>
-                            <input type="checkbox" 
-                                   name="deadline_enabled" 
-                                   value="1" 
+                            <input type="checkbox"
+                                   name="deadline_enabled"
+                                   value="1"
                                    {% if not day_info.menu or day_info.menu.deadline_enabled %}checked{% endif %}
                                    style="vertical-align: middle;">
-                            Anmeldefrist bis 
-                            <input type="time" 
-                                   name="registration_deadline" 
-                                   value="{{ day_info.menu.registration_deadline if day_info.menu else '19:45' }}" 
+                            Anmeldefrist bis
+                            <input type="time"
+                                   name="registration_deadline"
+                                   value="{{ day_info.menu.registration_deadline if day_info.menu else '19:45' }}"
                                    style="width: 100px; display: inline-block; padding: 4px 8px; vertical-align: middle;">
                         </label>
                     </div>
-                    
-                    <!-- Single Menu -->
+
                     <div id="single-{{ loop.index0 }}" class="menu-inputs {% if not day_info.menu or not day_info.menu.zwei_menues_aktiv %}active{% endif %}">
                         <div class="form-group">
                             <label>Menü</label>
-                            <input type="text" 
-                                   list="menu-options" 
-                                   name="menu_text" 
+                            <input type="text"
+                                   list="menu-options"
+                                   name="menu_text"
                                    value="{{ day_info.menu.description if day_info.menu and not day_info.menu.zwei_menues_aktiv else '' }}"
                                    placeholder="z.B. Schnitzel mit Pommes">
                         </div>
                     </div>
-                    
-                    <!-- Dual Menu -->
+
                     <div id="dual-{{ loop.index0 }}" class="menu-inputs {% if day_info.menu and day_info.menu.zwei_menues_aktiv %}active{% endif %}">
                         <div class="form-group">
                             <label>Menü 1</label>
-                            <input type="text" 
-                                   list="menu-options" 
-                                   name="menu1_text" 
+                            <input type="text"
+                                   list="menu-options"
+                                   name="menu1_text"
                                    value="{{ day_info.menu.menu1_name if day_info.menu else '' }}"
                                    placeholder="Erstes Menü">
                         </div>
                         <div class="form-group">
                             <label>Menü 2</label>
-                            <input type="text" 
-                                   list="menu-options" 
-                                   name="menu2_text" 
+                            <input type="text"
+                                   list="menu-options"
+                                   name="menu2_text"
                                    value="{{ day_info.menu.menu2_name if day_info.menu else '' }}"
                                    placeholder="Zweites Menü">
                         </div>
                     </div>
-                    
+
                     <button type="submit" name="save_day" value="1" class="btn btn-save">
                         💾 Speichern
                     </button>
-                    
-                    <!-- Löschen Button -->
-                    <button type="submit" 
-                            name="delete_day" 
-                            value="1" 
+
+                    <button type="submit"
+                            name="delete_day"
+                            value="1"
                             class="btn btn-delete"
                             onclick="return confirm('Tag {{ day_info.date_str }} wirklich löschen? Alle Anmeldungen gehen verloren!')">
                         🗑️ Tag löschen
                     </button>
-                    
+
                     {% if day_info.menu and day_info.menu.description %}
                     <div class="current-menu">
                         <strong>Aktuell:</strong><br>
@@ -157,14 +149,15 @@
             </div>
             {% endfor %}
         </div>
-        
+
         <datalist id="menu-options">
             {% for preset in preset_menus %}
             <option value="{{ preset.name }}">
             {% endfor %}
         </datalist>
     </div>
-    
+{% endblock %}
+
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/pages/weekly.js') }}" defer></script>
-</body>
-</html>
+{% endblock %}

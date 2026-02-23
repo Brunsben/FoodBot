@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="google" content="notranslate">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#dc2626">
+    <title>{% block title %}FoodBot{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/sidebar.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+
+<div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">🍽️</div>
+            <div>
+                <div class="sidebar-logo-text">FoodBot</div>
+                <div class="sidebar-logo-sub">FF Wietmarschen</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/admin" class="sidebar-item {% if active_page == 'admin' %}active{% endif %}">
+                <span class="sidebar-icon">⚙️</span> Admin
+            </a>
+            <a href="/kitchen" class="sidebar-item {% if active_page == 'kitchen' %}active{% endif %}">
+                <span class="sidebar-icon">🍳</span> Küche
+            </a>
+            <a href="/admin/weekly" class="sidebar-item {% if active_page == 'weekly' %}active{% endif %}">
+                <span class="sidebar-icon">📅</span> Wochenplan
+            </a>
+            <a href="/stats" class="sidebar-item {% if active_page == 'stats' %}active{% endif %}">
+                <span class="sidebar-icon">📊</span> Statistiken
+            </a>
+            <a href="/history" class="sidebar-item {% if active_page == 'history' %}active{% endif %}">
+                <span class="sidebar-icon">📜</span> Historie
+            </a>
+            <div class="sidebar-divider"></div>
+            <a href="/" class="sidebar-item">
+                <span class="sidebar-icon">📡</span> Touch-Modus
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/logout" class="sidebar-item" style="color: var(--error);">
+                <span class="sidebar-icon">🚪</span> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- Content -->
+    <div class="admin-content">
+
+        <!-- Mobile header -->
+        <div class="mobile-header">
+            <button class="hamburger" onclick="toggleSidebar()">☰</button>
+            <h1>{% block mobile_title %}FoodBot{% endblock %}</h1>
+        </div>
+
+        {% block content %}{% endblock %}
+
+    </div>
+</div>
+
+<script>
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+}
+</script>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

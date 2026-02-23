@@ -1,27 +1,23 @@
-{% extends "base.html" %}
+{% extends "admin_base.html" %}
+{% set active_page = 'kitchen' %}
 
 {% block title %}Küche – FoodBot{% endblock %}
+{% block mobile_title %}🍳 Küche{% endblock %}
 
 {% block styles %}
-    <meta name="color-scheme" content="dark">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/animations.css') }}?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/kitchen.css') }}?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}?v={{ asset_version }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/glass.css') }}?v={{ asset_version }}">
 {% endblock %}
 
-{% block body %}
-<body>
-    <header class="topbar">
-        <h1 class="topbar__title">🍳 Küche</h1>
-        <nav class="topbar__nav fancy-nav">
-            <a href="/kitchen/print" target="_blank" class="fancy-nav-item"><span class="icon">🖨️</span>Drucken</a>
-            <a href="/admin" class="fancy-nav-item"><span class="icon">⚙️</span>Admin</a>
-            <a href="/" class="fancy-nav-item"><span class="icon">📡</span>Touch</a>
-        </nav>
-    </header>
-
+{% block content %}
     <main class="content">
+        <!-- Drucken-Link -->
+        <div style="padding: 1rem 1.5rem 0; display: flex; justify-content: flex-end;">
+            <a href="/kitchen/print" target="_blank" class="btn btn-sm btn-ghost">🖨️ Drucken</a>
+        </div>
+
         <!-- Statistik -->
         <div class="stats">
             <div class="stat stat--total">
@@ -131,9 +127,8 @@
         <!-- Gäste-Verwaltung -->
         <section class="panel glass glass-ultra">
             <h2 class="panel__heading">👥 Gäste verwalten</h2>
-            
+
             {% if menu and menu.zwei_menues_aktiv %}
-                <!-- Zwei Menüs: Getrennte Gästeverwaltung -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div>
                         <h3 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">{{ menu.menu1_name or 'Menü 1' }}</h3>
@@ -157,7 +152,6 @@
                     </div>
                 </div>
             {% else %}
-                <!-- Ein Menü: Einfache Gästeverwaltung -->
                 <form method="post" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <input type="hidden" name="menu_choice" value="1"/>
@@ -169,8 +163,9 @@
             {% endif %}
         </section>
     </main>
+{% endblock %}
 
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/animations.js') }}?v={{ asset_version }}" defer></script>
     <script src="{{ url_for('static', filename='js/pages/kitchen.js') }}?v={{ asset_version }}" defer></script>
-</body>
 {% endblock %}

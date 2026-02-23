@@ -1,55 +1,48 @@
-<!DOCTYPE html>
-<html lang="de" translate="no">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="google" content="notranslate">
-    <title>Essenshistorie - FoodBot</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+{% extends "admin_base.html" %}
+{% set active_page = 'history' %}
+
+{% block title %}Essenshistorie – FoodBot{% endblock %}
+{% block mobile_title %}📜 Historie{% endblock %}
+
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/history.css') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <div class="history-container">
         <div class="page-header">
-            <h1>📊 Essenshistorie</h1>
+            <h1>📜 Essenshistorie</h1>
             <p class="page-subtitle">Übersicht aller Anmeldungen und Top-Esser</p>
-        </div>
-        
-        <div class="nav-buttons">
-            <a href="/admin" class="btn btn-secondary">🔧 Zurück zum Admin</a>
-            <a href="/stats" class="btn btn-primary">📈 Statistiken</a>
         </div>
 
         <div class="card">
             <h2>🏆 Top 10 Esser (90 Tage)</h2>
             <div class="table-responsive">
                 <table class="data-table top-table">
-                <tr>
-                    <th>Rang</th>
-                    <th>Name</th>
-                    <th>90 Tage</th>
-                    <th>30 Tage</th>
-                    <th>7 Tage</th>
-                    <th>Letzte Anmeldung</th>
-                </tr>
-                {% for user_stat in top_users %}
-                <tr>
-                    <td>
-                        {% if loop.index == 1 %}<span class="badge badge-gold">🥇 #1</span>
-                        {% elif loop.index == 2 %}<span class="badge badge-silver">🥈 #2</span>
-                        {% elif loop.index == 3 %}<span class="badge badge-bronze">🥉 #3</span>
-                        {% else %}#{{ loop.index }}{% endif %}
-                    </td>
-                    <td><a href="/history/user/{{ user_stat.user.id }}">{{ user_stat.user.name }}</a></td>
-                    <td><strong>{{ user_stat.count_90 }}</strong></td>
-                    <td>{{ user_stat.count_30 }}</td>
-                    <td>{{ user_stat.count_7 }}</td>
-                    <td>{{ user_stat.last_date.strftime('%d.%m.%Y') if user_stat.last_date else '-' }}</td>
-                </tr>
-                {% endfor %}
+                    <tr>
+                        <th>Rang</th>
+                        <th>Name</th>
+                        <th>90 Tage</th>
+                        <th>30 Tage</th>
+                        <th>7 Tage</th>
+                        <th>Letzte Anmeldung</th>
+                    </tr>
+                    {% for user_stat in top_users %}
+                    <tr>
+                        <td>
+                            {% if loop.index == 1 %}<span class="badge badge-gold">🥇 #1</span>
+                            {% elif loop.index == 2 %}<span class="badge badge-silver">🥈 #2</span>
+                            {% elif loop.index == 3 %}<span class="badge badge-bronze">🥉 #3</span>
+                            {% else %}#{{ loop.index }}{% endif %}
+                        </td>
+                        <td><a href="/history/user/{{ user_stat.user.id }}">{{ user_stat.user.name }}</a></td>
+                        <td><strong>{{ user_stat.count_90 }}</strong></td>
+                        <td>{{ user_stat.count_30 }}</td>
+                        <td>{{ user_stat.count_7 }}</td>
+                        <td>{{ user_stat.last_date.strftime('%d.%m.%Y') if user_stat.last_date else '-' }}</td>
+                    </tr>
+                    {% endfor %}
                 </table>
             </div>
         </div>
@@ -58,27 +51,26 @@
             <h2>👥 Alle Kameraden ({{ total_users }} gesamt)</h2>
             <div class="table-responsive">
                 <table class="data-table">
-                <tr>
-                    <th>Name</th>
-                    <th>90 Tage</th>
-                    <th>30 Tage</th>
-                    <th>7 Tage</th>
-                    <th>Letzte Anmeldung</th>
-                    <th>Detail</th>
-                </tr>
-                {% for user_stat in user_stats %}
-                <tr>
-                    <td>{{ user_stat.user.name }}</td>
-                    <td><span class="stat-box"><strong>{{ user_stat.count_90 }}</strong></span></td>
-                    <td>{{ user_stat.count_30 }}</td>
-                    <td>{{ user_stat.count_7 }}</td>
-                    <td>{{ user_stat.last_date.strftime('%d.%m.%Y') if user_stat.last_date else 'Nie' }}</td>
-                    <td><a href="/history/user/{{ user_stat.user.id }}">📅 Details</a></td>
-                </tr>
-                {% endfor %}
+                    <tr>
+                        <th>Name</th>
+                        <th>90 Tage</th>
+                        <th>30 Tage</th>
+                        <th>7 Tage</th>
+                        <th>Letzte Anmeldung</th>
+                        <th>Detail</th>
+                    </tr>
+                    {% for user_stat in user_stats %}
+                    <tr>
+                        <td>{{ user_stat.user.name }}</td>
+                        <td><span class="stat-box"><strong>{{ user_stat.count_90 }}</strong></span></td>
+                        <td>{{ user_stat.count_30 }}</td>
+                        <td>{{ user_stat.count_7 }}</td>
+                        <td>{{ user_stat.last_date.strftime('%d.%m.%Y') if user_stat.last_date else 'Nie' }}</td>
+                        <td><a href="/history/user/{{ user_stat.user.id }}">📅 Details</a></td>
+                    </tr>
+                    {% endfor %}
                 </table>
             </div>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}
