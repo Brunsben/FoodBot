@@ -18,10 +18,6 @@ services:
       - ./backups:/app/backups
       # Logs
       - ./logs:/app/logs
-      # RFID Device (nur wenn Reader angeschlossen)
-      # - /dev/ttyUSB0:/dev/ttyUSB0
-    # devices:
-      # - /dev/ttyUSB0:/dev/ttyUSB0
     networks:
       - foodbot-network
     healthcheck:
