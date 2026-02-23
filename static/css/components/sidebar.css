@@ -11,12 +11,15 @@
 /* Sidebar */
 .sidebar {
     position: fixed;
-    inset-y: 0;
+    top: 0;
+    bottom: 0;
     left: 0;
+    height: 100vh;
     z-index: 40;
     width: 224px;
     background: var(--bg-elevated);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
