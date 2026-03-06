@@ -11,9 +11,13 @@ def create_app():
     if base_path:
         app.config['APPLICATION_ROOT'] = base_path
 
-        # ProxyFix: vertraut dem Reverse-Proxy für korrekten SCRIPT_NAME
-        from werkzeug.middleware.proxy_fix import ProxyFix
-        app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
+        # SCRIPT_NAME direkt setzen — zuverlässiger als ProxyFix + Header
+        # nginx strippt das Präfix vor dem Weiterleiten, daher nur SCRIPT_NAME nötig
+        _inner_wsgi = app.wsgi_app
+        def _fix_script_name(environ, start_response):
+            environ['SCRIPT_NAME'] = base_path
+            return _inner_wsgi(environ, start_response)
+        app.wsgi_app = _fix_script_name
     
     # Konfiguration laden
     try:
