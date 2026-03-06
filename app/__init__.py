@@ -5,6 +5,15 @@ from datetime import timedelta
 
 def create_app():
     app = Flask(__name__, static_folder='../static', template_folder='../templates')
+
+    # Reverse-Proxy Base-Path (z.B. /food wenn hinter Portal)
+    base_path = os.environ.get('APPLICATION_ROOT', '').rstrip('/')
+    if base_path:
+        app.config['APPLICATION_ROOT'] = base_path
+
+        # ProxyFix: vertraut dem Reverse-Proxy für korrekten SCRIPT_NAME
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_prefix=1)
     
     # Konfiguration laden
     try:
@@ -45,6 +54,7 @@ def create_app():
         app.config['SESSION_COOKIE_SECURE'] = False
         app.config['SESSION_COOKIE_HTTPONLY'] = True
         app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+        app.config['SESSION_COOKIE_PATH'] = base_path or '/'
         app.config['WTF_CSRF_ENABLED'] = True
         app.config['WTF_CSRF_TIME_LIMIT'] = 3600
         app.config['WTF_CSRF_SSL_STRICT'] = False
