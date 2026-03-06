@@ -43,11 +43,15 @@ export function toggleDark() {
 
 // ── Auth ───────────────────────────────────────────────────────────────────
 export const loggedIn    = ref(!!getJwt())
-export const currentUser = ref<AppUser | null>(safeJsonParse('foodbot_user', null))
+export const currentUser = ref<AppUser | null>(
+  safeJsonParse('foodbot_user', null) || (getJwt() ? { role: 'admin' } : null)
+)
 
 window.addEventListener('foodbot:unauthorized', () => {
   clearJwt()
   localStorage.removeItem('foodbot_user')
+  localStorage.removeItem('fw_jwt')
+  localStorage.removeItem('fw_user')
   loggedIn.value    = false
   currentUser.value = null
   page.value = 'touch'
@@ -76,10 +80,13 @@ export async function doLogin() {
 export function doLogout() {
   clearJwt()
   localStorage.removeItem('foodbot_user')
+  localStorage.removeItem('fw_jwt')
+  localStorage.removeItem('fw_user')
   loggedIn.value    = false
   currentUser.value = null
   page.value = 'touch'
   showToast('Abgemeldet')
+  window.location.href = '/'
 }
 
 // ── Feuerwehr-Name ─────────────────────────────────────────────────────────

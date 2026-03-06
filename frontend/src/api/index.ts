@@ -4,7 +4,7 @@
 const API = () => window.CONFIG?.api || '/api'
 
 // ── JWT ───────────────────────────────────────────────────────────────────
-export const getJwt   = (): string | null => localStorage.getItem('foodbot_jwt')
+export const getJwt   = (): string | null => localStorage.getItem('foodbot_jwt') || localStorage.getItem('fw_jwt')
 export const setJwt   = (token: string) => localStorage.setItem('foodbot_jwt', token)
 export const clearJwt = () => localStorage.removeItem('foodbot_jwt')
 
