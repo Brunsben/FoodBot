@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, send_file
-from .models import db, User, Menu, Registration, Guest
+from .models import db, Menu, Registration, Guest
 from .auth import login_required
 from datetime import date, timedelta
 from sqlalchemy import func
@@ -14,31 +14,31 @@ def _build_stats_for_menus(menus):
     if not menus:
         return []
     
-    dates = [m.date for m in menus]
+    dates = [m.datum for m in menus]
     
     # Alle Registrierungen für diese Tage in einer Query
     reg_data = db.session.query(
-        Registration.date,
-        Registration.menu_choice,
+        Registration.datum,
+        Registration.menu_wahl,
         func.count(Registration.id)
-    ).filter(Registration.date.in_(dates)
-    ).group_by(Registration.date, Registration.menu_choice).all()
+    ).filter(Registration.datum.in_(dates)
+    ).group_by(Registration.datum, Registration.menu_wahl).all()
     
     # Alle Gäste für diese Tage in einer Query
-    guest_data = Guest.query.filter(Guest.date.in_(dates)).all()
+    guest_data = Guest.query.filter(Guest.datum.in_(dates)).all()
     
     # Lookup-Dicts aufbauen
-    reg_counts = {}  # {date: {menu_choice: count}}
-    for reg_date, menu_choice, count in reg_data:
+    reg_counts = {}  # {date: {menu_wahl: count}}
+    for reg_date, menu_wahl, count in reg_data:
         if reg_date not in reg_counts:
             reg_counts[reg_date] = {}
-        reg_counts[reg_date][menu_choice] = count
+        reg_counts[reg_date][menu_wahl] = count
     
-    guest_counts = {g.date: g.count for g in guest_data}
+    guest_counts = {g.datum: g.anzahl for g in guest_data}
     
     days = []
     for menu_entry in menus:
-        day = menu_entry.date
+        day = menu_entry.datum
         day_regs = reg_counts.get(day, {})
         total_regs = sum(day_regs.values())
         guests = guest_counts.get(day, 0)
@@ -48,7 +48,7 @@ def _build_stats_for_menus(menus):
             'registrations': total_regs,
             'guests': guests,
             'total': total_regs + guests,
-            'menu': menu_entry.description,
+            'menu': menu_entry.beschreibung,
         }
         
         if menu_entry.zwei_menues_aktiv:
@@ -70,7 +70,7 @@ def _build_stats_for_menus(menus):
 def index():
     """Statistik-Übersicht - nur Tage mit Menü"""
     start_date = date.today() - timedelta(days=180)
-    menus = Menu.query.filter(Menu.date >= start_date).order_by(Menu.date.desc()).limit(14).all()
+    menus = Menu.query.filter(Menu.datum >= start_date).order_by(Menu.datum.desc()).limit(14).all()
     
     days = _build_stats_for_menus(menus)
     
@@ -90,7 +90,7 @@ def export_csv():
     writer.writerow(['Datum', 'Kameraden', 'Gäste', 'Gesamt', 'Menü', 'Zwei Menüs', 'Menü 1', 'Menü 1 Anzahl', 'Menü 2', 'Menü 2 Anzahl'])
     
     start_date = date.today() - timedelta(days=365)
-    menus = Menu.query.filter(Menu.date >= start_date).order_by(Menu.date.desc()).all()
+    menus = Menu.query.filter(Menu.datum >= start_date).order_by(Menu.datum.desc()).all()
     
     days = _build_stats_for_menus(menus)
     

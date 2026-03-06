@@ -2,7 +2,7 @@
    Touch Screen JavaScript
    =================================== */
 
-let currentUserId = null;
+let currentMemberId = null;
 let currentCardId = null;
 let currentPersonalNumber = null;
 
@@ -25,8 +25,8 @@ function showStatus(type, title, subtitle) {
 /**
  * Show menu choice overlay
  */
-function showMenuChoice(userId, cardId, personalNumber, menu1, menu2) {
-    currentUserId = userId;
+function showMenuChoice(memberId, cardId, personalNumber, menu1, menu2) {
+    currentMemberId = memberId;
     currentCardId = cardId;
     currentPersonalNumber = personalNumber;
     
@@ -66,7 +66,7 @@ async function selectMenu(choice) {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: `user_id=${currentUserId}&card_id=${currentCardId}&menu_choice=${choice}`
+            body: `member_id=${currentMemberId}&card_id=${currentCardId}&menu_choice=${choice}`
         });
         
         const data = await res.json();
@@ -172,7 +172,7 @@ async function handleSubmit(e) {
         
         if (data.success) {
             if (data.need_menu_choice) {
-                currentUserId = data.user_id;
+                currentMemberId = data.member_id;
                 currentPersonalNumber = personalNumber;
                 
                 document.getElementById('choice1').textContent = data.menu1;

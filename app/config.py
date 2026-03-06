@@ -17,7 +17,8 @@ class Config:
     
     # Core Settings
     SECRET_KEY: str
-    DATABASE_URI: str = 'sqlite:///foodbot.db'
+    DATABASE_URI: str = 'postgresql://nocodb:nocodb@localhost:5432/nocodb'
+    JWT_SECRET: str = ''
     
     # Session
     SESSION_LIFETIME_HOURS: int = 1
@@ -91,8 +92,12 @@ class Config:
                 "Generiere einen längeren Key mit: python3 -c 'import secrets; print(secrets.token_hex(32))'"
             )
         
-        # Optional: Database URI
-        db_uri = os.getenv('DATABASE_URI', cls.DATABASE_URI)
+        # Optional: Database URI (PostgreSQL)
+        db_uri = os.getenv('DATABASE_URI',
+            os.getenv('DATABASE_URL', cls.DATABASE_URI))
+        
+        # JWT-Secret für gemeinsame Auth (fw_common)
+        jwt_secret = os.getenv('JWT_SECRET', '')
         
         # Optional: Integer-Werte mit Defaults
         session_hours = int(os.getenv('SESSION_LIFETIME_HOURS', cls.SESSION_LIFETIME_HOURS))
@@ -106,6 +111,7 @@ class Config:
         return cls(
             SECRET_KEY=secret,
             DATABASE_URI=db_uri,
+            JWT_SECRET=jwt_secret,
             SESSION_LIFETIME_HOURS=session_hours,
             SESSION_COOKIE_SECURE=https_enabled,
             DB_POOL_SIZE=db_pool_size,

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="google" content="notranslate">
-    <title>{{ user.name }} - Essenshistorie</title>
+    <title>{{ member.name }} - Essenshistorie</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layouts.css') }}">
@@ -15,20 +15,16 @@
     <div class="history-detail-container">
         <a href="/history" class="nav-btn">← Zurück zur Übersicht</a>
         
-        <h1>{{ user.name }}</h1>
-        <div class="history-subtitle">
-            Personalnummer: {{ user.personal_number }} | 
-            {% if user.card_id %}Karte: {{ user.card_id }}{% else %}Keine Karte{% endif %}
-        </div>
+        <h1>{{ member.name }}</h1>
 
         <div class="stats-grid">
             <div class="stat-card">
                 <h3>Gesamt (180 Tage)</h3>
-                <div class="number">{{ total }}</div>
+                <div class="number">{{ pagination.total }}</div>
             </div>
             <div class="stat-card">
                 <h3>Durchschnitt/Monat</h3>
-                <div class="number">{{ (total / 6)|round(1) }}</div>
+                <div class="number">{{ (pagination.total / 6)|round(1) }}</div>
             </div>
             <div class="stat-card">
                 <h3>Letzte Anmeldung</h3>
@@ -55,7 +51,7 @@
         </div>
 
         <div class="section">
-            <h2>Alle Anmeldungen ({{ total }})</h2>
+            <h2>Alle Anmeldungen ({{ pagination.total }})</h2>
             <div class="scrollable-list">
                 <ul class="month-list">
                     {% for reg in registrations %}

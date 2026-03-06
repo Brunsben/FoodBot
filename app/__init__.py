@@ -6,23 +6,26 @@ from datetime import timedelta
 def create_app():
     app = Flask(__name__, static_folder='../static', template_folder='../templates')
     
-    # Versuche neue Config zu laden, falle zurück auf alte Methode
+    # Konfiguration laden
     try:
         from .config import load_config
         config = load_config()
         app.config.update(config.to_flask_config())
     except (ImportError, ValueError) as e:
-        # Fallback auf alte Konfiguration
         import warnings
         warnings.warn(f"Config-Validierung fehlgeschlagen, nutze Fallback: {e}")
         
         from dotenv import load_dotenv
         load_dotenv()
         
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///foodbot.db'
+        # PostgreSQL als Default
+        db_uri = os.environ.get('DATABASE_URI',
+            os.environ.get('DATABASE_URL',
+                'postgresql://nocodb:nocodb@localhost:5432/nocodb'))
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         
-        # Database Connection Pooling
+        # Database Connection Pooling (PostgreSQL)
         app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
             'pool_size': 10,
             'pool_recycle': 3600,
@@ -31,10 +34,10 @@ def create_app():
             'pool_timeout': 30
         }
         
-        # SECRET_KEY (alte Validierung)
+        # SECRET_KEY
         secret_key = os.environ.get('SECRET_KEY')
         if not secret_key or secret_key in ('dev-secret-key-change-in-production', 'change-me-in-production'):
-            raise ValueError("SECRET_KEY muss gesetzt werden! Generiere einen mit: python3 -c 'import secrets; print(secrets.token_hex(32))'")
+            raise ValueError("SECRET_KEY muss gesetzt werden!")
         app.config['SECRET_KEY'] = secret_key
         app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
         
@@ -50,8 +53,9 @@ def create_app():
     
     db.init_app(app)
     
-    with app.app_context():
-        db.create_all()
+    # Hinweis: Tabellen werden per postgres-food.sql erstellt, NICHT per db.create_all()
+    # db.create_all() würde die fw_food-Tabellen korrekt finden, aber
+    # fw_common ist ein anderes Schema und wird separat verwaltet.
     
     # Blueprints importieren
     from . import routes

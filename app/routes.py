@@ -1,6 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, make_response
-from .models import db, User, Menu, Registration, Guest, PresetMenu, AdminLog
-from .utils import register_user_for_today, save_menu, get_guests_for_date, get_menu_for_date, db_transaction
+from .models import (
+    db, Menu, Registration, Guest, PresetMenu, AdminLog,
+    RfidCard, MobileToken,
+    get_member_name, get_member_by_personal_number, get_member,
+    get_all_members, get_member_cards, get_member_token
+)
+from .utils import register_member_for_today, save_menu, get_guests_for_date, get_menu_for_date, db_transaction
 from .validation import (
     validate_personal_number, validate_card_id, validate_name,
     validate_integer, validate_menu_choice, validate_date, validate_time
@@ -10,7 +15,6 @@ from .auth import login_required, check_auth
 from .api import limiter
 from .qr_generator import generate_qr_code
 from .notifications import notification_service
-from sqlalchemy.orm import joinedload
 from flask_limiter.util import get_remote_address
 from datetime import date
 from urllib.parse import urlparse
@@ -61,14 +65,14 @@ def index():
     message = None
     status = None
     need_menu_choice = False
-    pending_user_id = None
+    pending_member_id = None
     pending_card_id = None
     pending_personal_number = None
     
     if request.method == 'POST':
         personal_number = request.form.get('personal_number', '').strip()
         card_id = request.form.get('card_id', '').strip()
-        user = None
+        member_id = None
         
         # QR-Code-Format: FOODBOT:Personalnummer
         if personal_number and personal_number.startswith('FOODBOT:'):
@@ -85,15 +89,17 @@ def index():
             card_id = validate_card_id(card_id)
         
         if personal_number:
-            user = User.query.filter_by(personal_number=personal_number).first()
+            member_id = get_member_by_personal_number(personal_number)
         elif card_id:
-            user = find_user_by_card(card_id)
+            member_id = find_user_by_card(card_id)
             
-        if user:
+        if member_id:
+            member_name = get_member_name(member_id)
+            
             # Deadline-Prüfung
             if today_menu and not today_menu.is_registration_open():
                 # Abmeldung auch nach Deadline erlauben
-                existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+                existing_reg = Registration.query.filter_by(member_id=member_id, datum=date.today()).first()
                 if not existing_reg:
                     message = f"Anmeldefrist abgelaufen ({today_menu.registration_deadline} Uhr)"
                     status = 'error'
@@ -101,44 +107,44 @@ def index():
             
             # Prüfe ob zwei Menüs aktiv sind
             if today_menu and today_menu.zwei_menues_aktiv:
-                # Prüfe ob User schon angemeldet ist
-                existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+                # Prüfe ob Mitglied schon angemeldet ist
+                existing_reg = Registration.query.filter_by(member_id=member_id, datum=date.today()).first()
                 if existing_reg:
                     # Abmelden
-                    menu_name = today_menu.menu1_name if existing_reg.menu_choice == 1 else today_menu.menu2_name
+                    menu_name = today_menu.menu1_name if existing_reg.menu_wahl == 1 else today_menu.menu2_name
                     try:
                         with db_transaction():
                             db.session.delete(existing_reg)
                     except Exception as e:
-                        logger.error(f"Abmeldung fehlgeschlagen für {user.name}: {e}")
+                        logger.error(f"Abmeldung fehlgeschlagen für {member_name}: {e}")
                         message = "Datenbankfehler bei Abmeldung"
                         status = 'error'
                         return render_template('touch.html', menu=today_menu, message=message, status=status)
-                    message = f"{user.name}, du wurdest abgemeldet.\n{menu_name}"
+                    message = f"{member_name}, du wurdest abgemeldet.\n{menu_name}"
                     status = 'cancel'
-                    logger.info(f"Abmeldung: {user.name} ({user.personal_number})")
+                    logger.info(f"Abmeldung: {member_name}")
                 else:
                     # Zeige Menüauswahl
                     need_menu_choice = True
-                    pending_user_id = user.id
+                    pending_member_id = str(member_id)
                     pending_card_id = card_id
                     pending_personal_number = personal_number
                     message = "Bitte wähle dein Menü"
                     status = 'info'
             else:
                 # Normaler Modus ohne Menüauswahl
-                registered = register_user_for_today(user)
+                registered = register_member_for_today(member_id)
                 if registered:
-                    menu_text = today_menu.description if today_menu else "Kein Menü"
-                    message = f"{user.name}, du bist angemeldet!\n{menu_text}"
+                    menu_text = today_menu.beschreibung if today_menu else "Kein Menü"
+                    message = f"{member_name}, du bist angemeldet!\n{menu_text}"
                     status = 'success'
-                    logger.info(f"Anmeldung: {user.name} ({user.personal_number})")
-                    notification_service.notify_new_registration(user.name)
+                    logger.info(f"Anmeldung: {member_name}")
+                    notification_service.notify_new_registration(member_name)
                 else:
-                    menu_text = today_menu.description if today_menu else ""
-                    message = f"{user.name}, du wurdest abgemeldet.\n{menu_text}"
+                    menu_text = today_menu.beschreibung if today_menu else ""
+                    message = f"{member_name}, du wurdest abgemeldet.\n{menu_text}"
                     status = 'cancel'
-                    logger.info(f"Abmeldung: {user.name} ({user.personal_number})")
+                    logger.info(f"Abmeldung: {member_name}")
         else:
             message = "Benutzer nicht gefunden"
             status = 'error'
@@ -150,7 +156,7 @@ def index():
             'status': status,
             'message': message,
             'need_menu_choice': need_menu_choice,
-            'user_id': pending_user_id if need_menu_choice else None
+            'member_id': pending_member_id if need_menu_choice else None
         }
         # Menünamen hinzufügen wenn Auswahl benötigt wird
         if need_menu_choice and today_menu:
@@ -163,7 +169,7 @@ def index():
                          message=message, 
                          status=status,
                          need_menu_choice=need_menu_choice,
-                         pending_user_id=pending_user_id,
+                         pending_member_id=pending_member_id,
                          pending_card_id=pending_card_id,
                          pending_personal_number=pending_personal_number)
 
@@ -171,53 +177,51 @@ def index():
 @limiter.limit("60 per minute")  # Max 60 Menü-Auswahlen pro Minute
 def register_with_menu():
     """Route für Anmeldung mit Menüauswahl"""
-    user_id = validate_integer(request.form.get('user_id'), min_value=1)
+    member_id = request.form.get('member_id', '').strip()
     menu_choice = validate_menu_choice(request.form.get('menu_choice', 1), zwei_menues_aktiv=False)
     
-    # Input-Validierung
-    try:
-        user_id_int = int(user_id)
-    except (TypeError, ValueError):
+    if not member_id:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({'status': 'error', 'message': 'Ungültige Benutzer-ID'})
+            return jsonify({'status': 'error', 'message': 'Ungültige Mitglied-ID'})
         return redirect(url_for('main.index'))
     if menu_choice not in (1, 2):
         menu_choice = 1
     
-    user = db.session.get(User, user_id_int)
-    if user:
+    member = get_member(member_id)
+    if member:
         today_menu = get_menu_for_date()
+        member_name = member['name']
         
         # Erstelle neue Registration mit Menüwahl
-        existing_reg = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+        existing_reg = Registration.query.filter_by(member_id=member_id, datum=date.today()).first()
         if not existing_reg:
-            reg = Registration(user_id=user.id, date=date.today(), menu_choice=menu_choice)
+            reg = Registration(member_id=member_id, datum=date.today(), menu_wahl=menu_choice)
             try:
                 with db_transaction():
                     db.session.add(reg)
             except Exception as e:
-                logger.error(f"Registrierung mit Menü fehlgeschlagen für user_id {user_id}: {e}")
+                logger.error(f"Registrierung mit Menü fehlgeschlagen für member_id {member_id}: {e}")
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return jsonify({'status': 'error', 'message': 'Datenbankfehler'})
                 return redirect(url_for('main.index'))
             
             menu_name = today_menu.menu1_name if menu_choice == 1 else today_menu.menu2_name
-            message = f"{user.name}, du bist angemeldet!\n{menu_name}"
+            message = f"{member_name}, du bist angemeldet!\n{menu_name}"
             
-            logger.info(f"Anmeldung mit Menü {menu_choice}: {user.name} ({user.personal_number})")
-            notification_service.notify_new_registration(f"{user.name} - Menü {menu_choice}")
+            logger.info(f"Anmeldung mit Menü {menu_choice}: {member_name}")
+            notification_service.notify_new_registration(f"{member_name} - Menü {menu_choice}")
             
             # Bei AJAX JSON zurückgeben
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify({
                     'status': 'success',
                     'message': message,
-                    'name': user.name
+                    'name': member_name
                 })
             
             return render_template('touch.html', 
                                  menu=today_menu,
-                                 message=f"{user.name}, du bist angemeldet!\nMenü {menu_choice}: {menu_name}",
+                                 message=f"{member_name}, du bist angemeldet!\nMenü {menu_choice}: {menu_name}",
                                  status='success')
     
     return redirect(url_for('main.index'))
@@ -226,11 +230,12 @@ def register_with_menu():
 @bp.route('/kitchen', methods=['GET', 'POST'])
 def kitchen():
     today_menu = get_menu_for_date()
-    registrations = Registration.query.options(
-        joinedload(Registration.user)
-    ).filter_by(date=date.today()).all()
-    # Sortiere nach Username
-    registrations = sorted(registrations, key=lambda r: r.user.name.lower())
+    registrations = Registration.query.filter_by(datum=date.today()).all()
+    # Namen laden und nach Name sortieren
+    reg_entries = []
+    for r in registrations:
+        reg_entries.append({'reg': r, 'name': get_member_name(r.member_id)})
+    reg_entries.sort(key=lambda e: e['name'].lower())
     
     # Gäste laden
     guest_data = get_guests_for_date()
@@ -241,8 +246,8 @@ def kitchen():
     preset_menus = PresetMenu.get_all_ordered()
 
     # Menüstatistiken berechnen
-    menu1_count = sum(1 for r in registrations if r.menu_choice == 1) + (guest_menu1.count if guest_menu1 else 0)
-    menu2_count = sum(1 for r in registrations if r.menu_choice == 2) + (guest_menu2.count if guest_menu2 else 0)
+    menu1_count = sum(1 for r in registrations if r.menu_wahl == 1) + (guest_menu1.anzahl if guest_menu1 else 0)
+    menu2_count = sum(1 for r in registrations if r.menu_wahl == 2) + (guest_menu2.anzahl if guest_menu2 else 0)
 
     if request.method == 'POST':
         # Menü speichern
@@ -257,17 +262,17 @@ def kitchen():
         # Gäste hinzufügen/entfernen
         elif 'guest_action' in request.form:
             action = request.form.get('guest_action')
-            menu_choice = validate_menu_choice(request.form.get('menu_choice', 1), zwei_menues_aktiv=menu.zwei_menues_aktiv if menu else False)
+            menu_choice = validate_menu_choice(request.form.get('menu_choice', 1), zwei_menues_aktiv=today_menu.zwei_menues_aktiv if today_menu else False)
             
-            guest_entry = Guest.query.filter_by(date=date.today(), menu_choice=menu_choice).first()
+            guest_entry = Guest.query.filter_by(datum=date.today(), menu_wahl=menu_choice).first()
             if not guest_entry:
-                guest_entry = Guest(date=date.today(), menu_choice=menu_choice, count=0)
+                guest_entry = Guest(datum=date.today(), menu_wahl=menu_choice, anzahl=0)
                 db.session.add(guest_entry)
                 
-            if action == 'add' and guest_entry.count < 50:
-                guest_entry.count += 1
-            elif action == 'remove' and guest_entry.count > 0:
-                guest_entry.count -= 1
+            if action == 'add' and guest_entry.anzahl < 50:
+                guest_entry.anzahl += 1
+            elif action == 'remove' and guest_entry.anzahl > 0:
+                guest_entry.anzahl -= 1
             
             with db_transaction():
                 pass  # Changes werden automatisch committed
@@ -276,7 +281,7 @@ def kitchen():
     total = len(registrations) + guest_count
     return render_template('kitchen.html',
                          menu=today_menu,
-                         registrations=registrations,
+                         reg_entries=reg_entries,
                          guest_count=guest_count,
                          guest_menu1=guest_menu1,
                          guest_menu2=guest_menu2,
@@ -289,10 +294,7 @@ def kitchen():
 def kitchen_data():
     """API-Endpunkt für AJAX-Updates der Küchenseite"""
     today_menu = get_menu_for_date()
-    registrations = Registration.query.options(
-        joinedload(Registration.user)
-    ).filter_by(date=date.today()).all()
-    users = sorted([r.user for r in registrations], key=lambda u: u.name.lower())
+    registrations = Registration.query.filter_by(datum=date.today()).all()
     
     # Gäste laden
     guest_data = get_guests_for_date()
@@ -301,71 +303,71 @@ def kitchen_data():
     guest_count = guest_data['total_count']
     
     # Menüstatistiken
-    menu1_count = sum(1 for r in registrations if r.menu_choice == 1) + (guest_menu1.count if guest_menu1 else 0)
-    menu2_count = sum(1 for r in registrations if r.menu_choice == 2) + (guest_menu2.count if guest_menu2 else 0)
+    menu1_count = sum(1 for r in registrations if r.menu_wahl == 1) + (guest_menu1.anzahl if guest_menu1 else 0)
+    menu2_count = sum(1 for r in registrations if r.menu_wahl == 2) + (guest_menu2.anzahl if guest_menu2 else 0)
     
-    # Liefere für jeden User auch menu_choice und Menüname
+    # Liefere für jede Registration Name und Menüwahl
     user_entries = []
     for r in registrations:
+        name = get_member_name(r.member_id)
         entry = {
-            'name': r.user.name,
-            'menu_choice': r.menu_choice,
+            'name': name,
+            'menu_choice': r.menu_wahl,
         }
         if today_menu:
             if today_menu.zwei_menues_aktiv:
-                if r.menu_choice == 1:
+                if r.menu_wahl == 1:
                     entry['menu_name'] = today_menu.menu1_name or 'Menü 1'
-                elif r.menu_choice == 2:
+                elif r.menu_wahl == 2:
                     entry['menu_name'] = today_menu.menu2_name or 'Menü 2'
             else:
-                entry['menu_name'] = today_menu.description or ''
+                entry['menu_name'] = today_menu.beschreibung or ''
         else:
             entry['menu_name'] = ''
         user_entries.append(entry)
+    user_entries.sort(key=lambda e: e['name'].lower())
     return jsonify({
         'users': user_entries,
         'guest_count': guest_count,
-        'total': len(users) + guest_count,
+        'total': len(registrations) + guest_count,
         'menu1_count': menu1_count,
         'menu2_count': menu2_count,
         'menu': {
             'zwei_menues_aktiv': today_menu.zwei_menues_aktiv if today_menu else False,
             'menu1_name': today_menu.menu1_name if today_menu else None,
             'menu2_name': today_menu.menu2_name if today_menu else None,
-            'description': today_menu.description if today_menu else None
+            'description': today_menu.beschreibung if today_menu else None
         }
     })
 
 @bp.route('/kitchen/print')
 def kitchen_print():
     """Druckansicht für die Küche - gruppiert nach Menü"""
-    today_menu = Menu.query.filter_by(date=date.today()).first()
-    registrations = Registration.query.options(
-        joinedload(Registration.user)
-    ).filter_by(date=date.today()).all()
-    guest_entry = Guest.query.filter_by(date=date.today()).first()
-    guest_count = guest_entry.count if guest_entry else 0
+    today_menu = Menu.query.filter_by(datum=date.today()).first()
+    registrations = Registration.query.filter_by(datum=date.today()).all()
+    guest_data = get_guests_for_date()
+    guest_count = guest_data['total_count']
     
     # Nach Menüwahl gruppieren und alphabetisch sortieren
-    menu1_users = sorted([r.user for r in registrations if r.menu_choice == 1], key=lambda u: u.name.lower())
-    menu2_users = sorted([r.user for r in registrations if r.menu_choice == 2], key=lambda u: u.name.lower())
+    menu1_names = sorted([get_member_name(r.member_id) for r in registrations if r.menu_wahl == 1], key=str.lower)
+    menu2_names = sorted([get_member_name(r.member_id) for r in registrations if r.menu_wahl == 2], key=str.lower)
     
     total = len(registrations) + guest_count
     
     return render_template('kitchen_print.html', 
                          menu=today_menu,
-                         menu1_users=menu1_users,
-                         menu2_users=menu2_users,
+                         menu1_names=menu1_names,
+                         menu2_names=menu2_names,
                          guest_count=guest_count,
                          total=total)
 
 @bp.route('/menu/data', methods=['GET'])
 def menu_data():
     """API-Endpunkt für AJAX-Updates des Menüs auf der Touch-Seite"""
-    today_menu = Menu.query.filter_by(date=date.today()).first()
+    today_menu = Menu.query.filter_by(datum=date.today()).first()
     if today_menu:
         return jsonify({
-            'menu': today_menu.description if not today_menu.zwei_menues_aktiv else None,
+            'menu': today_menu.beschreibung if not today_menu.zwei_menues_aktiv else None,
             'zwei_menues_aktiv': today_menu.zwei_menues_aktiv,
             'menu1': today_menu.menu1_name if today_menu.zwei_menues_aktiv else None,
             'menu2': today_menu.menu2_name if today_menu.zwei_menues_aktiv else None
@@ -378,7 +380,7 @@ def admin():
     today_menu = get_menu_for_date()
     guest_data = get_guests_for_date()
     guest_menu1 = guest_data['menu1']
-    guest_count = guest_data['total_count']  # Gesamt für Kompatibilität
+    guest_count = guest_data['total_count']
     preset_menus = PresetMenu.get_all_ordered()
     message = None
 
@@ -409,7 +411,7 @@ def admin():
         # Vordefiniertes Menü löschen
         elif 'delete_preset_menu' in request.form:
             preset_id = request.form.get('delete_preset_id')
-            preset = db.session.get(PresetMenu, int(preset_id))
+            preset = db.session.get(PresetMenu, preset_id)
             if preset:
                 menu_name = preset.name
                 db.session.delete(preset)
@@ -418,116 +420,80 @@ def admin():
                 preset_menus = PresetMenu.get_all_ordered()
                 
         # Tagesan-/abmeldung
-        elif 'user_id' in request.form and 'edit_user' not in request.form:
-            user_id = request.form.get('user_id')
-            user = db.session.get(User, int(user_id))
-            if user:
-                registered = register_user_for_today(user)
+        elif 'member_id' in request.form and 'assign_card' not in request.form:
+            member_id = request.form.get('member_id', '').strip()
+            member = get_member(member_id)
+            if member:
+                registered = register_member_for_today(member_id)
                 if registered:
-                    message = f"{user.name} wurde für heute angemeldet."
+                    message = f"{member['name']} wurde für heute angemeldet."
                 else:
-                    message = f"{user.name} wurde für heute abgemeldet."
+                    message = f"{member['name']} wurde für heute abgemeldet."
             else:
-                message = "Unbekannter User."
-        # User anlegen
-        elif 'new_name' in request.form and 'new_personal_number' in request.form:
-            name = validate_name(request.form.get('new_name', ''))
-            personal_number = validate_personal_number(request.form.get('new_personal_number', ''))
-            card_id = validate_card_id(request.form.get('new_card_id', '')) or None
-            if not name or not personal_number:
-                message = "Name und Personalnummer sind erforderlich und m\u00fcssen g\u00fcltig sein."
-            elif User.query.filter_by(personal_number=personal_number).first():
-                message = "Personalnummer existiert bereits."
-            else:
-                user = User(name=name, personal_number=personal_number, card_id=card_id)
-                with db_transaction():
-                    db.session.add(user)
-                message = f"User {name} angelegt."
-        # User bearbeiten
-        elif 'edit_user' in request.form:
-            user_id = validate_integer(request.form.get('edit_user'), min_value=1)
-            user = db.session.get(User, user_id) if user_id else None
-            if user:
-                edit_name = validate_name(request.form.get('edit_name', ''))
-                edit_pn = validate_personal_number(request.form.get('edit_personal_number', ''))
-                if not edit_name or not edit_pn:
-                    message = "Name und Personalnummer d\u00fcrfen nicht leer sein und m\u00fcssen g\u00fcltig sein."
+                message = "Unbekanntes Mitglied."
+
+        # RFID-Karte zuweisen
+        elif 'assign_card' in request.form:
+            member_id = request.form.get('member_id', '').strip()
+            card_id = validate_card_id(request.form.get('card_id', ''))
+            if member_id and card_id:
+                existing = RfidCard.query.filter_by(card_id=card_id).first()
+                if existing:
+                    message = "Diese Karten-ID ist bereits vergeben."
                 else:
-                    # Duplikat-Prüfung (andere User mit gleicher Personalnummer)
-                    duplicate = User.query.filter(User.personal_number == edit_pn, User.id != user.id).first()
-                    if duplicate:
-                        message = f"Personalnummer {edit_pn} ist bereits vergeben."
-                    else:
-                        user.name = edit_name
-                        user.personal_number = edit_pn
-                        user.card_id = validate_card_id(request.form.get('edit_card_id', '')) or None
-                        try:
-                            with db_transaction():
-                                pass  # Änderungen werden automatisch committed
-                            message = f"User {user.name} aktualisiert."
-                        except Exception:
-                            message = "Fehler beim Speichern."
-        # User löschen
-        elif 'delete_user' in request.form:
-            user_id = request.form.get('delete_user')
-            user = db.session.get(User, int(user_id))
-            if user:
-                db.session.delete(user)
-                db.session.commit()
-                message = f"User {user.name} gelöscht."
-        # CSV-Import
-        elif 'csv_file' in request.files:
-            file = request.files['csv_file']
-            if file and file.filename and file.filename.endswith('.csv'):
-                try:
-                    reader = csv.DictReader(TextIOWrapper(file, encoding='utf-8'))
-                    count = 0
-                    skipped = 0
-                    for row in reader:
-                        name = row.get('name') or row.get('Name')
-                        personal_number = row.get('personal_number') or row.get('Personalnummer')
-                        card_id = row.get('card_id') or row.get('Karte')
-                        if name and personal_number:
-                            if not User.query.filter_by(personal_number=personal_number).first():
-                                user = User(name=name.strip(), personal_number=personal_number.strip(), card_id=(card_id or '').strip() or None)
-                                db.session.add(user)
-                                count += 1
-                            else:
-                                skipped += 1
+                    card = RfidCard(card_id=card_id, member_id=member_id)
+                    db.session.add(card)
                     db.session.commit()
-                    message = f"{count} User importiert, {skipped} übersprungen (bereits vorhanden)."
-                    logger.info(f"CSV-Import: {count} User importiert, {skipped} übersprungen")
-                except Exception as e:
-                    db.session.rollback()
-                    logger.error(f"CSV-Import-Fehler: {e}")
-                    message = "Fehler beim CSV-Import. Bitte Format prüfen."
+                    message = "RFID-Karte zugewiesen."
+            else:
+                message = "Mitglied-ID und Karten-ID erforderlich."
+
+        # RFID-Karte entfernen
+        elif 'remove_card' in request.form:
+            card_id = request.form.get('remove_card', '').strip()
+            card = RfidCard.query.filter_by(card_id=card_id).first()
+            if card:
+                db.session.delete(card)
+                db.session.commit()
+                message = "RFID-Karte entfernt."
+
         # Gäste verwalten (nur Menü 1 in Admin, da einfaches Interface)
         elif 'guest_action' in request.form:
             action = request.form.get('guest_action')
-            guest_entry = Guest.query.filter_by(date=date.today(), menu_choice=1).first()
+            guest_entry = Guest.query.filter_by(datum=date.today(), menu_wahl=1).first()
             if not guest_entry:
-                guest_entry = Guest(date=date.today(), menu_choice=1, count=0)
+                guest_entry = Guest(datum=date.today(), menu_wahl=1, anzahl=0)
                 db.session.add(guest_entry)
-            if action == 'add' and guest_entry.count < 50:
-                guest_entry.count += 1
-            elif action == 'remove' and guest_entry.count > 0:
-                guest_entry.count -= 1
+            if action == 'add' and guest_entry.anzahl < 50:
+                guest_entry.anzahl += 1
+            elif action == 'remove' and guest_entry.anzahl > 0:
+                guest_entry.anzahl -= 1
             elif action == 'set':
                 try:
                     count = int(request.form.get('guest_count', 0))
-                    guest_entry.count = max(0, min(50, count))
+                    guest_entry.anzahl = max(0, min(50, count))
                 except ValueError:
                     pass
             db.session.commit()
-            message = f"Gästezahl aktualisiert: {guest_entry.count}"
+            message = f"Gästezahl aktualisiert: {guest_entry.anzahl}"
     
     # Daten NACH allen POST-Operationen neu laden
-    users = User.query.order_by(User.name).all()
-    registrations = Registration.query.filter_by(date=date.today()).all()
-    registered_ids = {r.user_id for r in registrations}
+    members = get_all_members()
+    # RFID-Karten pro Mitglied laden
+    all_cards = RfidCard.query.all()
+    cards_by_member = {}
+    for c in all_cards:
+        mid = str(c.member_id)
+        if mid not in cards_by_member:
+            cards_by_member[mid] = []
+        cards_by_member[mid].append(c.card_id)
+
+    registrations = Registration.query.filter_by(datum=date.today()).all()
+    registered_ids = {str(r.member_id) for r in registrations}
     
     return render_template('admin.html', 
-                         users=users, 
+                         members=members,
+                         cards_by_member=cards_by_member,
                          registered_ids=registered_ids, 
                          message=message, 
                          menu=today_menu, 
@@ -550,14 +516,14 @@ def admin_weekly():
                     new_date = None
                     message = "Ungültiges Datumsformat."
                 if new_date:
-                    existing_menu = Menu.query.filter_by(date=new_date).first()
+                    existing_menu = Menu.query.filter_by(datum=new_date).first()
                     if not existing_menu:
                         menu = Menu(
-                            date=new_date,
-                            description='',
+                            datum=new_date,
+                            beschreibung='',
                             zwei_menues_aktiv=False,
-                            deadline_enabled=True,
-                            registration_deadline='19:45'
+                            frist_aktiv=True,
+                            anmeldefrist='19:45'
                         )
                         db.session.add(menu)
                         db.session.commit()
@@ -575,9 +541,9 @@ def admin_weekly():
                     menu_date = None
                     message = "Ungültiges Datumsformat."
                 if menu_date:
-                    menu = Menu.query.filter_by(date=menu_date).first()
+                    menu = Menu.query.filter_by(datum=menu_date).first()
                     if menu:
-                        Registration.query.filter_by(date=menu_date).delete()
+                        Registration.query.filter_by(datum=menu_date).delete()
                         db.session.delete(menu)
                         db.session.commit()
                         message = f"Tag {menu_date.strftime('%d.%m.%Y')} gelöscht."
@@ -600,17 +566,17 @@ def admin_weekly():
     
     # Alle zukünftigen und heutigen Menüs laden (sortiert nach Datum)
     today = date.today()
-    menus = Menu.query.filter(Menu.date >= today).order_by(Menu.date).all()
+    menus = Menu.query.filter(Menu.datum >= today).order_by(Menu.datum).all()
     
     weekdays_de = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
     
     days = []
     for menu in menus:
         days.append({
-            'date_iso': menu.date.isoformat(),
-            'date_str': menu.date.strftime('%d.%m.%Y'),
-            'weekday': weekdays_de[menu.date.weekday()],
-            'is_today': menu.date == today,
+            'date_iso': menu.datum.isoformat(),
+            'date_str': menu.datum.strftime('%d.%m.%Y'),
+            'weekday': weekdays_de[menu.datum.weekday()],
+            'is_today': menu.datum == today,
             'menu': menu
         })
     
@@ -658,25 +624,27 @@ def start_rfid_thread():
 def on_load(state):
     start_rfid_thread()
 
-@bp.route('/qr/<int:user_id>')
+@bp.route('/qr/<member_id>')
 @login_required
-def qr_code(user_id):
-    """Generiere QR-Code für User - Mobile Registrierung"""
-    user = db.session.get(User, user_id)
-    if not user:
-        return {'error': 'User nicht gefunden'}, 404
+def qr_code(member_id):
+    """Generiere QR-Code für Mitglied - Mobile Registrierung"""
+    member = get_member(member_id)
+    if not member:
+        return {'error': 'Mitglied nicht gefunden'}, 404
     
-    # Sicherstellen, dass User einen Token hat
-    if not user.mobile_token:
-        user.mobile_token = User.generate_token()
+    # Sicherstellen, dass Mitglied einen Token hat
+    token_entry = get_member_token(member_id)
+    if not token_entry:
+        token_entry = MobileToken(member_id=member_id, token=MobileToken.generate_token())
+        db.session.add(token_entry)
         db.session.commit()
     
     # QR-Code mit Mobile-URL generieren
     base_url = os.getenv('BASE_URL', request.host_url.rstrip('/'))
-    mobile_url = f"{base_url}/m/{user.mobile_token}"
+    mobile_url = f"{base_url}/m/{token_entry.token}"
     qr_image = generate_qr_code(mobile_url)
     
-    return render_template('qr.html', user=user, qr_image=qr_image, mobile_url=mobile_url)
+    return render_template('qr.html', member=member, qr_image=qr_image, mobile_url=mobile_url)
 
 
 @bp.route('/admin/example-csv')
@@ -706,12 +674,16 @@ def example_csv():
 # Mobile Registrierung via Token
 @bp.route('/m/<token>', methods=['GET', 'POST'])
 def mobile_registration(token):
-    user = User.query.filter_by(mobile_token=token).first()
-    if not user:
+    token_entry = MobileToken.query.filter_by(token=token).first()
+    if not token_entry:
         return render_template('invalid_token.html'), 404
     
-    today_menu = Menu.query.filter_by(date=date.today()).first()
-    registration = Registration.query.filter_by(user_id=user.id, date=date.today()).first()
+    member_id = token_entry.member_id
+    member_name = get_member_name(member_id)
+    member = {'id': str(member_id), 'name': member_name}
+    
+    today_menu = Menu.query.filter_by(datum=date.today()).first()
+    registration = Registration.query.filter_by(member_id=member_id, datum=date.today()).first()
     is_registered = registration is not None
     registration_closed = today_menu and not today_menu.is_registration_open() if today_menu else False
     
@@ -726,7 +698,7 @@ def mobile_registration(token):
                 message = "Heute ist kein Menü verfügbar"
                 status_type = "info"
             elif today_menu and not today_menu.is_registration_open():
-                message = f"Anmeldefrist abgelaufen ({today_menu.registration_deadline} Uhr)"
+                message = f"Anmeldefrist abgelaufen ({today_menu.anmeldefrist} Uhr)"
                 status_type = "error"
             elif is_registered:
                 message = "Du bist bereits angemeldet"
@@ -742,9 +714,9 @@ def mobile_registration(token):
                         menu_choice = 1
                 
                 new_registration = Registration(
-                    user_id=user.id,
-                    date=date.today(),
-                    menu_choice=menu_choice
+                    member_id=member_id,
+                    datum=date.today(),
+                    menu_wahl=menu_choice
                 )
                 try:
                     db.session.add(new_registration)
@@ -777,7 +749,7 @@ def mobile_registration(token):
                 status_type = "info"
     
     return render_template('mobile.html',
-                         user=user,
+                         member=member,
                          menu=today_menu,
                          is_registered=is_registered,
                          registration=registration,

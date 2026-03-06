@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>Küchenliste - {{ menu.date.strftime('%d.%m.%Y') if menu else 'Kein Menü' }}</title>
+    <title>Küchenliste - {{ menu.datum.strftime('%d.%m.%Y') if menu else 'Kein Menü' }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/kitchen_print.css') }}">
 </head>
 <body>
     <div class="print-header">
         <h1>🍽️ Küchenliste</h1>
-        <div class="date">{{ menu.date.strftime('%A, %d. %B %Y') if menu else 'Kein Datum' }}</div>
+        <div class="date">{{ menu.datum.strftime('%A, %d. %B %Y') if menu else 'Kein Datum' }}</div>
     </div>
 
     {% if menu %}
@@ -18,12 +18,12 @@
             <div class="menu-section">
                 <div class="menu-title">
                     <span>Menü 1: {{ menu.menu1_name }}</span>
-                    <span class="count">{{ menu1_users|length }}</span>
+                    <span class="count">{{ menu1_names|length }}</span>
                 </div>
-                {% if menu1_users %}
+                {% if menu1_names %}
                 <div class="name-list">
-                    {% for user in menu1_users %}
-                    <div class="name-item">{{ user.name }}</div>
+                    {% for name in menu1_names %}
+                    <div class="name-item">{{ name }}</div>
                     {% endfor %}
                 </div>
                 {% else %}
@@ -34,12 +34,12 @@
             <div class="menu-section">
                 <div class="menu-title">
                     <span>Menü 2: {{ menu.menu2_name }}</span>
-                    <span class="count">{{ menu2_users|length }}</span>
+                    <span class="count">{{ menu2_names|length }}</span>
                 </div>
-                {% if menu2_users %}
+                {% if menu2_names %}
                 <div class="name-list">
-                    {% for user in menu2_users %}
-                    <div class="name-item">{{ user.name }}</div>
+                    {% for name in menu2_names %}
+                    <div class="name-item">{{ name }}</div>
                     {% endfor %}
                 </div>
                 {% else %}
@@ -49,13 +49,13 @@
         {% else %}
             <div class="menu-section">
                 <div class="menu-title">
-                    <span>{{ menu.description }}</span>
-                    <span class="count">{{ menu1_users|length }}</span>
+                    <span>{{ menu.beschreibung }}</span>
+                    <span class="count">{{ menu1_names|length }}</span>
                 </div>
-                {% if menu1_users %}
+                {% if menu1_names %}
                 <div class="name-list">
-                    {% for user in menu1_users %}
-                    <div class="name-item">{{ user.name }}</div>
+                    {% for name in menu1_names %}
+                    <div class="name-item">{{ name }}</div>
                     {% endfor %}
                 </div>
                 {% else %}
@@ -77,11 +77,11 @@
             {% if menu.zwei_menues_aktiv %}
             <div class="summary-row">
                 <span>Menü 1:</span>
-                <span>{{ menu1_users|length }} Personen</span>
+                <span>{{ menu1_names|length }} Personen</span>
             </div>
             <div class="summary-row">
                 <span>Menü 2:</span>
-                <span>{{ menu2_users|length }} Personen</span>
+                <span>{{ menu2_names|length }} Personen</span>
             </div>
             {% endif %}
             <div class="summary-row">

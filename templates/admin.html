@@ -20,7 +20,7 @@
         <!-- Tab-Navigation -->
         <nav class="tabs" role="tablist">
             <button class="tab active" data-tab="day" role="tab">📋 Tagesplanung</button>
-            <button class="tab" data-tab="users" role="tab">👥 User-Verwaltung</button>
+            <button class="tab" data-tab="users" role="tab">👥 Mitglieder & Karten</button>
         </nav>
 
         <!-- =================== TAB 1: Tagesplanung =================== -->
@@ -113,69 +113,62 @@
             <!-- Angemeldete Personen -->
             <section class="card glass">
                 <h2 class="card__heading">
-                    📋 Alle User
-                    <span class="count-badge">{{ users|length }}</span>
+                    📋 Alle Mitglieder
+                    <span class="count-badge">{{ members|length }}</span>
                     <span style="font-size: 0.8em; font-weight: normal; color: var(--text-muted);"> · {{ registered_ids|length }} angemeldet</span>
                 </h2>
 
-                {% if users %}
+                {% if members %}
                 <div class="reg-list">
-                    {% for user in users %}
-                    <div class="reg-item {% if user.id in registered_ids %}reg-item--on{% endif %}">
-                        <span class="reg-item__name">{{ user.name }}</span>
+                    {% for m in members %}
+                    <div class="reg-item {% if m.id in registered_ids %}reg-item--on{% endif %}">
+                        <span class="reg-item__name">{{ m.name }}</span>
                         <form method="post" class="reg-item__form">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <input type="hidden" name="member_id" value="{{ m.id }}">
                             <button type="submit"
-                                    class="btn-toggle {% if user.id in registered_ids %}btn-toggle--off{% else %}btn-toggle--on{% endif %}">
-                                {{ 'Abmelden' if user.id in registered_ids else 'Anmelden' }}
+                                    class="btn-toggle {% if m.id in registered_ids %}btn-toggle--off{% else %}btn-toggle--on{% endif %}">
+                                {{ 'Abmelden' if m.id in registered_ids else 'Anmelden' }}
                             </button>
                         </form>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <p class="empty-hint">Keine User vorhanden</p>
+                <p class="empty-hint">Keine Mitglieder vorhanden</p>
                 {% endif %}
             </section>
         </div>
 
-        <!-- =================== TAB 2: User-Verwaltung =================== -->
+        <!-- =================== TAB 2: Mitglieder & Karten =================== -->
         <div class="tab-panel" id="tab-users" role="tabpanel">
 
-            <!-- Neuen User anlegen -->
+            <!-- RFID-Karte zuweisen -->
             <section class="card glass">
-                <h2 class="card__heading">➕ Neuen User anlegen</h2>
+                <h2 class="card__heading">🔑 RFID-Karte zuweisen</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9em;">
+                    Mitglieder werden zentral über die PSA-Verwaltung gepflegt.
+                    Hier können RFID-Karten und QR-Codes verwaltet werden.
+                </p>
 
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="row-3">
                         <div class="field">
-                            <label>Name</label>
-                            <input type="text" name="new_name" placeholder="Max Mustermann" required inputmode="text" aria-label="Name">
+                            <label>Mitglied</label>
+                            <select name="member_id" required aria-label="Mitglied auswählen">
+                                <option value="">– Auswählen –</option>
+                                {% for m in members %}
+                                <option value="{{ m.id }}">{{ m.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="field">
-                            <label>Personalnummer</label>
-                            <input type="text" name="new_personal_number" placeholder="z.B. A123, MA-456" required inputmode="text" aria-label="Personalnummer">
-                        </div>
-                        <div class="field">
-                            <label>Karten-ID (optional)</label>
-                            <input type="text" name="new_card_id" placeholder="RFID Karte" inputmode="text" aria-label="Karten-ID">
+                            <label>Karten-ID / Personalnummer</label>
+                            <input type="text" name="card_id" placeholder="RFID-Karte oder Personalnr." required inputmode="text" aria-label="Karten-ID">
                         </div>
                     </div>
-                    <button type="submit" class="btn-action">👤 User anlegen</button>
-                </form>
-
-                <hr class="divider">
-
-                <h3 class="sub-heading">📂 CSV-Import</h3>
-                <form method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    <div class="field">
-                        <label>CSV-Datei hochladen</label>
-                        <input type="file" name="csv_file" accept=".csv" required class="file-input" aria-label="CSV-Datei">
-                    </div>
-                    <button type="submit" class="btn-action">📤 CSV importieren</button>
+                    <button type="submit" name="assign_card" value="1" class="btn-action">🔑 Karte zuweisen</button>
                 </form>
             </section>
 
@@ -206,71 +199,48 @@
                 </div>
             </section>
 
-            <!-- Alle User -->
+            <!-- Alle Mitglieder mit Karten -->
             <section class="card glass">
                 <h2 class="card__heading">
-                    ✏️ Alle User
-                    <span class="count-badge">{{ users|length }}</span>
+                    👥 Mitglieder & RFID-Karten
+                    <span class="count-badge">{{ members|length }}</span>
                 </h2>
 
-                {% if users %}
+                {% if members %}
                 <div class="user-list">
-                    {% for user in users %}
+                    {% for m in members %}
                     <div class="user-row">
                         <div class="user-row__info">
-                            <span class="user-row__name">{{ user.name }}</span>
-                            <span class="user-row__meta">Nr. {{ user.personal_number }}{% if user.card_id %} · Karte: {{ user.card_id }}{% endif %}</span>
+                            <span class="user-row__name">{{ m.name }}</span>
+                            <span class="user-row__meta">
+                                {% if cards_by_member.get(m.id) %}
+                                    Karten: {{ cards_by_member[m.id]|join(', ') }}
+                                {% else %}
+                                    <em>Keine Karte</em>
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="user-row__actions">
-                            <a href="/qr/{{ user.id }}" target="_blank" class="btn-icon" title="QR-Code">📱</a>
-                            <button class="btn-icon edit-user-btn" title="Bearbeiten"
-                                    data-id="{{ user.id }}"
-                                    data-name="{{ user.name }}"
-                                    data-pnr="{{ user.personal_number }}"
-                                    data-card="{{ user.card_id or '' }}">✏️</button>
+                            <a href="/qr/{{ m.id }}" target="_blank" class="btn-icon" title="QR-Code">📱</a>
+                            {% for card_id in cards_by_member.get(m.id, []) %}
                             <form method="post" class="inline-form">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                <input type="hidden" name="delete_user" value="{{ user.id }}">
-                                <button type="submit" class="btn-icon btn-icon--danger delete-user-btn"
-                                        data-name="{{ user.name }}" title="Löschen">🗑️</button>
+                                <input type="hidden" name="remove_card" value="{{ card_id }}">
+                                <button type="submit" class="btn-icon btn-icon--danger"
+                                        title="Karte {{ card_id }} entfernen">🗑️</button>
                             </form>
+                            {% endfor %}
                         </div>
                     </div>
                     {% endfor %}
                 </div>
                 {% else %}
-                <p class="empty-hint">Keine User vorhanden</p>
+                <p class="empty-hint">Keine Mitglieder vorhanden</p>
                 {% endif %}
             </section>
         </div>
     </main>
 
-    <!-- Edit User Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal__box">
-            <h2 class="modal__title">User bearbeiten</h2>
-            <form method="post">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input type="hidden" id="edit_user_id" name="edit_user">
-                <div class="field">
-                    <label>Name</label>
-                    <input type="text" id="edit_name" name="edit_name" required inputmode="text" aria-label="Name">
-                </div>
-                <div class="field">
-                    <label>Personalnummer</label>
-                    <input type="text" id="edit_personal_number" name="edit_personal_number" required inputmode="text" aria-label="Personalnummer">
-                </div>
-                <div class="field">
-                    <label>Karten-ID</label>
-                    <input type="text" id="edit_card_id" name="edit_card_id" inputmode="text" aria-label="Karten-ID">
-                </div>
-                <div class="modal__actions">
-                    <button type="submit" class="btn-action">💾 Speichern</button>
-                    <button type="button" onclick="closeEditModal()" class="btn-cancel">Abbrechen</button>
-                </div>
-            </form>
-        </div>
-    </div>
 {% endblock %}
 
 {% block scripts %}

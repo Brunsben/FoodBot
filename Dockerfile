@@ -1,10 +1,11 @@
 # Multi-stage build für kleinere Image-Größe
 FROM python:3.11-slim as builder
 
-# Build-Dependencies
+# Build-Dependencies (inkl. libpq-dev für psycopg2)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libc6-dev \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Virtual Environment erstellen
@@ -20,8 +21,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # ============================================
 FROM python:3.11-slim
 
-# Runtime-Dependencies
+# Runtime-Dependencies (libpq5 für psycopg2, libusb für RFID-Reader)
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
     libusb-1.0-0 \
     && rm -rf /var/lib/apt/lists/*
 

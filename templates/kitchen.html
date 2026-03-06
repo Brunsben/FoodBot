@@ -108,16 +108,16 @@
         <section class="panel glass glass-ultra">
             <h2 class="panel__heading">
                 👥 Angemeldet
-                <span class="count-badge" id="user-count">{{ registrations|length }}</span>
+                <span class="count-badge" id="user-count">{{ reg_entries|length }}</span>
             </h2>
             <div class="users-grid" id="users-list">
-                {% for reg in registrations %}
+                {% for entry in reg_entries %}
                 <div class="user-badge">
-                    {{ reg.user.name }}
+                    {{ entry.name }}
                     {% if menu and menu.zwei_menues_aktiv %}
-                        <span class="user-badge__detail">· {{ 'Menü 1' if reg.menu_choice==1 else 'Menü 2' }}{% if reg.menu_choice==1 and menu.menu1_name %}: {{ menu.menu1_name }}{% elif reg.menu_choice==2 and menu.menu2_name %}: {{ menu.menu2_name }}{% endif %}</span>
-                    {% elif menu and menu.description %}
-                        <span class="user-badge__detail">· {{ menu.description }}</span>
+                        <span class="user-badge__detail">· {{ 'Menü 1' if entry.reg.menu_wahl==1 else 'Menü 2' }}{% if entry.reg.menu_wahl==1 and menu.menu1_name %}: {{ menu.menu1_name }}{% elif entry.reg.menu_wahl==2 and menu.menu2_name %}: {{ menu.menu2_name }}{% endif %}</span>
+                    {% elif menu and menu.beschreibung %}
+                        <span class="user-badge__detail">· {{ menu.beschreibung }}</span>
                     {% endif %}
                 </div>
                 {% endfor %}

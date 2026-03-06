@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>QR-Code für {{ user.name }}</title>
+    <title>QR-Code für {{ member.name }}</title>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
@@ -80,8 +80,7 @@
     <div class="qr-card">
         <h1>&#128241; Mobile Anmeldung</h1>
         <img src="{{ qr_image }}" alt="QR Code" style="max-width: 300px;">
-        <div class="info"><b>Name:</b> {{ user.name }}</div>
-        <div class="info"><b>Personalnummer:</b> {{ user.personal_number }}</div>
+        <div class="info"><b>Name:</b> {{ member.name }}</div>
         <div class="url">{{ mobile_url }}</div>
         <div class="info" style="font-size: 0.9em; color: #64748b; margin-top: 20px;">
             QR-Code mit Smartphone scannen für schnelle Essensanmeldung
