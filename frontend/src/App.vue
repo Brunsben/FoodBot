@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { page, loggedIn, loginForm, loading, doLogin, feuerwehrName } from './store'
 
