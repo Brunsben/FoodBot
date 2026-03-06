@@ -1,0 +1,5 @@
+// FoodBot Frontend Config (wird von configure-frontend.sh generiert)
+window.CONFIG = {
+  api: '/api',
+  feuerwehrName: 'FF Wietmarschen',
+};

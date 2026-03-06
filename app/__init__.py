@@ -70,9 +70,7 @@ def create_app():
     
     # Nur spezifische API-Endpunkte von CSRF ausnehmen
     # (Touch-Display und RFID haben keine CSRF-Token)
-    csrf.exempt(api.register)  # POST /api/register (Touch/RFID)
-    csrf.exempt(api.status)    # GET /api/status
-    csrf.exempt(api.stats)     # GET /api/stats
+    csrf.exempt(api.api)  # Gesamtes API-Blueprint (Vue-Frontend nutzt JWT, kein CSRF)
     
     # Touch-Display Routen ohne CSRF (kein Form-Token möglich)
     csrf.exempt(routes.index)                  # POST / (Touch-Anmeldung)
@@ -127,9 +125,34 @@ def create_app():
         # Cache static assets (CSS, JS, images) for 1 year
         if request.path.startswith('/static/'):
             response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        elif request.path.startswith('/app/assets/'):
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
         # No cache for HTML pages to ensure fresh content
         elif 'text/html' in response.headers.get('Content-Type', ''):
             response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         return response
-    
+
+    # ── Vue 3 Frontend Serving ──────────────────────────────────────────────
+    # Serviert das gebaute Vue-Frontend aus frontend_dist/
+    # SPA-Fallback: alle unbekannten Routen → index.html
+    vue_dist = os.path.join(os.path.dirname(__file__), '..', 'frontend_dist')
+    if os.path.isdir(vue_dist):
+        from flask import send_from_directory
+
+        @app.route('/app/')
+        @app.route('/app/<path:filename>')
+        def vue_app(filename='index.html'):
+            """Vue SPA serving mit Fallback auf index.html"""
+            filepath = os.path.join(vue_dist, filename)
+            if os.path.isfile(filepath):
+                return send_from_directory(vue_dist, filename)
+            return send_from_directory(vue_dist, 'index.html')
+
+        @app.route('/app/config.js')
+        def vue_config():
+            """Dynamische config.js für Vue-Frontend"""
+            fw_name = os.environ.get('FEUERWEHR_NAME', 'FF Wietmarschen')
+            config_js = f"window.CONFIG = {{ api: '/api', feuerwehrName: '{fw_name}' }};"
+            return config_js, 200, {'Content-Type': 'application/javascript', 'Cache-Control': 'no-cache'}
+
     return app

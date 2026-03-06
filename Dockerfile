@@ -1,4 +1,18 @@
-# Multi-stage build für kleinere Image-Größe
+# ============================================
+# Stage 1: Vue 3 Frontend bauen
+# ============================================
+FROM node:20-alpine AS frontend
+
+WORKDIR /frontend
+COPY frontend/package.json ./
+RUN npm install
+COPY frontend/ .
+ENV VITE_BASE=/app/
+RUN npm run build
+
+# ============================================
+# Stage 2: Python Dependencies
+# ============================================
 FROM python:3.11-slim as builder
 
 # Build-Dependencies (inkl. libpq-dev für psycopg2)
@@ -45,6 +59,9 @@ COPY --chown=foodbot:foodbot app/ ./app/
 COPY --chown=foodbot:foodbot templates/ ./templates/
 COPY --chown=foodbot:foodbot static/ ./static/
 COPY --chown=foodbot:foodbot scripts/backup_db.py scripts/clear_registrations.py ./
+
+# Vue Frontend dist in static einbinden
+COPY --from=frontend --chown=foodbot:foodbot /frontend/dist ./frontend_dist/
 
 # Verzeichnisse für Daten erstellen
 RUN mkdir -p /app/backups /app/logs && \

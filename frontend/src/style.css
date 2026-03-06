@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+html, body { width: 100%; }
+[v-cloak] { display: none; }
+
+/* ── Übergänge ──────────────────────────────────────────────────── */
+.fade-enter-active { transition: opacity .15s ease, transform .15s ease; }
+.fade-leave-active { transition: opacity .1s ease; }
+.fade-enter-from   { opacity: 0; transform: translateY(8px); }
+.fade-leave-to     { opacity: 0; }
+
+/* ── Modal ──────────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; padding: 1rem;
+}
+.modal-box {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 25px 60px -12px rgba(0,0,0,0.3);
+  width: 100%; max-width: 32rem;
+  padding: 1.5rem;
+  max-height: 90vh; overflow-y: auto;
+}
+:is(.dark) .modal-box {
+  background: #1f2937;
+  border: 1px solid #374151;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.625rem 1rem; border-radius: 0.5rem;
+  background: #dc2626; color: white;
+  font-weight: 600; font-size: 0.875rem;
+  transition: background .15s;
+}
+.btn-primary:hover { background: #b91c1c; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.625rem 1rem; border-radius: 0.5rem;
+  background: #f3f4f6; color: #374151;
+  font-weight: 500; font-size: 0.875rem;
+  transition: background .15s;
+}
+.btn-secondary:hover { background: #e5e7eb; }
+:is(.dark) .btn-secondary { background: #374151; color: #d1d5db; }
+:is(.dark) .btn-secondary:hover { background: #4b5563; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 0.75rem; border-radius: 0.5rem;
+  background: transparent; color: #6b7280;
+  font-weight: 500; font-size: 0.875rem;
+  transition: background .15s;
+}
+.btn-ghost:hover { background: #f3f4f6; }
+:is(.dark) .btn-ghost { color: #9ca3af; }
+:is(.dark) .btn-ghost:hover { background: #374151; }
+
+/* ── Inputs ─────────────────────────────────────────────────────── */
+.input {
+  width: 100%; padding: 0.625rem 0.75rem;
+  border: 1px solid #d1d5db; border-radius: 0.5rem;
+  font-size: 0.875rem; background: white; color: #111827;
+  transition: border-color .15s, box-shadow .15s;
+}
+.input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.1); }
+:is(.dark) .input { background: #1f2937; border-color: #4b5563; color: #f3f4f6; }
+:is(.dark) .input:focus { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+
+.label {
+  display: block; font-size: 0.75rem; font-weight: 600;
+  color: #6b7280; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.025em;
+}
+:is(.dark) .label { color: #9ca3af; }
+
+/* ── Kiosk Touch-Buttons ────────────────────────────────────────── */
+.touch-btn {
+  width: 5rem; height: 5rem;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 1rem; font-size: 2rem; font-weight: 700;
+  transition: transform .1s, background .15s;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.touch-btn:active { transform: scale(0.95); }
+
+/* ── Druck ──────────────────────────────────────────────────────── */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white !important; color: black !important; }
+}

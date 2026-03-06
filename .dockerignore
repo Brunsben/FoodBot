@@ -60,3 +60,7 @@ temp/
 
 # Data
 data/
+
+# Frontend node_modules (wird im Build installiert)
+frontend/node_modules/
+frontend/dist/
