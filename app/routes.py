@@ -224,6 +224,7 @@ def register_with_menu():
 
 # Küche: Anzeige und Menü-Eingabe
 @bp.route('/kitchen', methods=['GET', 'POST'])
+@login_required
 def kitchen():
     today_menu = get_menu_for_date()
     registrations = Registration.query.options(
@@ -257,7 +258,7 @@ def kitchen():
         # Gäste hinzufügen/entfernen
         elif 'guest_action' in request.form:
             action = request.form.get('guest_action')
-            menu_choice = validate_menu_choice(request.form.get('menu_choice', 1), zwei_menues_aktiv=menu.zwei_menues_aktiv if menu else False)
+            menu_choice = validate_menu_choice(request.form.get('menu_choice', 1), zwei_menues_aktiv=today_menu.zwei_menues_aktiv if today_menu else False)
             
             guest_entry = Guest.query.filter_by(date=date.today(), menu_choice=menu_choice).first()
             if not guest_entry:
@@ -269,8 +270,7 @@ def kitchen():
             elif action == 'remove' and guest_entry.count > 0:
                 guest_entry.count -= 1
             
-            with db_transaction():
-                pass  # Changes werden automatisch committed
+            db.session.commit()
         return redirect(url_for('main.kitchen'))
 
     total = len(registrations) + guest_count
@@ -286,6 +286,7 @@ def kitchen():
                          preset_menus=preset_menus)
 
 @bp.route('/kitchen/data', methods=['GET'])
+@login_required
 def kitchen_data():
     """API-Endpunkt für AJAX-Updates der Küchenseite"""
     today_menu = get_menu_for_date()

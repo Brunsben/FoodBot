@@ -164,7 +164,7 @@ Die folgenden Verzeichnisse werden automatisch gemountet:
 Erstelle eine `.env` Datei oder setze die Variablen in der Service-Datei:
 
 ```bash
-# Admin-Passwort (Standard: feuerwehr2026)
+# Admin-Passwort (wird bei Setup automatisch generiert)
 ADMIN_PASSWORD=dein-sicheres-passwort
 
 # Secret Key für Sessions (WICHTIG: ändern in Production!)

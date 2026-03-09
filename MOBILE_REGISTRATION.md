@@ -15,7 +15,7 @@ Jeder Benutzer erhält einen persönlichen QR-Code mit einem einzigartigen, sich
 
 ### Im Adminbereich
 
-1. Gehe zu **http://localhost:5001/admin** (Passwort: `feuerwehr2026`)
+1. Gehe zu **http://localhost:5001/admin** (Login erforderlich)
 2. In der Benutzertabelle findest du bei jedem User ein **📱**-Symbol in der "QR"-Spalte
 3. Klicke auf das Symbol, um den persönlichen QR-Code anzuzeigen
 4. Nutze die **"🖨️ Drucken"**-Funktion zum Ausdrucken

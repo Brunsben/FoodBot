@@ -27,7 +27,7 @@ Ein modernes System zur Essensanmeldung für die Feuerwehr, optimiert für den R
 - 🖨️ **Druckliste**: Gruppiert nach Menü mit Checkboxen für die Küche
 
 ### Security & Performance
-- 🔐 **Admin-Login**: Session-basierte Authentifizierung (Standard-Passwort: feuerwehr2026)
+- 🔐 **Admin-Login**: Session-basierte Authentifizierung (Passwort wird bei Setup generiert)
 - ⚡ **Rate Limiting**: Schutz vor API-Missbrauch (200/Tag, 50/Stunde)
 - 📝 **Logrotate**: Automatische Log-Verwaltung (täglich, 14 Tage Retention)
 - 🔔 **Webhooks**: Benachrichtigungen via Slack, Discord, etc.
@@ -106,7 +106,7 @@ Nach der Installation erreichbar unter:
 - **Historie**: `http://<raspberry-pi>:5001/history` - Essenshistorie & Top-10 (Login erforderlich)
 
 ### 🔐 Standard-Login
-- **Passwort**: `feuerwehr2026`
+- **Passwort**: Wird bei der Installation automatisch generiert (siehe `.env`-Datei)
 - Ändern via Environment-Variable: `ADMIN_PASSWORD=dein-passwort`
 
 ## 🔌 REST-API
@@ -150,7 +150,7 @@ GET /api/users
 Erstelle eine `.env`-Datei oder setze die Variablen im System:
 
 ```bash
-# Admin-Passwort (Standard: feuerwehr2026)
+# Admin-Passwort (wird bei Setup automatisch generiert)
 ADMIN_PASSWORD=dein-sicheres-passwort
 
 # Secret Key für Sessions (WICHTIG in Production!)

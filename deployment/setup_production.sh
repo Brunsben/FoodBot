@@ -91,18 +91,21 @@ if [ ! -f "$PROJECT_DIR/.env" ]; then
     # Generiere SECRET_KEY
     SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
     
+    # Generiere sicheres Admin-Passwort
+    ADMIN_PASSWORD=$(python3 -c 'import secrets, string; chars=string.ascii_letters+string.digits+"!@#$%&*"; print("".join(secrets.choice(chars) for _ in range(16)))')
+    
     # Erstelle .env
     cat > "$PROJECT_DIR/.env" <<EOF
 SECRET_KEY=$SECRET_KEY
-ADMIN_PASSWORD=feuerwehr2026
+ADMIN_PASSWORD=$ADMIN_PASSWORD
 FLASK_ENV=production
 EOF
     
     chown "$PROJECT_USER:$PROJECT_USER" "$PROJECT_DIR/.env"
     chmod 600 "$PROJECT_DIR/.env"
     echo -e "${GREEN}✓${NC} .env Datei erstellt"
-    echo -e "${YELLOW}⚠️  Standard Admin-Passwort: feuerwehr2026${NC}"
-    echo -e "${YELLOW}   Bitte nach dem ersten Login ändern!${NC}"
+    echo -e "${YELLOW}⚠️  Generiertes Admin-Passwort: $ADMIN_PASSWORD${NC}"
+    echo -e "${YELLOW}   Bitte sicher notieren und nach dem ersten Login ändern!${NC}"
 else
     echo -e "${GREEN}✓${NC} .env Datei existiert bereits"
 fi

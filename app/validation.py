@@ -35,8 +35,13 @@ def sanitize_string(value: Any, max_length: Optional[int] = None, allow_empty: b
         cleaned = cleaned[:max_length]
     
     # XSS-gefährliche Zeichen entfernen/escapen
-    # Entfernt < > für grundlegenden XSS-Schutz
-    cleaned = cleaned.replace('<', '&lt;').replace('>', '&gt;')
+    cleaned = (cleaned
+        .replace('&', '&amp;')
+        .replace('<', '&lt;')
+        .replace('>', '&gt;')
+        .replace('"', '&quot;')
+        .replace("'", '&#x27;')
+    )
     
     return cleaned
 
