@@ -45,7 +45,7 @@ COPY --chown=foodbot:foodbot static/ ./static/
 COPY --chown=foodbot:foodbot scripts/backup_db.py scripts/clear_registrations.py ./
 
 # Verzeichnisse für Daten erstellen
-RUN mkdir -p /app/backups /app/logs && \
+RUN mkdir -p /app/backups /app/logs /app/data && \
     chown -R foodbot:foodbot /app
 
 # User wechseln
