@@ -1,4 +1,4 @@
-/* Modern Glow/Gradient Button Styles for FoodBot */
+/* Button Styles for FoodBot — PSA flat design */
 .btn,
 button.btn,
 input[type="submit"].btn,
@@ -9,57 +9,63 @@ input[type="submit"].btn,
 .btn--primary,
 .btn--danger {
   position: relative;
-  display: inline-block;
-  padding: 0.85em 2.2em;
-  font-size: 1.08em;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
   border: none;
-  border-radius: 1.8em;
-  background: linear-gradient(90deg, #dc2626 0%, #f43f5e 100%);
+  border-radius: var(--radius-md);
+  background: var(--primary);
   color: #fff;
-  box-shadow: 0 4px 24px 0 rgba(220, 38, 38,0.18), 0 1.5px 0 #fff3;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  transition: background 0.15s, box-shadow 0.15s;
   overflow: hidden;
   outline: none;
   z-index: 1;
 }
 .btn-primary,
 .btn--primary {
-  background: linear-gradient(90deg, #dc2626 0%, #f43f5e 100%);
+  background: var(--primary);
 }
 .btn-secondary {
-  background: linear-gradient(90deg, #fca5a5 0%, #dc2626 100%);
-  color: #fff;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 .btn-save {
-  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  background: var(--success);
   color: #fff;
 }
 .btn-delete,
 .btn--danger {
-  background: linear-gradient(90deg, #f43f5e 0%, #dc2626 100%);
+  background: var(--error);
   color: #fff;
 }
-.btn:focus,
-.btn-primary:focus,
-.btn-secondary:focus,
-.btn-save:focus,
-.btn-delete:focus,
-.btn--primary:focus,
-.btn--danger:focus {
-  box-shadow: 0 0 0 4px #dc262655, 0 4px 24px 0 rgba(220, 38, 38,0.18);
+.btn:focus-visible,
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-save:focus-visible,
+.btn-delete:focus-visible,
+.btn--primary:focus-visible,
+.btn--danger:focus-visible {
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.3);
 }
 .btn:hover,
 .btn-primary:hover,
-.btn-secondary:hover,
-.btn-save:hover,
+.btn--primary:hover {
+  background: var(--primary-dark);
+}
+.btn-secondary:hover {
+  background: var(--border-color);
+}
+.btn-save:hover {
+  background: #059669;
+}
 .btn-delete:hover,
-.btn--primary:hover,
 .btn--danger:hover {
-  filter: brightness(1.08) saturate(1.2);
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 8px 32px 0 rgba(220, 38, 38,0.22), 0 2px 0 #fff3;
+  background: #dc2626;
 }
 .btn:active,
 .btn-primary:active,
@@ -68,15 +74,12 @@ input[type="submit"].btn,
 .btn-delete:active,
 .btn--primary:active,
 .btn--danger:active {
-  filter: brightness(0.98);
-  transform: scale(0.97);
-  box-shadow: 0 2px 8px 0 rgba(220, 38, 38,0.10);
+  opacity: 0.9;
 }
 .btn[disabled],
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   pointer-events: none;
-  filter: grayscale(0.3);
 }
 /* For icon buttons */
 .btn .icon, .btn-icon {

@@ -14,12 +14,12 @@ body {
 
 /* --- Topbar --- */
 .topbar {
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--bg-elevated);
     padding: 0.875rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 3px solid var(--error);
+    border-bottom: 1px solid var(--border-color);
     flex-wrap: wrap;
     gap: 0.75rem;
 }
@@ -39,19 +39,18 @@ body {
 .topbar__nav a {
     padding: 0.5rem 0.875rem;
     border-radius: 0.5rem;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--bg-secondary);
     color: var(--text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--border-color);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.8rem;
-    transition: background 0.2s, transform 0.2s;
+    transition: background 0.15s;
     white-space: nowrap;
 }
 
 .topbar__nav a:hover {
-    background: rgba(255, 255, 255, 0.12);
-    transform: translateY(-1px);
+    background: var(--border-color);
 }
 
 .topbar__logout {
@@ -71,11 +70,11 @@ body {
 
 /* --- Flash Message --- */
 .flash {
-    background: rgba(16, 185, 129, 0.15);
-    border: 2px solid var(--success);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
     color: var(--text-primary);
     padding: 0.875rem 1.25rem;
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     font-weight: 500;
 }
 
@@ -83,22 +82,22 @@ body {
 .tabs {
     display: flex;
     gap: 0.25rem;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .tab {
     padding: 0.75rem 1.5rem;
     background: none;
     border: none;
-    border-bottom: 3px solid transparent;
+    border-bottom: 2px solid transparent;
     color: var(--text-muted);
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 0.875rem;
+    font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
+    transition: color 0.15s, border-color 0.15s;
     white-space: nowrap;
-    margin-bottom: -2px;
+    margin-bottom: -1px;
 }
 
 .tab:hover {
@@ -136,19 +135,20 @@ body {
 
 /* --- Cards --- */
 .card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
 }
 
 .card__heading {
-    font-size: clamp(1.1rem, 3vw, 1.4rem);
+    font-size: clamp(1rem, 3vw, 1.25rem);
     font-weight: 700;
-    color: var(--error);
+    color: var(--text-primary);
     margin: 0 0 1.25rem;
     padding-bottom: 0.75rem;
-    border-bottom: 2px solid rgba(239, 68, 68, 0.15);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -178,7 +178,7 @@ body {
 
 .divider {
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-color);
     margin: 1.5rem 0;
 }
 
@@ -198,9 +198,11 @@ body {
 .field label {
     display: block;
     margin-bottom: 0.375rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 input[type="text"],
@@ -208,21 +210,21 @@ input[type="time"],
 input[type="number"],
 select {
     width: 100%;
-    padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-family: inherit;
-    transition: border-color 0.2s;
+    transition: border-color 0.15s;
 }
 
 input:focus,
 select:focus {
     outline: none;
-    border-color: var(--error);
-    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
 
 input::placeholder { color: var(--text-muted); }
@@ -236,12 +238,12 @@ input[type="checkbox"] {
 
 .file-input {
     width: 100%;
-    padding: 0.75rem;
-    background: rgba(255, 255, 255, 0.04);
-    border: 2px dashed rgba(255, 255, 255, 0.15);
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px dashed var(--border-color);
     border-radius: 0.5rem;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-family: inherit;
     cursor: pointer;
 }
@@ -258,8 +260,8 @@ input[type="checkbox"] {
 
 /* --- Info Box (Deadline) --- */
 .info-box {
-    background: rgba(239, 68, 68, 0.08);
-    border: 1.5px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.15);
     border-radius: 0.5rem;
     padding: 1rem;
     margin-bottom: 1rem;
@@ -303,46 +305,46 @@ input[type="checkbox"] {
 .btn-action {
     display: block;
     width: 100%;
-    padding: 0.75rem 1.25rem;
-    background: linear-gradient(135deg, var(--error), #b91c1c);
+    padding: 0.5rem 1rem;
+    background: var(--primary);
     color: white;
     border: none;
     border-radius: 0.5rem;
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 0.875rem;
+    font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    transition: opacity 0.15s, transform 0.15s;
+    transition: background 0.15s;
     text-align: center;
 }
 
-.btn-action:hover { opacity: 0.9; transform: translateY(-1px); }
-.btn-action:active { transform: scale(0.98); }
+.btn-action:hover { background: var(--primary-dark); }
+.btn-action:active { opacity: 0.9; }
 
 .btn-action--compact {
     width: auto;
-    padding: 0.625rem 1.25rem;
-    font-size: 0.9rem;
+    padding: 0.375rem 1rem;
+    font-size: 0.8rem;
     flex-shrink: 0;
 }
 
 .btn-cancel {
     display: block;
     width: 100%;
-    padding: 0.75rem 1.25rem;
-    background: rgba(255, 255, 255, 0.08);
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
     color: var(--text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--border-color);
     border-radius: 0.5rem;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.15s;
     text-align: center;
 }
 
-.btn-cancel:hover { background: rgba(255, 255, 255, 0.12); }
+.btn-cancel:hover { background: var(--border-color); }
 
 .btn-toggle {
     padding: 0.375rem 0.875rem;
@@ -357,12 +359,12 @@ input[type="checkbox"] {
 }
 
 .btn-toggle--on {
-    background: rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.1);
     color: var(--success);
 }
 
 .btn-toggle--off {
-    background: rgba(239, 68, 68, 0.15);
+    background: rgba(239, 68, 68, 0.1);
     color: #f87171;
 }
 
@@ -374,25 +376,25 @@ input[type="checkbox"] {
     justify-content: center;
     width: 2.25rem;
     height: 2.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
     border-radius: 0.5rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.15s, transform 0.15s;
+    transition: background 0.15s;
     text-decoration: none;
     line-height: 1;
 }
 
-.btn-icon:hover { background: rgba(255, 255, 255, 0.1); transform: scale(1.05); }
+.btn-icon:hover { background: var(--border-color); }
 
 .btn-icon--danger {
     border-color: rgba(239, 68, 68, 0.2);
     color: #f87171;
 }
 
-.btn-icon--danger:hover { background: rgba(239, 68, 68, 0.15); }
+.btn-icon--danger:hover { background: rgba(239, 68, 68, 0.1); }
 
 /* --- Registration List --- */
 .reg-list {
@@ -407,13 +409,13 @@ input[type="checkbox"] {
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--bg-secondary);
     border-radius: 0.5rem;
     border-left: 3px solid transparent;
     transition: background 0.15s;
 }
 
-.reg-item:hover { background: rgba(255, 255, 255, 0.04); }
+.reg-item:hover { background: var(--border-color); }
 
 .reg-item--on {
     border-left-color: var(--success);
@@ -447,13 +449,13 @@ input[type="checkbox"] {
     justify-content: space-between;
     gap: 1rem;
     padding: 0.75rem 1rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     transition: background 0.15s;
 }
 
-.user-row:hover { background: rgba(255, 255, 255, 0.04); }
+.user-row:hover { background: var(--border-color); }
 
 .user-row__info {
     display: flex;
@@ -507,14 +509,14 @@ input[type="checkbox"] {
 }
 
 .preset-tag {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.15);
     border-radius: 0.5rem;
     padding: 0.375rem 0.75rem;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .preset-tag__form {
@@ -539,7 +541,8 @@ input[type="checkbox"] {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -548,17 +551,18 @@ input[type="checkbox"] {
 
 .modal__box {
     background: var(--bg-elevated);
-    border: 2px solid var(--error);
-    border-radius: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: 2rem;
     max-width: 500px;
     width: 100%;
+    box-shadow: var(--shadow-xl);
 }
 
 .modal__title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     margin: 0 0 1.25rem;
-    color: var(--error);
+    color: var(--text-primary);
 }
 
 .modal__actions {

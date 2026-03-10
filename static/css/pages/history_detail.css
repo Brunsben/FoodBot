@@ -5,28 +5,27 @@
 .history-detail-container {
     max-width: 1000px;
     margin: 0 auto;
-    background: var(--bg-glass);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-xl);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
     padding: var(--space-2xl);
     border: 1px solid var(--border-color);
 }
 
 .nav-btn {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    color: var(--text-primary);
-    padding: var(--space-md) var(--space-xl);
+    background: var(--primary);
+    color: white;
+    padding: 0.5rem 1rem;
     border-radius: var(--radius-md);
     text-decoration: none;
     font-weight: 600;
     display: inline-block;
     margin-bottom: var(--space-2xl);
-    transition: all var(--transition-base);
+    transition: background var(--transition-fast);
 }
 
 .nav-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+    background: var(--primary-dark);
 }
 
 .history-subtitle {
@@ -36,7 +35,7 @@
 }
 
 .section {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     padding: var(--space-xl);
     margin: var(--space-xl) 0;
@@ -72,7 +71,7 @@
 }
 
 .month-list li:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     padding-left: var(--space-lg);
 }
 
@@ -97,7 +96,7 @@
 }
 
 .scrollable-list::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
     border-radius: var(--radius-sm);
 }
 

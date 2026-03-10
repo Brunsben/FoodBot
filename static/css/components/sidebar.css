@@ -18,7 +18,7 @@
     z-index: 40;
     width: 224px;
     background: var(--bg-elevated);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-right: 1px solid var(--border-color);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -27,7 +27,7 @@
 
 .sidebar-logo {
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -80,12 +80,12 @@
 }
 
 .sidebar-item:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--bg-secondary);
     color: var(--text-primary);
 }
 
 .sidebar-item.active {
-    background: rgba(220, 38, 38, 0.15);
+    background: rgba(220, 38, 38, 0.1);
     color: var(--primary-light);
 }
 
@@ -98,13 +98,13 @@
 
 .sidebar-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--border-color);
     margin: 0.5rem 1rem;
 }
 
 .sidebar-footer {
     padding: 0.75rem 0.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-color);
 }
 
 /* Main content area offset */
@@ -121,7 +121,7 @@
     gap: 1rem;
     padding: 0.875rem 1rem;
     background: var(--bg-elevated);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 30;

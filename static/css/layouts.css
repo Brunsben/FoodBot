@@ -21,14 +21,13 @@
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    background: var(--bg-gradient);
+    background: var(--bg-base);
 }
 
 .page-header {
-    padding: var(--space-lg) 0;
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: var(--space-md) 0;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -37,10 +36,7 @@
 .page-title {
     font-size: clamp(1.5rem, 4vw, 3rem);
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
 }
 
 .main-content {

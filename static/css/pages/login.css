@@ -18,12 +18,11 @@ body {
 }
 
 .login-box {
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px);
-    border: 2px solid rgba(220, 38, 38, 0.3);
-    border-radius: var(--radius-xl);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
     padding: var(--space-2xl);
-    box-shadow: var(--shadow-xl), 0 0 100px rgba(220, 38, 38, 0.2);
+    box-shadow: var(--shadow-xl);
 }
 
 .login-header {
@@ -38,17 +37,14 @@ body {
 }
 
 .login-box h1 {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-2xl);
     margin: 0 0 var(--space-sm) 0;
-    background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text-primary);
 }
 
 .login-subtitle {
     color: var(--text-muted);
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-sm);
     margin: 0;
 }
 
@@ -58,21 +54,20 @@ body {
 
 .login-input {
     width: 100%;
-    font-size: var(--font-size-lg);
-    padding: var(--space-lg);
-    border-radius: var(--radius-lg);
-    border: 2px solid var(--border-color);
-    background: rgba(255, 255, 255, 0.05);
+    font-size: var(--font-size-sm);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
     color: var(--text-primary);
     font-family: inherit;
-    transition: all var(--transition-base);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .login-input:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
-    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
 
 .login-input::placeholder {
@@ -81,10 +76,10 @@ body {
 
 .btn-login {
     width: 100%;
-    padding: var(--space-lg);
-    font-size: var(--font-size-lg);
-    font-weight: 700;
-    margin-top: var(--space-lg);
+    padding: 0.5rem 1rem;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin-top: var(--space-md);
 }
 
 .login-info {
@@ -130,16 +125,5 @@ body {
     .login-input,
     .btn-login {
         font-size: var(--font-size-base);
-    }
-}
-
-/* Dark mode enhancement */
-@media (prefers-color-scheme: dark) {
-    .login-input {
-        background: rgba(255, 255, 255, 0.03);
-    }
-    
-    .login-input:focus {
-        background: rgba(255, 255, 255, 0.06);
     }
 }

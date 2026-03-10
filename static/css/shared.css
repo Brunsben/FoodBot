@@ -9,14 +9,14 @@ body {
     min-height: 100dvh;
 }
 
-/* Header Variations */
+/* Header Variations — PSA style */
 .header {
-    background: rgba(0, 0, 0, 0.3);
-    padding: var(--space-lg) var(--space-xl);
+    background: var(--bg-elevated);
+    padding: var(--space-md) var(--space-xl);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 3px solid var(--primary);
+    border-bottom: 1px solid var(--border-color);
     flex-wrap: wrap;
     gap: var(--space-md);
 }
@@ -37,19 +37,18 @@ body {
 .header-actions button {
     padding: var(--space-sm) var(--space-lg);
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-secondary);
     color: var(--text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-color);
     text-decoration: none;
     font-weight: 600;
-    transition: all var(--transition-base);
+    transition: background var(--transition-fast);
     cursor: pointer;
 }
 
 .header-actions a:hover,
 .header-actions button:hover {
-    transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--border-color);
 }
 
 /* Form Elements */
@@ -59,10 +58,12 @@ body {
 
 .form-group label {
     display: block;
-    margin-bottom: var(--space-sm);
-    font-weight: 600;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-xs);
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: var(--label-size, 0.7rem);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .form-row {
@@ -85,14 +86,14 @@ input[type="email"],
 textarea,
 select {
     width: 100%;
-    padding: var(--space-md);
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-primary);
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     font-family: inherit;
-    transition: all var(--transition-base);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 input:focus,
@@ -100,8 +101,7 @@ textarea:focus,
 select:focus {
     outline: none;
     border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
 
 input::placeholder,
@@ -125,21 +125,24 @@ input[type="checkbox"] {
 }
 
 .data-table thead tr {
-    background: rgba(220, 38, 38, 0.2);
+    background: var(--bg-secondary);
 }
 
 .data-table th {
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     text-align: left;
     font-weight: 600;
-    color: var(--text-primary);
-    border-bottom: 2px solid var(--primary);
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
 }
 
 .data-table td {
-    padding: var(--space-md);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .data-table tbody tr {
@@ -147,7 +150,7 @@ input[type="checkbox"] {
 }
 
 .data-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-secondary);
 }
 
 .data-table tr:last-child td {
@@ -166,23 +169,22 @@ input[type="checkbox"] {
 }
 
 .action-btn.edit {
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.1);
     color: #60a5fa;
 }
 
 .action-btn.delete {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.1);
     color: #f87171;
 }
 
 .action-btn.qr {
-    background: rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.1);
     color: #34d399;
 }
 
 .action-btn:hover {
-    transform: scale(1.05);
-    filter: brightness(1.2);
+    opacity: 0.8;
 }
 
 /* Empty States */
@@ -230,38 +232,33 @@ input[type="checkbox"] {
 }
 
 .message-success {
-    background: rgba(16, 185, 129, 0.2);
-    border: 1px solid var(--success);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
     color: var(--success);
 }
 
 .message-error {
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid var(--error);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
     color: var(--error);
 }
 
 .message-warning {
-    background: rgba(245, 158, 11, 0.2);
-    border: 1px solid var(--warning);
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
     color: var(--warning);
 }
 
 .message-info {
-    background: rgba(59, 130, 246, 0.2);
-    border: 1px solid #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     color: #60a5fa;
 }
 
 /* Section Dividers */
 .section-divider {
-    height: 2px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--primary),
-        transparent
-    );
+    height: 1px;
+    background: var(--border-color);
     margin: var(--space-2xl) 0;
 }
 
@@ -274,11 +271,12 @@ input[type="checkbox"] {
 }
 
 .stat-card {
-    background: var(--bg-glass);
+    background: var(--bg-card);
     padding: var(--space-lg);
     border-radius: var(--radius-lg);
     text-align: center;
-    border: 1px solid rgba(220, 38, 38, 0.3);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
 }
 
 .stat-value {
@@ -289,7 +287,8 @@ input[type="checkbox"] {
 }
 
 .stat-label {
-    font-size: var(--font-size-sm);
+    font-size: var(--label-size, 0.7rem);
+    font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -349,7 +348,7 @@ input[type="checkbox"] {
     
     .data-table tr {
         margin-bottom: var(--space-lg);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         padding: var(--space-md);
     }
