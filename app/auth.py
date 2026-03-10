@@ -23,7 +23,7 @@ if not ADMIN_PASSWORD or ADMIN_PASSWORD == 'change-this-password':
 # Portal JWT Secret für SSO (optional — ohne JWT_SECRET nur Passwort-Login)
 PORTAL_JWT_SECRET = os.getenv('JWT_SECRET')
 
-# Portal-Rollen die FoodBot-Admin-Zugriff erhalten
+# Portal-Rollen die FoodBot-Admin-Zugriff erhalten (Fallback bei altem JWT ohne food_rolle)
 FOOD_ADMIN_ROLES = {'Admin'}
 
 
@@ -62,7 +62,7 @@ def login_required(f):
         fw_jwt = request.cookies.get('fw_jwt')
         if fw_jwt:
             claims = verify_portal_jwt(fw_jwt)
-            if claims and claims.get('app_role') in FOOD_ADMIN_ROLES:
+            if claims and (claims.get('food_rolle') == 'Admin' or claims.get('app_role') in FOOD_ADMIN_ROLES):
                 session['admin_logged_in'] = True
                 session['portal_user'] = claims.get('sub')
                 session.permanent = True

@@ -40,7 +40,8 @@ def sync_kameraden():
     resp = http_requests.get(
         f'{POSTGREST_URL}/Kameraden',
         params={
-            'select': 'id,Vorname,Name,Personalnummer,KartenID,Aktiv',
+            'select': 'id,Vorname,Name,Personalnummer,KartenID,Aktiv,food_rolle',
+            'food_rolle': 'not.is.null',
             'Personalnummer': 'not.is.null',
             'Aktiv': 'eq.true',
         },
