@@ -5,9 +5,9 @@
 {% block styles %}
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#0f172a">
-    <link rel="stylesheet" href="/static/css/components/animations.css?v={{ asset_version }}">
-    <link rel="stylesheet" href="/static/css/pages/touch.css?v={{ asset_version }}">
-    <link rel="stylesheet" href="/static/css/components/button.css?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/animations.css') }}?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/touch.css') }}?v={{ asset_version }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/button.css') }}?v={{ asset_version }}">
 {% endblock %}
 
 {% block body %}
