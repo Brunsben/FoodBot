@@ -100,8 +100,9 @@ class Config:
         db_pool_recycle = int(os.getenv('DB_POOL_RECYCLE', cls.DB_POOL_RECYCLE))
         db_max_overflow = int(os.getenv('DB_MAX_OVERFLOW', cls.DB_MAX_OVERFLOW))
         
-        # Optional: Boolean-Werte
-        https_enabled = os.getenv('HTTPS_ENABLED', 'false').lower() in ('true', '1', 'yes')
+        # Cookie Secure-Flag: Standardmäßig True (Cloudflare Tunnel = HTTPS)
+        # Nur mit HTTPS_ENABLED=false explizit deaktivieren (z.B. lokale Entwicklung)
+        https_enabled = os.getenv('HTTPS_ENABLED', 'true').lower() not in ('false', '0', 'no')
         
         return cls(
             SECRET_KEY=secret,
