@@ -36,7 +36,7 @@
                             {% elif loop.index == 3 %}<span class="badge badge-bronze">🥉 #3</span>
                             {% else %}#{{ loop.index }}{% endif %}
                         </td>
-                        <td><a href="/history/user/{{ user_stat.user.id }}">{{ user_stat.user.name }}</a></td>
+                        <td><a href="{{ url_for('history.user_detail', user_id=user_stat.user.id) }}">{{ user_stat.user.name }}</a></td>
                         <td><strong>{{ user_stat.count_90 }}</strong></td>
                         <td>{{ user_stat.count_30 }}</td>
                         <td>{{ user_stat.count_7 }}</td>
@@ -66,7 +66,7 @@
                         <td>{{ user_stat.count_30 }}</td>
                         <td>{{ user_stat.count_7 }}</td>
                         <td>{{ user_stat.last_date.strftime('%d.%m.%Y') if user_stat.last_date else 'Nie' }}</td>
-                        <td><a href="/history/user/{{ user_stat.user.id }}">📅 Details</a></td>
+                        <td><a href="{{ url_for('history.user_detail', user_id=user_stat.user.id) }}">📅 Details</a></td>
                     </tr>
                     {% endfor %}
                 </table>

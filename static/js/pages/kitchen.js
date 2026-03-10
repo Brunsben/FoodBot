@@ -6,7 +6,7 @@
  * Updates the kitchen display with fresh data from the server
  */
 function updateKitchen() {
-    fetch(`/kitchen/data?t=${Date.now()}`)
+    fetch(`${BASE_URL}/kitchen/data?t=${Date.now()}`)
         .then(response => response.json())
         .then(data => {
             // Update statistics counters

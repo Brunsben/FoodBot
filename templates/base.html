@@ -32,6 +32,9 @@
     </main>
     {% endblock %}
     
+    <!-- Base URL für JavaScript (Proxy-Prefix-aware) -->
+    <script>window.BASE_URL = {{ request.script_root|tojson }};</script>
+
     <!-- Base Scripts -->
     <script src="{{ url_for('static', filename='js/utils.js') }}?v={{ asset_version }}" defer></script>
     

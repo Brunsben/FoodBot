@@ -1,7 +1,7 @@
 // Dieses Skript pollt regelmäßig eine lokale API, um eine gescannte Karten-ID automatisch ins Formular einzutragen.
 setInterval(async function() {
     try {
-        let resp = await fetch('/rfid_scan');
+        let resp = await fetch(BASE_URL + '/rfid_scan');
         if (resp.ok) {
             let data = await resp.json();
             if (data.card_id) {

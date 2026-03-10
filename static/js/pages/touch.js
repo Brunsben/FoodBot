@@ -43,7 +43,7 @@ async function selectMenu(choice) {
     
     if (currentPersonalNumber) {
         // Handle personal number selection
-        const res = await fetch('/api/register', {
+        const res = await fetch(BASE_URL + '/api/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -60,7 +60,7 @@ async function selectMenu(choice) {
         }
     } else {
         // Handle RFID selection
-        const res = await fetch('/register_with_menu', {
+        const res = await fetch(BASE_URL + '/register_with_menu', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -82,7 +82,7 @@ async function selectMenu(choice) {
  */
 async function updateMenu() {
     try {
-        const res = await fetch(`/menu/data?t=${Date.now()}`);
+        const res = await fetch(`${BASE_URL}/menu/data?t=${Date.now()}`);
         const data = await res.json();
         const display = document.getElementById('menuDisplay');
         
@@ -162,7 +162,7 @@ async function handleSubmit(e) {
     if (!personalNumber) return;
     
     try {
-        const res = await fetch('/api/register', {
+        const res = await fetch(BASE_URL + '/api/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({personal_number: personalNumber})

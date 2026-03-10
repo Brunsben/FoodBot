@@ -222,7 +222,7 @@
                             <span class="user-row__meta">Nr. {{ user.personal_number }}{% if user.card_id %} · Karte: {{ user.card_id }}{% endif %}</span>
                         </div>
                         <div class="user-row__actions">
-                            <a href="/qr/{{ user.id }}" target="_blank" class="btn-icon" title="QR-Code">📱</a>
+                            <a href="{{ url_for('main.qr_code', user_id=user.id) }}" target="_blank" class="btn-icon" title="QR-Code">📱</a>
                             <button class="btn-icon edit-user-btn" title="Bearbeiten"
                                     data-id="{{ user.id }}"
                                     data-name="{{ user.name }}"

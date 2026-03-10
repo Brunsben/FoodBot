@@ -13,7 +13,7 @@
 </head>
 <body>
     <div class="history-detail-container">
-        <a href="/history" class="nav-btn">← Zurück zur Übersicht</a>
+        <a href="{{ url_for('history.index') }}" class="nav-btn">← Zurück zur Übersicht</a>
         
         <h1>{{ user.name }}</h1>
         <div class="history-subtitle">

@@ -27,29 +27,29 @@
         </div>
 
         <nav class="sidebar-nav">
-            <a href="/admin" class="sidebar-item {% if active_page == 'admin' %}active{% endif %}">
+            <a href="{{ url_for('main.admin') }}" class="sidebar-item {% if active_page == 'admin' %}active{% endif %}">
                 <span class="sidebar-icon">⚙️</span> Admin
             </a>
-            <a href="/kitchen" class="sidebar-item {% if active_page == 'kitchen' %}active{% endif %}">
+            <a href="{{ url_for('main.kitchen') }}" class="sidebar-item {% if active_page == 'kitchen' %}active{% endif %}">
                 <span class="sidebar-icon">🍳</span> Küche
             </a>
-            <a href="/admin/weekly" class="sidebar-item {% if active_page == 'weekly' %}active{% endif %}">
+            <a href="{{ url_for('main.admin_weekly') }}" class="sidebar-item {% if active_page == 'weekly' %}active{% endif %}">
                 <span class="sidebar-icon">📅</span> Wochenplan
             </a>
-            <a href="/stats" class="sidebar-item {% if active_page == 'stats' %}active{% endif %}">
+            <a href="{{ url_for('stats.index') }}" class="sidebar-item {% if active_page == 'stats' %}active{% endif %}">
                 <span class="sidebar-icon">📊</span> Statistiken
             </a>
-            <a href="/history" class="sidebar-item {% if active_page == 'history' %}active{% endif %}">
+            <a href="{{ url_for('history.index') }}" class="sidebar-item {% if active_page == 'history' %}active{% endif %}">
                 <span class="sidebar-icon">📜</span> Historie
             </a>
             <div class="sidebar-divider"></div>
-            <a href="/" class="sidebar-item">
+            <a href="{{ url_for('main.index') }}" class="sidebar-item">
                 <span class="sidebar-icon">📡</span> Touch-Modus
             </a>
         </nav>
 
         <div class="sidebar-footer">
-            <a href="/logout" class="sidebar-item" style="color: var(--error);">
+            <a href="{{ url_for('main.logout') }}" class="sidebar-item" style="color: var(--error);">
                 <span class="sidebar-icon">🚪</span> Logout
             </a>
         </div>

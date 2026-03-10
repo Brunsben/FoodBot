@@ -72,7 +72,7 @@
 
         <div class="actions">
             {% if is_registered %}
-            <form method="post" action="/m/{{ token }}">
+            <form method="post" action="{{ url_for('main.mobile_registration', token=token) }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="action" value="unregister">
                 <button type="submit" class="btn btn--danger">Abmelden</button>
@@ -80,20 +80,20 @@
 
             {% elif not registration_closed and menu %}
                 {% if menu.zwei_menues_aktiv %}
-                <form method="post" action="/m/{{ token }}">
+                <form method="post" action="{{ url_for('main.mobile_registration', token=token) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <input type="hidden" name="action" value="register">
                     <input type="hidden" name="menu_choice" value="1">
                     <button type="submit" class="btn btn--primary">Anmelden – Menü 1</button>
                 </form>
-                <form method="post" action="/m/{{ token }}">
+                <form method="post" action="{{ url_for('main.mobile_registration', token=token) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <input type="hidden" name="action" value="register">
                     <input type="hidden" name="menu_choice" value="2">
                     <button type="submit" class="btn btn--primary">Anmelden – Menü 2</button>
                 </form>
                 {% else %}
-                <form method="post" action="/m/{{ token }}">
+                <form method="post" action="{{ url_for('main.mobile_registration', token=token) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <input type="hidden" name="action" value="register">
                     <button type="submit" class="btn btn--primary">Jetzt anmelden</button>
