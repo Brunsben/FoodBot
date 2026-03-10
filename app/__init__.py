@@ -1,10 +1,13 @@
 from flask import Flask, request
+from werkzeug.middleware.proxy_fix import ProxyFix
 from .models import db
 import os
 from datetime import timedelta
 
 def create_app():
     app = Flask(__name__, static_folder='../static', template_folder='../templates')
+    # Cloudflare Tunnel → nginx → Flask: Forwarded-Headers + Prefix (/food) auswerten
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_prefix=1)
     
     # Versuche neue Config zu laden, falle zurück auf alte Methode
     try:
