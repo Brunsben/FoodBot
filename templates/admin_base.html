@@ -7,6 +7,8 @@
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="#dc2626">
     <title>{% block title %}FoodBot{% endblock %}</title>
+    <script>(function(){var t=(document.cookie.match(/(?:^|;\s*)fw_theme=(\w+)/)||[])[1];
+    if(t==='light'){document.documentElement.classList.add('light');document.querySelector('meta[name=color-scheme]').content='light';}})()</script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components/sidebar.css') }}">

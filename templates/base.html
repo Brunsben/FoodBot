@@ -7,6 +7,7 @@
     <meta name="description" content="FoodBot - Feuerwehr Essensanmeldung">
     <meta name="theme-color" content="#dc2626">
     <title>{% block title %}FoodBot{% endblock %}</title>
+    <script>if((document.cookie.match(/(?:^|;\s*)fw_theme=(\w+)/)||[])[1]==='light')document.documentElement.classList.add('light')</script>
     
     <!-- Preconnect for faster resource loading -->
     <link rel="preconnect" href="{{ url_for('static', filename='css/base.css') | replace('css/base.css', '') }}" crossorigin>
