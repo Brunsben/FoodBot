@@ -143,9 +143,22 @@
         <!-- =================== TAB 2: User-Verwaltung =================== -->
         <div class="tab-panel" id="tab-users" role="tabpanel">
 
-            <!-- Neuen User anlegen -->
+            <!-- Portal-Sync -->
             <section class="card glass">
-                <h2 class="card__heading">➕ Neuen User anlegen</h2>
+                <h2 class="card__heading">🔄 Portal-Synchronisierung</h2>
+                <p style="margin-bottom: 1rem; color: var(--text-muted, #666);">
+                    Mitglieder-Stammdaten (Name, Personalnummer, Karten-ID) werden zentral im
+                    <strong>Portal</strong> unter <em>PSA → Kameraden</em> verwaltet und hierher synchronisiert.
+                </p>
+                <form method="post" action="{{ url_for('main.admin_sync') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn-action">🔄 Jetzt synchronisieren</button>
+                </form>
+            </section>
+
+            <!-- Neuen User anlegen (Fallback) -->
+            <details class="card glass">
+                <summary class="card__heading" style="cursor: pointer;">➕ User manuell anlegen (Fallback)</summary>
 
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -177,7 +190,7 @@
                     </div>
                     <button type="submit" class="btn-action">📤 CSV importieren</button>
                 </form>
-            </section>
+            </details>
 
             <!-- Vordefinierte Menüs -->
             <section class="card glass">

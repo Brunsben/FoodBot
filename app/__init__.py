@@ -55,6 +55,13 @@ def create_app():
     
     with app.app_context():
         db.create_all()
+        # Auto-Sync Kameraden vom Portal (falls JWT_SECRET gesetzt)
+        try:
+            from .sync import sync_kameraden
+            sync_kameraden()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Kameraden-Sync beim Start fehlgeschlagen: {e}")
     
     # Blueprints importieren
     from . import routes

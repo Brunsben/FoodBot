@@ -29,6 +29,20 @@ bp = Blueprint('main', __name__)
 @bp.route('/login', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")  # Max 5 Login-Versuche pro Minute
 def login():
+    from .auth import verify_portal_jwt, FOOD_ADMIN_ROLES
+    # Portal-SSO: Automatischer Login wenn gültiges JWT vorhanden
+    fw_jwt = request.cookies.get('fw_jwt')
+    if fw_jwt:
+        claims = verify_portal_jwt(fw_jwt)
+        if claims and claims.get('app_role') in FOOD_ADMIN_ROLES:
+            session['admin_logged_in'] = True
+            session['portal_user'] = claims.get('sub')
+            session.permanent = True
+            next_page = request.args.get('next')
+            if next_page and urlparse(next_page).netloc == '':
+                return redirect(next_page)
+            return redirect(url_for('main.admin'))
+
     error = None
     if request.method == 'POST':
         password = request.form.get('password')
@@ -381,7 +395,7 @@ def admin():
     guest_menu1 = guest_data['menu1']
     guest_count = guest_data['total_count']  # Gesamt für Kompatibilität
     preset_menus = PresetMenu.get_all_ordered()
-    message = None
+    message = session.pop('sync_message', None)
 
     
     if request.method == 'POST':
@@ -534,6 +548,19 @@ def admin():
                          menu=today_menu, 
                          guest_count=guest_count,
                          preset_menus=preset_menus)
+
+@bp.route('/admin/sync', methods=['POST'])
+@login_required
+def admin_sync():
+    """Synchronisiert Mitglieder-Daten vom Portal."""
+    from .sync import sync_kameraden
+    try:
+        created, updated = sync_kameraden()
+        session['sync_message'] = f'✅ Sync erfolgreich: {created} erstellt, {updated} aktualisiert'
+    except Exception as e:
+        logger.error(f"Manueller Sync fehlgeschlagen: {e}")
+        session['sync_message'] = f'❌ Sync fehlgeschlagen: {e}'
+    return redirect(url_for('main.admin'))
 
 @bp.route('/admin/weekly', methods=['GET', 'POST'])
 @login_required
