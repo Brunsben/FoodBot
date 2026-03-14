@@ -11,9 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Requirements installieren
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Requirements installieren (lock-Datei für reproduzierbare Builds)
+COPY requirements.lock .
+RUN pip install --no-cache-dir -r requirements.lock
 
 # ============================================
 # Production Stage
