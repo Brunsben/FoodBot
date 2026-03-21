@@ -92,11 +92,16 @@ def create_app():
     limiter = Limiter(
         app=app,
         key_func=get_remote_address,
-        default_limits=["500 per day", "100 per hour"],
+        default_limits=["5000 per day", "500 per hour"],
         storage_uri="memory://",
         # Wichtig: Erlaube Touchscreen-Zugriff, aber rate-limited
         headers_enabled=True
     )
+    
+    # Health-/Status-Endpunkte von Rate Limiting ausnehmen
+    # (werden von Portal-Health-Check & Uptime Kuma hochfrequent abgefragt)
+    limiter.exempt(system_bp)
+    limiter.exempt(api.status)
     
     # API-spezifische Limits werden in api.py gesetzt
     from .api import limiter as api_limiter

@@ -16,7 +16,7 @@ limiter = Limiter(
 )
 
 @api.route('/status', methods=['GET'])
-@limiter.limit("30 per minute")
+@limiter.exempt
 def status():
     """Aktueller Status: Menü, Anmeldungen, Gäste"""
     today = date.today()
