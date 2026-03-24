@@ -1,5 +1,5 @@
 # Multi-stage build für kleinere Image-Größe
-FROM python:3.11-slim as builder
+FROM python:3.14-slim as builder
 
 # Build-Dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.lock
 # ============================================
 # Production Stage
 # ============================================
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # Runtime-Dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
