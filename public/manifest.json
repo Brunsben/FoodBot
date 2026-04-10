@@ -1,0 +1,9 @@
+{
+  "name": "FoodBot",
+  "short_name": "FoodBot",
+  "start_url": "/food/",
+  "display": "standalone",
+  "background_color": "#1e293b",
+  "theme_color": "#1e293b",
+  "description": "Feuerwehr Essensanmeldung"
+}
