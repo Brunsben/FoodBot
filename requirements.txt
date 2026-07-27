@@ -5,7 +5,7 @@ flask-wtf==1.2.2
 python-dotenv==1.2.2
 pyserial==3.5
 qrcode[pil]==7.4.2
-requests==2.33.0
+requests==2.33.1
 gunicorn==25.3.0
 wtforms==3.2.1
 PyJWT==2.12.0
