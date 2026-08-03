@@ -6,6 +6,6 @@ python-dotenv==1.2.2
 pyserial==3.5
 qrcode[pil]==8.2
 requests==2.33.1
-gunicorn==25.3.0
+gunicorn==26.0.0
 wtforms==3.2.2
 PyJWT==2.13.0
