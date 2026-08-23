@@ -18,12 +18,14 @@ export const users = food.table(
   "users",
   {
     id: serial("id").primaryKey(),
+    portalMemberId: text("portal_member_id"),
     name: text("name").notNull(),
     personalNumber: text("personal_number").notNull(),
     cardId: text("card_id"),
     mobileToken: text("mobile_token"),
   },
   (t) => [
+    uniqueIndex("users_portal_member_id_idx").on(t.portalMemberId),
     uniqueIndex("users_personal_number_idx").on(t.personalNumber),
     uniqueIndex("users_card_id_idx").on(t.cardId),
     uniqueIndex("users_mobile_token_idx").on(t.mobileToken),
@@ -45,7 +47,9 @@ export const menus = food.table(
     zweiMenuesAktiv: boolean("zwei_menues_aktiv").notNull().default(false),
     menu1Name: text("menu1_name"),
     menu2Name: text("menu2_name"),
-    registrationDeadline: text("registration_deadline").notNull().default("19:45"),
+    registrationDeadline: text("registration_deadline")
+      .notNull()
+      .default("19:45"),
     deadlineEnabled: boolean("deadline_enabled").notNull().default(true),
   },
   (t) => [uniqueIndex("menus_date_idx").on(t.date)],
@@ -92,7 +96,9 @@ export const adminLog = food.table(
   "admin_log",
   {
     id: serial("id").primaryKey(),
-    timestamp: timestamp("timestamp", { mode: "string" }).notNull().defaultNow(),
+    timestamp: timestamp("timestamp", { mode: "string" })
+      .notNull()
+      .defaultNow(),
     adminUser: text("admin_user").notNull(),
     action: text("action").notNull(),
     details: text("details"),
@@ -104,14 +110,11 @@ export const adminLog = food.table(
 );
 
 // ─── Preset Menus ─────────────────────────────────────────────
-export const presetMenus = food.table(
-  "preset_menus",
-  {
-    id: serial("id").primaryKey(),
-    name: text("name").notNull().unique(),
-    sortOrder: integer("sort_order").notNull().default(0),
-  },
-);
+export const presetMenus = food.table("preset_menus", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
 
 // ─── Type Exports ─────────────────────────────────────────────
 export type User = typeof users.$inferSelect;

@@ -10,7 +10,11 @@ const JWT_SECRET = process.env.JWT_SECRET || "";
  * Sync users from Portal (PostgREST) → fw_food.users.
  * Creates new users and updates existing ones. Does not delete.
  */
-export async function syncFromPortal(): Promise<{ created: number; updated: number; errors: string[] }> {
+export async function syncFromPortal(): Promise<{
+  created: number;
+  updated: number;
+  errors: string[];
+}> {
   const errors: string[] = [];
   let created = 0;
   let updated = 0;
@@ -26,18 +30,25 @@ export async function syncFromPortal(): Promise<{ created: number; updated: numb
     .sign(secret);
 
   // Fetch active members from Portal
-  const response = await fetch(`${POSTGREST_URL}/Kameraden?Aktiv=eq.true&Personalnummer=not.is.null`, {
-    headers: {
-      Authorization: `Bearer ${serviceToken}`,
-      Accept: "application/json",
+  const response = await fetch(
+    `${POSTGREST_URL}/Kameraden?Aktiv=eq.true&Personalnummer=not.is.null`,
+    {
+      headers: {
+        Authorization: `Bearer ${serviceToken}`,
+        Accept: "application/json",
+      },
     },
-  });
+  );
 
   if (!response.ok) {
-    throw new Error(`Portal-Sync fehlgeschlagen: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Portal-Sync fehlgeschlagen: ${response.status} ${response.statusText}`,
+    );
   }
 
   const kameraden = (await response.json()) as Array<{
+    Id?: number;
+    id?: number;
     Vorname: string;
     Name: string;
     Personalnummer: string;
@@ -45,29 +56,58 @@ export async function syncFromPortal(): Promise<{ created: number; updated: numb
   }>;
 
   for (const k of kameraden) {
+    const rawMemberId = k.Id ?? k.id;
+    if (rawMemberId === null || rawMemberId === undefined) {
+      errors.push(
+        `${k.Personalnummer}: Portal-Mitglied ohne ID wurde übersprungen`,
+      );
+      continue;
+    }
+
+    const portalMemberId = String(rawMemberId);
     const name = `${k.Vorname} ${k.Name}`.trim();
     const personalNumber = k.Personalnummer;
     const cardId = k.KartenID || null;
 
     try {
-      const [existing] = await db
+      const [existingByPortalId] = await db
+        .select()
+        .from(users)
+        .where(eq(users.portalMemberId, portalMemberId))
+        .limit(1);
+
+      const [existingByPersonalNumber] = await db
         .select()
         .from(users)
         .where(eq(users.personalNumber, personalNumber))
         .limit(1);
 
+      const existing = existingByPortalId || existingByPersonalNumber;
+
       if (existing) {
         await db
           .update(users)
-          .set({ name, cardId })
+          .set({
+            name,
+            personalNumber,
+            cardId,
+            portalMemberId,
+          })
           .where(eq(users.id, existing.id));
         updated++;
       } else {
-        await db.insert(users).values({ name, personalNumber, cardId });
+        await db.insert(users).values({
+          name,
+          personalNumber,
+          cardId,
+          portalMemberId,
+        });
         created++;
       }
     } catch (err) {
-      errors.push(`${personalNumber}: ${err instanceof Error ? err.message : String(err)}`);
+      errors.push(
+        `${portalMemberId}/${personalNumber}: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 

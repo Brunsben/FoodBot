@@ -27,10 +27,13 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, personal_number, card_id } = body;
+    const { name, personal_number, card_id, portal_member_id } = body;
 
     if (!name || !personal_number) {
-      return NextResponse.json({ error: "Name und Personalnummer erforderlich" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Name und Personalnummer erforderlich" },
+        { status: 400 },
+      );
     }
 
     const [newUser] = await db
@@ -39,10 +42,15 @@ export async function POST(req: NextRequest) {
         name,
         personalNumber: personal_number,
         cardId: card_id || null,
+        portalMemberId: portal_member_id ? String(portal_member_id) : null,
       })
       .returning();
 
-    await logAdmin(auth.username, "Benutzer erstellt", `${name} (${personal_number})`);
+    await logAdmin(
+      auth.username,
+      "Benutzer erstellt",
+      `${name} (${personal_number})`,
+    );
 
     return NextResponse.json({ success: true, user: newUser }, { status: 201 });
   } catch (error) {

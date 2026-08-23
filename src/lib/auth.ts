@@ -25,7 +25,9 @@ export async function verifyAuth(): Promise<AuthSession | null> {
 
   try {
     const secret = new TextEncoder().encode(JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
+    const { payload } = await jwtVerify(token, secret, {
+      algorithms: ["HS256"],
+    });
 
     const foodRolle = (payload.food_rolle as string) || "";
     const appRole = (payload.app_role as string) || "";
@@ -35,8 +37,8 @@ export async function verifyAuth(): Promise<AuthSession | null> {
     if (!isAdmin) return null;
 
     return {
-      userId: (payload.benutzer_id as number) || 0,
-      username: (payload.benutzername as string) || "",
+      userId: Number(payload.kamerad_id || payload.benutzer_id || 0),
+      username: (payload.kamerad_name as string) || (payload.sub as string) || "",
       role: "admin",
       foodRolle,
       isPortalUser: true,
@@ -64,13 +66,17 @@ export function verifyPassword(password: string): boolean {
 /**
  * Middleware helper: check if request has valid auth.
  */
-export async function authFromRequest(req: NextRequest): Promise<AuthSession | null> {
+export async function authFromRequest(
+  req: NextRequest,
+): Promise<AuthSession | null> {
   const token = req.cookies.get("fw_jwt")?.value;
   if (!token || !JWT_SECRET) return null;
 
   try {
     const secret = new TextEncoder().encode(JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
+    const { payload } = await jwtVerify(token, secret, {
+      algorithms: ["HS256"],
+    });
 
     const foodRolle = (payload.food_rolle as string) || "";
     const appRole = (payload.app_role as string) || "";
@@ -78,8 +84,8 @@ export async function authFromRequest(req: NextRequest): Promise<AuthSession | n
     if (!isAdmin) return null;
 
     return {
-      userId: (payload.benutzer_id as number) || 0,
-      username: (payload.benutzername as string) || "",
+      userId: Number(payload.kamerad_id || payload.benutzer_id || 0),
+      username: (payload.kamerad_name as string) || (payload.sub as string) || "",
       role: "admin",
       foodRolle,
       isPortalUser: true,
@@ -98,8 +104,12 @@ export async function checkSessionCookie(): Promise<AuthSession | null> {
   if (!session) return null;
 
   try {
-    const secret = new TextEncoder().encode(JWT_SECRET || "foodbot-session-secret");
-    const { payload } = await jwtVerify(session, secret, { algorithms: ["HS256"] });
+    const secret = new TextEncoder().encode(
+      JWT_SECRET || "foodbot-session-secret",
+    );
+    const { payload } = await jwtVerify(session, secret, {
+      algorithms: ["HS256"],
+    });
     return {
       userId: 0,
       username: (payload.username as string) || "admin",

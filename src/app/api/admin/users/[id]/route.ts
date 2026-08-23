@@ -5,7 +5,10 @@ import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { logAdmin } from "@/lib/audit";
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const auth = await getAuth();
     if (!auth) {
@@ -13,10 +16,17 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const { id } = await params;
-    const [user] = await db.select().from(users).where(eq(users.id, parseInt(id, 10))).limit(1);
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, parseInt(id, 10)))
+      .limit(1);
 
     if (!user) {
-      return NextResponse.json({ error: "Benutzer nicht gefunden" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Benutzer nicht gefunden" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({ user });
@@ -26,7 +36,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const auth = await getAuth();
     if (!auth) {
@@ -36,24 +49,40 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const userId = parseInt(id, 10);
     const body = await req.json();
-    const { name, personal_number, card_id } = body;
+    const { name, personal_number, card_id, portal_member_id } = body;
 
-    const [existing] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const [existing] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
     if (!existing) {
-      return NextResponse.json({ error: "Benutzer nicht gefunden" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Benutzer nicht gefunden" },
+        { status: 404 },
+      );
     }
 
     const [updated] = await db
       .update(users)
       .set({
         ...(name !== undefined && { name }),
-        ...(personal_number !== undefined && { personalNumber: personal_number }),
+        ...(personal_number !== undefined && {
+          personalNumber: personal_number,
+        }),
         ...(card_id !== undefined && { cardId: card_id || null }),
+        ...(portal_member_id !== undefined && {
+          portalMemberId: portal_member_id ? String(portal_member_id) : null,
+        }),
       })
       .where(eq(users.id, userId))
       .returning();
 
-    await logAdmin(auth.username, "Benutzer aktualisiert", `ID ${userId}: ${updated.name}`);
+    await logAdmin(
+      auth.username,
+      "Benutzer aktualisiert",
+      `ID ${userId}: ${updated.name}`,
+    );
 
     return NextResponse.json({ success: true, user: updated });
   } catch (error) {
@@ -62,7 +91,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const auth = await getAuth();
     if (!auth) {
@@ -72,13 +104,24 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params;
     const userId = parseInt(id, 10);
 
-    const [existing] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const [existing] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
     if (!existing) {
-      return NextResponse.json({ error: "Benutzer nicht gefunden" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Benutzer nicht gefunden" },
+        { status: 404 },
+      );
     }
 
     await db.delete(users).where(eq(users.id, userId));
-    await logAdmin(auth.username, "Benutzer gelöscht", `${existing.name} (${existing.personalNumber})`);
+    await logAdmin(
+      auth.username,
+      "Benutzer gelöscht",
+      `${existing.name} (${existing.personalNumber})`,
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

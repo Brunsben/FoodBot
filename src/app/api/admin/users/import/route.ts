@@ -16,13 +16,18 @@ export async function POST(req: NextRequest) {
     const { csv } = body;
 
     if (!csv || typeof csv !== "string") {
-      return NextResponse.json({ error: "CSV-Daten erforderlich" }, { status: 400 });
+      return NextResponse.json(
+        { error: "CSV-Daten erforderlich" },
+        { status: 400 },
+      );
     }
 
     const lines = csv
       .split("\n")
       .map((l: string) => l.trim())
-      .filter((l: string) => l && !l.startsWith("name") && !l.startsWith("Name"));
+      .filter(
+        (l: string) => l && !l.startsWith("name") && !l.startsWith("Name"),
+      );
 
     let created = 0;
     let updated = 0;
@@ -30,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     for (let i = 0; i < lines.length; i++) {
       const parts = lines[i].split(/[,;]/).map((p: string) => p.trim());
-      const [name, personalNumber, cardId] = parts;
+      const [name, personalNumber, cardId, portalMemberId] = parts;
 
       if (!name || !personalNumber) {
         errors.push(`Zeile ${i + 1}: Name und Personalnummer erforderlich`);
@@ -47,7 +52,11 @@ export async function POST(req: NextRequest) {
         if (existing) {
           await db
             .update(users)
-            .set({ name, cardId: cardId || existing.cardId })
+            .set({
+              name,
+              cardId: cardId || existing.cardId,
+              portalMemberId: portalMemberId || existing.portalMemberId,
+            })
             .where(eq(users.id, existing.id));
           updated++;
         } else {
@@ -55,15 +64,22 @@ export async function POST(req: NextRequest) {
             name,
             personalNumber,
             cardId: cardId || null,
+            portalMemberId: portalMemberId || null,
           });
           created++;
         }
       } catch (err) {
-        errors.push(`Zeile ${i + 1}: ${err instanceof Error ? err.message : "Fehler"}`);
+        errors.push(
+          `Zeile ${i + 1}: ${err instanceof Error ? err.message : "Fehler"}`,
+        );
       }
     }
 
-    await logAdmin(auth.username, "CSV-Import", `Erstellt: ${created}, Aktualisiert: ${updated}, Fehler: ${errors.length}`);
+    await logAdmin(
+      auth.username,
+      "CSV-Import",
+      `Erstellt: ${created}, Aktualisiert: ${updated}, Fehler: ${errors.length}`,
+    );
 
     return NextResponse.json({ success: true, created, updated, errors });
   } catch (error) {
