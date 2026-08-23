@@ -7,7 +7,11 @@ function todayString() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default async function MobilePage({ params }: { params: Promise<{ token: string }> }) {
+export default async function MobilePage({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
   const { token } = await params;
 
   const user = await db.query.users.findFirst({
@@ -33,15 +37,24 @@ export default async function MobilePage({ params }: { params: Promise<{ token: 
   const [menu, registration] = await Promise.all([
     db.query.menus.findFirst({ where: eq(menus.date, today) }),
     db.query.registrations.findFirst({
-      where: and(eq(registrations.userId, user.id), eq(registrations.date, today)),
+      where: and(
+        eq(registrations.userId, user.id),
+        eq(registrations.date, today),
+      ),
     }),
   ]);
 
   return (
     <MobileRegistration
-      user={{ id: user.id, name: user.name, personalNumber: user.personalNumber }}
+      user={{
+        id: user.id,
+        name: user.name,
+        personalNumber: user.personalNumber,
+      }}
       menu={menu || null}
-      initialRegistration={registration ? { menuChoice: registration.menuChoice } : null}
+      initialRegistration={
+        registration ? { menuChoice: registration.menuChoice } : null
+      }
     />
   );
 }

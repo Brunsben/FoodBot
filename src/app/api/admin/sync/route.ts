@@ -11,12 +11,17 @@ export async function POST() {
     }
 
     const result = await syncFromPortal();
-    await logAdmin(auth.username, "Portal-Sync", `Erstellt: ${result.created}, Aktualisiert: ${result.updated}`);
+    await logAdmin(
+      auth.username,
+      "Portal-Sync",
+      `Erstellt: ${result.created}, Aktualisiert: ${result.updated}`,
+    );
 
     return NextResponse.json({ success: true, ...result });
   } catch (error) {
     console.error("Sync error:", error);
-    const message = error instanceof Error ? error.message : "Sync fehlgeschlagen";
+    const message =
+      error instanceof Error ? error.message : "Sync fehlgeschlagen";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

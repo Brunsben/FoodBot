@@ -14,11 +14,18 @@ export async function POST(req: NextRequest) {
     const { date, menu_choice, count } = body;
 
     if (!date || menu_choice === undefined || count === undefined) {
-      return NextResponse.json({ error: "date, menu_choice und count erforderlich" }, { status: 400 });
+      return NextResponse.json(
+        { error: "date, menu_choice und count erforderlich" },
+        { status: 400 },
+      );
     }
 
     await setGuestCount(date, menu_choice, count);
-    await logAdmin(auth.username, "Gäste aktualisiert", `${date}: Menü ${menu_choice} = ${count}`);
+    await logAdmin(
+      auth.username,
+      "Gäste aktualisiert",
+      `${date}: Menü ${menu_choice} = ${count}`,
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

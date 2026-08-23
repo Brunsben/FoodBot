@@ -8,8 +8,14 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 // ─── Tab 1: Tagesplanung ────────────────────────────────────────
 
 function DayPlanningTab() {
-  const { data: menuData, mutate: mutateMenu } = useSWR("/food/api/menu/data", fetcher);
-  const { data: kitchenData, mutate: mutateKitchen } = useSWR("/food/api/kitchen/data", fetcher);
+  const { data: menuData, mutate: mutateMenu } = useSWR(
+    "/food/api/menu/data",
+    fetcher,
+  );
+  const { data: kitchenData, mutate: mutateKitchen } = useSWR(
+    "/food/api/kitchen/data",
+    fetcher,
+  );
   const { data: presets } = useSWR("/food/api/admin/preset-menus", fetcher);
 
   const [description, setDescription] = useState("");
@@ -68,7 +74,9 @@ function DayPlanningTab() {
     <div className="space-y-6">
       {/* Menu form */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">Tagesmenü</h2>
+        <h2 className="text-lg font-semibold mb-4 dark:text-white">
+          Tagesmenü
+        </h2>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -101,13 +109,17 @@ function DayPlanningTab() {
               />
               <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
             </label>
-            <span className="text-sm text-gray-700 dark:text-gray-300">Zwei Menüs</span>
+            <span className="text-sm text-gray-700 dark:text-gray-300">
+              Zwei Menüs
+            </span>
           </div>
 
           {zweiMenues && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Menü 1</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Menü 1
+                </label>
                 <input
                   type="text"
                   value={menu1Name}
@@ -116,7 +128,9 @@ function DayPlanningTab() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Menü 2</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Menü 2
+                </label>
                 <input
                   type="text"
                   value={menu2Name}
@@ -138,7 +152,9 @@ function DayPlanningTab() {
                 />
                 <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600" />
               </label>
-              <span className="text-sm text-gray-700 dark:text-gray-300">Deadline</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Deadline
+              </span>
             </div>
             {deadlineEnabled && (
               <input
@@ -165,17 +181,45 @@ function DayPlanningTab() {
         <h2 className="text-lg font-semibold mb-4 dark:text-white">Gäste</h2>
         <div className="flex gap-6">
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Menü 1:</span>
-            <button onClick={() => adjustGuests(1, -1)} className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 font-bold transition-colors">-</button>
-            <span className="w-8 text-center font-semibold dark:text-white">{kitchenData?.guests?.menu1 ?? 0}</span>
-            <button onClick={() => adjustGuests(1, 1)} className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 font-bold transition-colors">+</button>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              Menü 1:
+            </span>
+            <button
+              onClick={() => adjustGuests(1, -1)}
+              className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 font-bold transition-colors"
+            >
+              -
+            </button>
+            <span className="w-8 text-center font-semibold dark:text-white">
+              {kitchenData?.guests?.menu1 ?? 0}
+            </span>
+            <button
+              onClick={() => adjustGuests(1, 1)}
+              className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 font-bold transition-colors"
+            >
+              +
+            </button>
           </div>
           {(zweiMenues || menu?.zweiMenuesAktiv) && (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Menü 2:</span>
-              <button onClick={() => adjustGuests(2, -1)} className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 font-bold transition-colors">-</button>
-              <span className="w-8 text-center font-semibold dark:text-white">{kitchenData?.guests?.menu2 ?? 0}</span>
-              <button onClick={() => adjustGuests(2, 1)} className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 font-bold transition-colors">+</button>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Menü 2:
+              </span>
+              <button
+                onClick={() => adjustGuests(2, -1)}
+                className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 font-bold transition-colors"
+              >
+                -
+              </button>
+              <span className="w-8 text-center font-semibold dark:text-white">
+                {kitchenData?.guests?.menu2 ?? 0}
+              </span>
+              <button
+                onClick={() => adjustGuests(2, 1)}
+                className="w-8 h-8 rounded-lg bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 font-bold transition-colors"
+              >
+                +
+              </button>
             </div>
           )}
         </div>
@@ -183,23 +227,33 @@ function DayPlanningTab() {
 
       {/* User list */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">Benutzer ({kitchenData?.users?.length ?? 0})</h2>
+        <h2 className="text-lg font-semibold mb-4 dark:text-white">
+          Benutzer ({kitchenData?.users?.length ?? 0})
+        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-          {kitchenData?.users?.map((u: { id: number; name: string; personalNumber: string; registered: boolean; menuChoice?: number }) => (
-            <button
-              key={u.id}
-              onClick={() => toggleUser(u.personalNumber)}
-              className={`p-2 text-sm rounded-lg text-left transition-colors ${
-                u.registered
-                  ? u.menuChoice === 2
-                    ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 ring-1 ring-green-300 dark:ring-green-700"
-                    : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 ring-1 ring-blue-300 dark:ring-blue-700"
-                  : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-600"
-              }`}
-            >
-              {u.name}
-            </button>
-          ))}
+          {kitchenData?.users?.map(
+            (u: {
+              id: number;
+              name: string;
+              personalNumber: string;
+              registered: boolean;
+              menuChoice?: number;
+            }) => (
+              <button
+                key={u.id}
+                onClick={() => toggleUser(u.personalNumber)}
+                className={`p-2 text-sm rounded-lg text-left transition-colors ${
+                  u.registered
+                    ? u.menuChoice === 2
+                      ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 ring-1 ring-green-300 dark:ring-green-700"
+                      : "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 ring-1 ring-blue-300 dark:ring-blue-700"
+                    : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-600"
+                }`}
+              >
+                {u.name}
+              </button>
+            ),
+          )}
         </div>
       </div>
     </div>
@@ -209,8 +263,14 @@ function DayPlanningTab() {
 // ─── Tab 2: User-Verwaltung ──────────────────────────────────────
 
 function UserManagementTab() {
-  const { data: usersData, mutate: mutateUsers } = useSWR("/food/api/users", fetcher);
-  const { data: presets, mutate: mutatePresets } = useSWR("/food/api/admin/preset-menus", fetcher);
+  const { data: usersData, mutate: mutateUsers } = useSWR(
+    "/food/api/users",
+    fetcher,
+  );
+  const { data: presets, mutate: mutatePresets } = useSWR(
+    "/food/api/admin/preset-menus",
+    fetcher,
+  );
 
   const [newName, setNewName] = useState("");
   const [newPersonalNr, setNewPersonalNr] = useState("");
@@ -236,7 +296,11 @@ function UserManagementTab() {
     await fetch("/food/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newName, personal_number: newPersonalNr, card_id: newCardId || null }),
+      body: JSON.stringify({
+        name: newName,
+        personal_number: newPersonalNr,
+        card_id: newCardId || null,
+      }),
     });
     setNewName("");
     setNewPersonalNr("");
@@ -255,7 +319,10 @@ function UserManagementTab() {
     if (!file) return;
     const formData = new FormData();
     formData.append("file", file);
-    await fetch("/food/api/admin/users/import", { method: "POST", body: formData });
+    await fetch("/food/api/admin/users/import", {
+      method: "POST",
+      body: formData,
+    });
     mutateUsers();
     e.target.value = "";
   };
@@ -290,14 +357,21 @@ function UserManagementTab() {
           </button>
           <label className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors cursor-pointer">
             CSV Import
-            <input type="file" accept=".csv" onChange={handleImportCSV} className="hidden" />
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleImportCSV}
+              className="hidden"
+            />
           </label>
         </div>
       </div>
 
       {/* Add user */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">Benutzer hinzufügen</h2>
+        <h2 className="text-lg font-semibold mb-4 dark:text-white">
+          Benutzer hinzufügen
+        </h2>
         <form onSubmit={handleAddUser} className="flex flex-wrap gap-3">
           <input
             type="text"
@@ -337,31 +411,56 @@ function UserManagementTab() {
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-slate-700">
               <tr>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Personal-Nr.</th>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Karten-ID</th>
-                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Aktionen</th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Name
+                </th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Personal-Nr.
+                </th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Karten-ID
+                </th>
+                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Aktionen
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-              {usersData?.map?.((u: { id: number; name: string; personalNumber: string; cardId: string | null }) => (
-                <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
-                  <td className="p-3 text-sm dark:text-gray-200">{u.name}</td>
-                  <td className="p-3 text-sm text-gray-600 dark:text-gray-400">{u.personalNumber}</td>
-                  <td className="p-3 text-sm text-gray-600 dark:text-gray-400">{u.cardId || "–"}</td>
-                  <td className="p-3 text-sm text-right">
-                    <a href={`/food/qr/${u.id}`} className="text-blue-600 dark:text-blue-400 hover:underline mr-3">
-                      QR
-                    </a>
-                    <button
-                      onClick={() => handleDeleteUser(u.id)}
-                      className="text-red-600 dark:text-red-400 hover:underline"
-                    >
-                      Löschen
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {usersData?.map?.(
+                (u: {
+                  id: number;
+                  name: string;
+                  personalNumber: string;
+                  cardId: string | null;
+                }) => (
+                  <tr
+                    key={u.id}
+                    className="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                  >
+                    <td className="p-3 text-sm dark:text-gray-200">{u.name}</td>
+                    <td className="p-3 text-sm text-gray-600 dark:text-gray-400">
+                      {u.personalNumber}
+                    </td>
+                    <td className="p-3 text-sm text-gray-600 dark:text-gray-400">
+                      {u.cardId || "–"}
+                    </td>
+                    <td className="p-3 text-sm text-right">
+                      <a
+                        href={`/food/qr/${u.id}`}
+                        className="text-blue-600 dark:text-blue-400 hover:underline mr-3"
+                      >
+                        QR
+                      </a>
+                      <button
+                        onClick={() => handleDeleteUser(u.id)}
+                        className="text-red-600 dark:text-red-400 hover:underline"
+                      >
+                        Löschen
+                      </button>
+                    </td>
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
         </div>
@@ -369,7 +468,9 @@ function UserManagementTab() {
 
       {/* Preset menus */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">Menü-Vorlagen</h2>
+        <h2 className="text-lg font-semibold mb-4 dark:text-white">
+          Menü-Vorlagen
+        </h2>
         <div className="flex gap-3 mb-4">
           <input
             type="text"
@@ -388,7 +489,10 @@ function UserManagementTab() {
         </div>
         <div className="flex flex-wrap gap-2">
           {presets?.map?.((p: { id: number; name: string }) => (
-            <span key={p.id} className="inline-flex items-center gap-1 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg text-sm">
+            <span
+              key={p.id}
+              className="inline-flex items-center gap-1 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg text-sm"
+            >
               {p.name}
               <button
                 onClick={() => handleDeletePreset(p.id)}

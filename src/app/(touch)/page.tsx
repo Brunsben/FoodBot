@@ -26,7 +26,10 @@ export default function TouchPage() {
   const [manualInput, setManualInput] = useState("");
   const [status, setStatus] = useState<StatusPopup | null>(null);
   const [menuChoice, setMenuChoice] = useState<number | null>(null);
-  const [pendingIdentifier, setPendingIdentifier] = useState<{ card_id?: string; personal_number?: string } | null>(null);
+  const [pendingIdentifier, setPendingIdentifier] = useState<{
+    card_id?: string;
+    personal_number?: string;
+  } | null>(null);
   const bufferRef = useRef("");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -34,13 +37,19 @@ export default function TouchPage() {
     refreshInterval: 10000,
   });
 
-  const showStatus = useCallback((type: "success" | "error", message: string) => {
-    setStatus({ type, message });
-    setTimeout(() => setStatus(null), 3000);
-  }, []);
+  const showStatus = useCallback(
+    (type: "success" | "error", message: string) => {
+      setStatus({ type, message });
+      setTimeout(() => setStatus(null), 3000);
+    },
+    [],
+  );
 
   const doRegister = useCallback(
-    async (identifier: { card_id?: string; personal_number?: string }, choice?: number) => {
+    async (
+      identifier: { card_id?: string; personal_number?: string },
+      choice?: number,
+    ) => {
       try {
         const res = await fetch("/food/api/register", {
           method: "POST",
@@ -137,7 +146,9 @@ export default function TouchPage() {
       {data?.menu ? (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-8 w-full max-w-lg text-center">
           <h2 className="text-xl font-semibold mb-2">Heutiges Menü</h2>
-          <p className="text-lg text-gray-700 dark:text-gray-300">{data.menu.description}</p>
+          <p className="text-lg text-gray-700 dark:text-gray-300">
+            {data.menu.description}
+          </p>
           {data.menu.zweiMenuesAktiv && (
             <div className="mt-3 flex gap-4 justify-center text-sm">
               <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-3 py-1 rounded-full">
@@ -156,7 +167,9 @@ export default function TouchPage() {
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 mb-8 w-full max-w-lg text-center">
-          <p className="text-gray-500 dark:text-gray-400">Kein Menü für heute eingetragen</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            Kein Menü für heute eingetragen
+          </p>
         </div>
       )}
 
@@ -165,7 +178,9 @@ export default function TouchPage() {
         <p className="text-xl text-blue-700 dark:text-blue-300 font-medium">
           Karte an den Scanner halten
         </p>
-        <p className="text-sm text-blue-500 dark:text-blue-400 mt-1">RFID / Barcode</p>
+        <p className="text-sm text-blue-500 dark:text-blue-400 mt-1">
+          RFID / Barcode
+        </p>
       </div>
 
       {/* Manual input */}
@@ -212,7 +227,9 @@ export default function TouchPage() {
       {pendingIdentifier && data?.menu?.zweiMenuesAktiv && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-40">
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <h3 className="text-2xl font-bold text-center mb-6 dark:text-white">Menü wählen</h3>
+            <h3 className="text-2xl font-bold text-center mb-6 dark:text-white">
+              Menü wählen
+            </h3>
             <div className="flex gap-4">
               <button
                 onClick={() => handleMenuChoiceSelect(1)}

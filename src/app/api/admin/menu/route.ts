@@ -11,11 +11,21 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { date, description, zwei_menues_aktiv, menu1_name, menu2_name, registration_deadline, deadline_enabled } =
-      body;
+    const {
+      date,
+      description,
+      zwei_menues_aktiv,
+      menu1_name,
+      menu2_name,
+      registration_deadline,
+      deadline_enabled,
+    } = body;
 
     if (!date || !description) {
-      return NextResponse.json({ error: "Datum und Beschreibung erforderlich" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Datum und Beschreibung erforderlich" },
+        { status: 400 },
+      );
     }
 
     await saveMenu(date, {
@@ -27,7 +37,11 @@ export async function POST(req: NextRequest) {
       deadlineEnabled: deadline_enabled,
     });
 
-    await logAdmin(auth.username, "Menü gespeichert", `${date}: ${description}`);
+    await logAdmin(
+      auth.username,
+      "Menü gespeichert",
+      `${date}: ${description}`,
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

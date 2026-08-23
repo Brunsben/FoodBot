@@ -10,11 +10,17 @@ export async function POST(req: NextRequest) {
     const { password } = body;
 
     if (!password) {
-      return NextResponse.json({ error: "Passwort erforderlich" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Passwort erforderlich" },
+        { status: 400 },
+      );
     }
 
     if (!verifyPassword(password)) {
-      return NextResponse.json({ error: "Ungültiges Passwort" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Ungültiges Passwort" },
+        { status: 401 },
+      );
     }
 
     const secret = new TextEncoder().encode(JWT_SECRET);

@@ -50,7 +50,9 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center mb-6 dark:text-white">FoodBot Login</h1>
+        <h1 className="text-2xl font-bold text-center mb-6 dark:text-white">
+          FoodBot Login
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <input
@@ -63,7 +65,9 @@ export default function LoginPage() {
             />
           </div>
           {error && (
-            <p className="text-red-500 dark:text-red-400 text-sm text-center">{error}</p>
+            <p className="text-red-500 dark:text-red-400 text-sm text-center">
+              {error}
+            </p>
           )}
           <button
             type="submit"

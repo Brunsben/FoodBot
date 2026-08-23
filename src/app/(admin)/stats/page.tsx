@@ -70,9 +70,15 @@ export default async function StatsPage() {
 
       {/* Summary */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm">
-        <p className="text-sm text-gray-500 dark:text-gray-400">Durchschnitt pro Tag</p>
-        <p className="text-4xl font-bold mt-1 text-blue-600 dark:text-blue-400">{avgPerDay}</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Anmeldungen</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Durchschnitt pro Tag
+        </p>
+        <p className="text-4xl font-bold mt-1 text-blue-600 dark:text-blue-400">
+          {avgPerDay}
+        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Anmeldungen
+        </p>
       </div>
 
       {/* Table */}
@@ -81,16 +87,29 @@ export default async function StatsPage() {
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-slate-700">
               <tr>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Datum</th>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Menü</th>
-                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Anmeldungen</th>
-                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Gäste</th>
-                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Gesamt</th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Datum
+                </th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Menü
+                </th>
+                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Anmeldungen
+                </th>
+                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Gäste
+                </th>
+                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Gesamt
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
               {dayStats.map((day) => (
-                <tr key={day.date} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                <tr
+                  key={day.date}
+                  className="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                >
                   <td className="p-3 text-sm dark:text-gray-200">
                     {new Date(day.date).toLocaleDateString("de-DE", {
                       weekday: "short",
@@ -101,9 +120,15 @@ export default async function StatsPage() {
                   <td className="p-3 text-sm text-gray-600 dark:text-gray-400 max-w-[200px] truncate">
                     {day.description}
                   </td>
-                  <td className="p-3 text-sm text-right dark:text-gray-200">{day.registrations}</td>
-                  <td className="p-3 text-sm text-right text-gray-500 dark:text-gray-400">{day.guests}</td>
-                  <td className="p-3 text-sm text-right font-semibold dark:text-white">{day.total}</td>
+                  <td className="p-3 text-sm text-right dark:text-gray-200">
+                    {day.registrations}
+                  </td>
+                  <td className="p-3 text-sm text-right text-gray-500 dark:text-gray-400">
+                    {day.guests}
+                  </td>
+                  <td className="p-3 text-sm text-right font-semibold dark:text-white">
+                    {day.total}
+                  </td>
                 </tr>
               ))}
             </tbody>

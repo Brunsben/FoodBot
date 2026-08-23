@@ -49,8 +49,10 @@ export default async function KitchenPrintPage() {
       {/* Menu 1 list */}
       <section className="mb-6">
         <h2 className="text-lg font-bold border-b-2 border-black pb-1 mb-2">
-          {menu?.zweiMenuesAktiv ? `Menü 1: ${menu.menu1Name || "Standard"}` : "Anmeldungen"}
-          {" "}({menu1Regs.length})
+          {menu?.zweiMenuesAktiv
+            ? `Menü 1: ${menu.menu1Name || "Standard"}`
+            : "Anmeldungen"}{" "}
+          ({menu1Regs.length})
         </h2>
         <div className="grid grid-cols-3 gap-x-4 gap-y-0.5 text-sm">
           {menu1Regs.map((r, i) => (
@@ -84,7 +86,9 @@ export default async function KitchenPrintPage() {
           </thead>
           <tbody>
             <tr>
-              <td className="py-1">{menu?.zweiMenuesAktiv ? "Menü 1" : "Anmeldungen"}</td>
+              <td className="py-1">
+                {menu?.zweiMenuesAktiv ? "Menü 1" : "Anmeldungen"}
+              </td>
               <td className="text-right py-1">{menu1Regs.length}</td>
             </tr>
             {menu?.zweiMenuesAktiv && (
@@ -99,7 +103,9 @@ export default async function KitchenPrintPage() {
             </tr>
             <tr className="border-t-2 border-black font-bold">
               <td className="py-1">Gesamt</td>
-              <td className="text-right py-1">{regs.length + guestMenu1 + guestMenu2}</td>
+              <td className="text-right py-1">
+                {regs.length + guestMenu1 + guestMenu2}
+              </td>
             </tr>
           </tbody>
         </table>

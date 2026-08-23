@@ -17,7 +17,10 @@ interface DayPlan {
 }
 
 export default function WeeklyPage() {
-  const { data: days, mutate } = useSWR<DayPlan[]>("/food/api/admin/weekly", fetcher);
+  const { data: days, mutate } = useSWR<DayPlan[]>(
+    "/food/api/admin/weekly",
+    fetcher,
+  );
   const [newDate, setNewDate] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<DayPlan>>({});
@@ -100,10 +103,15 @@ export default function WeeklyPage() {
       {/* Day cards */}
       <div className="space-y-4">
         {days?.map((day) => (
-          <div key={day.id} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm">
+          <div
+            key={day.id}
+            className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm"
+          >
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="font-semibold text-lg dark:text-white">{formatDate(day.date)}</h3>
+                <h3 className="font-semibold text-lg dark:text-white">
+                  {formatDate(day.date)}
+                </h3>
                 {editingId !== day.id && (
                   <p className="text-gray-600 dark:text-gray-400 mt-1">
                     {day.description || "Kein Menü eingetragen"}
@@ -140,7 +148,9 @@ export default function WeeklyPage() {
                 <input
                   type="text"
                   value={editForm.description ?? ""}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, description: e.target.value })
+                  }
                   placeholder="Menübeschreibung"
                   className="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
@@ -149,7 +159,12 @@ export default function WeeklyPage() {
                     <input
                       type="checkbox"
                       checked={editForm.zweiMenuesAktiv ?? false}
-                      onChange={(e) => setEditForm({ ...editForm, zweiMenuesAktiv: e.target.checked })}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          zweiMenuesAktiv: e.target.checked,
+                        })
+                      }
                       className="rounded border-gray-300 dark:border-gray-600"
                     />
                     Zwei Menüs
@@ -158,7 +173,12 @@ export default function WeeklyPage() {
                     <input
                       type="checkbox"
                       checked={editForm.deadlineEnabled ?? true}
-                      onChange={(e) => setEditForm({ ...editForm, deadlineEnabled: e.target.checked })}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          deadlineEnabled: e.target.checked,
+                        })
+                      }
                       className="rounded border-gray-300 dark:border-gray-600"
                     />
                     Deadline
@@ -167,7 +187,12 @@ export default function WeeklyPage() {
                     <input
                       type="time"
                       value={editForm.registrationDeadline ?? "19:45"}
-                      onChange={(e) => setEditForm({ ...editForm, registrationDeadline: e.target.value })}
+                      onChange={(e) =>
+                        setEditForm({
+                          ...editForm,
+                          registrationDeadline: e.target.value,
+                        })
+                      }
                       className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                     />
                   )}
@@ -177,14 +202,18 @@ export default function WeeklyPage() {
                     <input
                       type="text"
                       value={editForm.menu1Name ?? ""}
-                      onChange={(e) => setEditForm({ ...editForm, menu1Name: e.target.value })}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, menu1Name: e.target.value })
+                      }
                       placeholder="Menü 1 Name"
                       className="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
                     <input
                       type="text"
                       value={editForm.menu2Name ?? ""}
-                      onChange={(e) => setEditForm({ ...editForm, menu2Name: e.target.value })}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, menu2Name: e.target.value })
+                      }
                       placeholder="Menü 2 Name"
                       className="p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />

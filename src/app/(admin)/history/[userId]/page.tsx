@@ -4,7 +4,11 @@ import { eq, sql, desc } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-export default async function UserHistoryPage({ params }: { params: Promise<{ userId: string }> }) {
+export default async function UserHistoryPage({
+  params,
+}: {
+  params: Promise<{ userId: string }>;
+}) {
   const { userId: userIdStr } = await params;
   const userId = parseInt(userIdStr, 10);
   if (isNaN(userId)) notFound();
@@ -30,7 +34,9 @@ export default async function UserHistoryPage({ params }: { params: Promise<{ us
   // Monthly breakdown
   const monthlyStats = await db
     .select({
-      month: sql<string>`to_char(${registrations.date}::date, 'YYYY-MM')`.as("month"),
+      month: sql<string>`to_char(${registrations.date}::date, 'YYYY-MM')`.as(
+        "month",
+      ),
       count: sql<number>`count(*)`.as("count"),
     })
     .from(registrations)
@@ -80,16 +86,28 @@ export default async function UserHistoryPage({ params }: { params: Promise<{ us
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm">
           <p className="text-sm text-gray-500 dark:text-gray-400">Gesamt</p>
-          <p className="text-3xl font-bold mt-1 text-blue-600 dark:text-blue-400">{totalRegs}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Anmeldungen</p>
+          <p className="text-3xl font-bold mt-1 text-blue-600 dark:text-blue-400">
+            {totalRegs}
+          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            Anmeldungen
+          </p>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Ø pro Monat</p>
-          <p className="text-3xl font-bold mt-1 text-green-600 dark:text-green-400">{avgPerMonth}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Anmeldungen</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Ø pro Monat
+          </p>
+          <p className="text-3xl font-bold mt-1 text-green-600 dark:text-green-400">
+            {avgPerMonth}
+          </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            Anmeldungen
+          </p>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Letzte Anmeldung</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Letzte Anmeldung
+          </p>
           <p className="text-xl font-bold mt-1 dark:text-white">
             {lastReg[0]
               ? new Date(lastReg[0].date).toLocaleDateString("de-DE")
@@ -101,21 +119,32 @@ export default async function UserHistoryPage({ params }: { params: Promise<{ us
       {/* Monthly breakdown */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-100 dark:border-slate-700">
-          <h2 className="font-semibold dark:text-white">Monatliche Übersicht</h2>
+          <h2 className="font-semibold dark:text-white">
+            Monatliche Übersicht
+          </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-slate-700">
               <tr>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Monat</th>
-                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Anmeldungen</th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Monat
+                </th>
+                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Anmeldungen
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
               {monthlyStats.map((m) => (
-                <tr key={m.month} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                <tr
+                  key={m.month}
+                  className="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                >
                   <td className="p-3 text-sm dark:text-gray-200">{m.month}</td>
-                  <td className="p-3 text-sm text-right font-medium dark:text-white">{m.count}</td>
+                  <td className="p-3 text-sm text-right font-medium dark:text-white">
+                    {m.count}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -132,14 +161,23 @@ export default async function UserHistoryPage({ params }: { params: Promise<{ us
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-slate-700">
               <tr>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Datum</th>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Menü</th>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Wahl</th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Datum
+                </th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Menü
+                </th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Wahl
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
               {allRegs.map((r, i) => (
-                <tr key={i} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                <tr
+                  key={i}
+                  className="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                >
                   <td className="p-3 text-sm dark:text-gray-200">
                     {new Date(r.date).toLocaleDateString("de-DE", {
                       weekday: "short",
@@ -161,11 +199,17 @@ export default async function UserHistoryPage({ params }: { params: Promise<{ us
                         }
                       >
                         Menü {r.menuChoice}
-                        {r.menuChoice === 1 && r.menu1Name ? ` (${r.menu1Name})` : ""}
-                        {r.menuChoice === 2 && r.menu2Name ? ` (${r.menu2Name})` : ""}
+                        {r.menuChoice === 1 && r.menu1Name
+                          ? ` (${r.menu1Name})`
+                          : ""}
+                        {r.menuChoice === 2 && r.menu2Name
+                          ? ` (${r.menu2Name})`
+                          : ""}
                       </span>
                     ) : (
-                      <span className="text-gray-500 dark:text-gray-400">–</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        –
+                      </span>
                     )}
                   </td>
                 </tr>

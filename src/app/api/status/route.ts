@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { today, getMenuForDate, getRegistrationCount, getGuestsForDate } from "@/lib/utils";
+import {
+  today,
+  getMenuForDate,
+  getRegistrationCount,
+  getGuestsForDate,
+} from "@/lib/utils";
 
 export async function GET() {
   try {

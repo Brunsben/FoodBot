@@ -8,7 +8,8 @@ export async function GET() {
       return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
     }
 
-    const csv = "Name,Personalnummer,KartenID\nMax Mustermann,12345,ABC123\nErika Musterfrau,12346,DEF456\n";
+    const csv =
+      "Name,Personalnummer,KartenID\nMax Mustermann,12345,ABC123\nErika Musterfrau,12346,DEF456\n";
 
     return new NextResponse(csv, {
       headers: {

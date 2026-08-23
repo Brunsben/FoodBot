@@ -21,7 +21,11 @@ export function today(): string {
  * Get the menu for a specific date.
  */
 export async function getMenuForDate(date: string) {
-  const [menu] = await db.select().from(menus).where(eq(menus.date, date)).limit(1);
+  const [menu] = await db
+    .select()
+    .from(menus)
+    .where(eq(menus.date, date))
+    .limit(1);
   return menu || null;
 }
 
@@ -57,7 +61,10 @@ export async function getRegistrationsForDate(date: string) {
 /**
  * Check if registration is still open for a menu.
  */
-export function isRegistrationOpen(menu: { registrationDeadline: string; deadlineEnabled: boolean }) {
+export function isRegistrationOpen(menu: {
+  registrationDeadline: string;
+  deadlineEnabled: boolean;
+}) {
   if (!menu.deadlineEnabled) return true;
   const now = new Date();
   const [hours, minutes] = menu.registrationDeadline.split(":").map(Number);
@@ -70,14 +77,19 @@ export function isRegistrationOpen(menu: { registrationDeadline: string; deadlin
  * Toggle registration for a user on today.
  * Returns { registered: boolean, menuChoice: number }.
  */
-export async function toggleRegistration(userId: number, menuChoice: number = 1) {
+export async function toggleRegistration(
+  userId: number,
+  menuChoice: number = 1,
+) {
   const dateStr = today();
 
   // Check if already registered
   const [existing] = await db
     .select()
     .from(registrations)
-    .where(and(eq(registrations.userId, userId), eq(registrations.date, dateStr)))
+    .where(
+      and(eq(registrations.userId, userId), eq(registrations.date, dateStr)),
+    )
     .limit(1);
 
   if (existing) {
@@ -86,7 +98,9 @@ export async function toggleRegistration(userId: number, menuChoice: number = 1)
     return { registered: false, menuChoice: existing.menuChoice };
   } else {
     // Register
-    await db.insert(registrations).values({ userId, date: dateStr, menuChoice });
+    await db
+      .insert(registrations)
+      .values({ userId, date: dateStr, menuChoice });
     return { registered: true, menuChoice };
   }
 }
@@ -127,7 +141,11 @@ export async function saveMenu(
 /**
  * Set guest count for a date and menu choice.
  */
-export async function setGuestCount(date: string, menuChoice: number, count: number) {
+export async function setGuestCount(
+  date: string,
+  menuChoice: number,
+  count: number,
+) {
   const [existing] = await db
     .select()
     .from(guests)
@@ -140,7 +158,9 @@ export async function setGuestCount(date: string, menuChoice: number, count: num
       .set({ count: Math.max(0, count) })
       .where(eq(guests.id, existing.id));
   } else if (count > 0) {
-    await db.insert(guests).values({ date, menuChoice, count: Math.max(0, count) });
+    await db
+      .insert(guests)
+      .values({ date, menuChoice, count: Math.max(0, count) });
   }
 }
 

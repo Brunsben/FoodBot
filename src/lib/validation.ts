@@ -17,13 +17,24 @@ export const nameSchema = z
   .min(2, "Mindestens 2 Zeichen")
   .max(100, "Maximal 100 Zeichen");
 
-export const menuChoiceSchema = z.coerce.number().int().min(1).max(2).default(1);
+export const menuChoiceSchema = z.coerce
+  .number()
+  .int()
+  .min(1)
+  .max(2)
+  .default(1);
 
-export const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format: YYYY-MM-DD");
+export const dateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Format: YYYY-MM-DD");
 
 export const timeSchema = z.string().regex(/^\d{2}:\d{2}$/, "Format: HH:MM");
 
-export const tokenSchema = z.string().min(32).max(64).regex(/^[A-Za-z0-9_\-]+$/);
+export const tokenSchema = z
+  .string()
+  .min(32)
+  .max(64)
+  .regex(/^[A-Za-z0-9_\-]+$/);
 
 export function sanitizeString(input: string): string {
   return input

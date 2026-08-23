@@ -5,8 +5,12 @@ import Link from "next/link";
 
 export default async function HistoryPage() {
   const now = new Date();
-  const d90 = new Date(now.getTime() - 90 * 86400000).toISOString().slice(0, 10);
-  const d30 = new Date(now.getTime() - 30 * 86400000).toISOString().slice(0, 10);
+  const d90 = new Date(now.getTime() - 90 * 86400000)
+    .toISOString()
+    .slice(0, 10);
+  const d30 = new Date(now.getTime() - 30 * 86400000)
+    .toISOString()
+    .slice(0, 10);
   const d7 = new Date(now.getTime() - 7 * 86400000).toISOString().slice(0, 10);
 
   // Top 10 by total registration count
@@ -70,7 +74,9 @@ export default async function HistoryPage() {
 
       {/* Top 10 */}
       <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">Top 10 Stammesser</h2>
+        <h2 className="text-lg font-semibold mb-4 dark:text-white">
+          Top 10 Stammesser
+        </h2>
         <div className="space-y-2">
           {topUsers.map((u, i) => (
             <Link
@@ -79,7 +85,9 @@ export default async function HistoryPage() {
               className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className="text-xl w-8 text-center">{badges[i] ?? `${i + 1}.`}</span>
+                <span className="text-xl w-8 text-center">
+                  {badges[i] ?? `${i + 1}.`}
+                </span>
                 <span className="font-medium dark:text-white">{u.name}</span>
               </div>
               <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -96,20 +104,37 @@ export default async function HistoryPage() {
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-slate-700">
               <tr>
-                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">Name</th>
-                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">90 Tage</th>
-                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">30 Tage</th>
-                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">7 Tage</th>
+                <th className="text-left p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Name
+                </th>
+                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  90 Tage
+                </th>
+                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  30 Tage
+                </th>
+                <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+                  7 Tage
+                </th>
                 <th className="text-right p-3 text-sm font-medium text-gray-600 dark:text-gray-300"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
               {userStats.map((u) => (
-                <tr key={u.userId} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                <tr
+                  key={u.userId}
+                  className="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                >
                   <td className="p-3 text-sm dark:text-gray-200">{u.name}</td>
-                  <td className="p-3 text-sm text-right dark:text-gray-300">{u.last90}</td>
-                  <td className="p-3 text-sm text-right dark:text-gray-300">{u.last30}</td>
-                  <td className="p-3 text-sm text-right dark:text-gray-300">{u.last7}</td>
+                  <td className="p-3 text-sm text-right dark:text-gray-300">
+                    {u.last90}
+                  </td>
+                  <td className="p-3 text-sm text-right dark:text-gray-300">
+                    {u.last30}
+                  </td>
+                  <td className="p-3 text-sm text-right dark:text-gray-300">
+                    {u.last7}
+                  </td>
                   <td className="p-3 text-sm text-right">
                     <Link
                       href={`/food/history/${u.userId}`}

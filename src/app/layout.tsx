@@ -6,11 +6,18 @@ export const metadata: Metadata = {
   description: "Feuerwehr Essensanmeldung",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="de" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
         <link rel="manifest" href="/food/manifest.json" />
         <meta name="theme-color" content="#1e293b" />
         <script

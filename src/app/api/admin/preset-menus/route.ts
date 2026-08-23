@@ -12,7 +12,10 @@ export async function GET() {
       return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 });
     }
 
-    const menus = await db.select().from(presetMenus).orderBy(presetMenus.sortOrder, presetMenus.name);
+    const menus = await db
+      .select()
+      .from(presetMenus)
+      .orderBy(presetMenus.sortOrder, presetMenus.name);
     return NextResponse.json({ preset_menus: menus });
   } catch (error) {
     console.error("Preset menus GET error:", error);
@@ -41,7 +44,10 @@ export async function POST(req: NextRequest) {
 
     await logAdmin(auth.username, "Voreinstellung erstellt", name);
 
-    return NextResponse.json({ success: true, preset_menu: preset }, { status: 201 });
+    return NextResponse.json(
+      { success: true, preset_menu: preset },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Preset menus POST error:", error);
     return NextResponse.json({ error: "Interner Fehler" }, { status: 500 });
@@ -62,9 +68,16 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "ID erforderlich" }, { status: 400 });
     }
 
-    const [existing] = await db.select().from(presetMenus).where(eq(presetMenus.id, parseInt(id, 10))).limit(1);
+    const [existing] = await db
+      .select()
+      .from(presetMenus)
+      .where(eq(presetMenus.id, parseInt(id, 10)))
+      .limit(1);
     if (!existing) {
-      return NextResponse.json({ error: "Voreinstellung nicht gefunden" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Voreinstellung nicht gefunden" },
+        { status: 404 },
+      );
     }
 
     await db.delete(presetMenus).where(eq(presetMenus.id, parseInt(id, 10)));

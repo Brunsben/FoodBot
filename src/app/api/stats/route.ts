@@ -6,7 +6,10 @@ import { sql, gte, desc } from "drizzle-orm";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const days = Math.min(Math.max(parseInt(searchParams.get("days") || "7", 10) || 7, 1), 90);
+    const days = Math.min(
+      Math.max(parseInt(searchParams.get("days") || "7", 10) || 7, 1),
+      90,
+    );
 
     const since = new Date();
     since.setDate(since.getDate() - days);

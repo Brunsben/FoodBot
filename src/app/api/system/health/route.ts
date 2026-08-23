@@ -5,9 +5,15 @@ import { sql } from "drizzle-orm";
 
 export async function GET() {
   try {
-    const [userCount] = await db.select({ count: sql<number>`count(*)::int` }).from(users);
-    const [menuCount] = await db.select({ count: sql<number>`count(*)::int` }).from(menus);
-    const [regCount] = await db.select({ count: sql<number>`count(*)::int` }).from(registrations);
+    const [userCount] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(users);
+    const [menuCount] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(menus);
+    const [regCount] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(registrations);
 
     return NextResponse.json({
       status: "ok",

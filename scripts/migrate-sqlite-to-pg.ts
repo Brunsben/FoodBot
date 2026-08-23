@@ -1,6 +1,6 @@
 /**
  * Migration: FoodBot SQLite → PostgreSQL
- * 
+ *
  * Liest die bestehende SQLite-DB und schreibt alle Daten nach PostgreSQL.
  *
  * Voraussetzungen:
@@ -38,7 +38,11 @@ async function migrate() {
   // Tables in order (FK dependencies)
   const tables = [
     { name: "user", pgName: "users", boolCols: [] as string[] },
-    { name: "menu", pgName: "menus", boolCols: ["zwei_menues_aktiv", "deadline_enabled"] },
+    {
+      name: "menu",
+      pgName: "menus",
+      boolCols: ["zwei_menues_aktiv", "deadline_enabled"],
+    },
     { name: "registration", pgName: "registrations", boolCols: [] as string[] },
     { name: "guest", pgName: "guests", boolCols: [] as string[] },
     { name: "admin_log", pgName: "admin_log", boolCols: [] as string[] },
@@ -48,7 +52,10 @@ async function migrate() {
   for (const table of tables) {
     let rows: Record<string, unknown>[];
     try {
-      rows = sqlite.prepare(`SELECT * FROM ${table.name}`).all() as Record<string, unknown>[];
+      rows = sqlite.prepare(`SELECT * FROM ${table.name}`).all() as Record<
+        string,
+        unknown
+      >[];
     } catch {
       console.log(`  ⏭️  ${table.name}: Tabelle nicht vorhanden`);
       continue;
@@ -97,7 +104,9 @@ async function migrate() {
       );
     }
 
-    console.log(`  ✅ ${table.name} → ${table.pgName}: ${inserted}/${rows.length} Zeilen migriert`);
+    console.log(
+      `  ✅ ${table.name} → ${table.pgName}: ${inserted}/${rows.length} Zeilen migriert`,
+    );
   }
 
   console.log("\n🎉 Migration abgeschlossen!");

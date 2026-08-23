@@ -6,7 +6,11 @@ import { generateToken } from "@/lib/utils";
 import { generateQRCode } from "@/lib/qr";
 import QRPrintButton from "./qr-print-button";
 
-export default async function QRCodePage({ params }: { params: Promise<{ userId: string }> }) {
+export default async function QRCodePage({
+  params,
+}: {
+  params: Promise<{ userId: string }>;
+}) {
   const { userId: userIdStr } = await params;
   const userId = parseInt(userIdStr, 10);
   if (isNaN(userId)) notFound();
@@ -17,7 +21,10 @@ export default async function QRCodePage({ params }: { params: Promise<{ userId:
   // Generate token if user doesn't have one
   if (!user.mobileToken) {
     const token = generateToken();
-    await db.update(users).set({ mobileToken: token }).where(eq(users.id, userId));
+    await db
+      .update(users)
+      .set({ mobileToken: token })
+      .where(eq(users.id, userId));
     user = { ...user, mobileToken: token };
   }
 
