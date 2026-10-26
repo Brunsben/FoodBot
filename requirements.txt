@@ -7,5 +7,5 @@ pyserial==3.5
 qrcode[pil]==8.2
 requests==2.33.1
 gunicorn==25.3.0
-wtforms==3.2.2
+wtforms==3.3.0
 PyJWT==2.13.0
